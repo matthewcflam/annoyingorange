@@ -5,15 +5,16 @@
   min-height: 100vh;
 }
 
-/* "who?" spray (§7.2). The 910×302 guide box sits at mockup (713, 582), so
-   its ink lands where the mockup's does (714–1647 × 631–902); the canvas
+/* "who?" spray (§7.2). The 910×302 guide box sits at mockup (713, 220) (Figma "Home Page": up beside the name block,
+   above the map; was 582), so
+   its ink lands where the mockup's does (714–1647 × 269–540); the canvas
    extends --who-pad past it on every side for overspray and drips. Centred at
    x 1168 on the stretched axis. It lives in the glass layer (fixed, full
    viewport), which home's layout matches. */
 .home__who {
   position: absolute;
   left: calc(1168 * var(--vx) - (var(--who-w) / 2 + var(--who-pad)) * var(--px));
-  top: calc((582 - var(--who-pad)) * var(--px));
+  top: calc((220 - var(--who-pad)) * var(--px));
   width: calc((var(--who-w) + 2 * var(--who-pad)) * var(--px));
   height: calc((var(--who-h) + 2 * var(--who-pad)) * var(--px));
   pointer-events: none;

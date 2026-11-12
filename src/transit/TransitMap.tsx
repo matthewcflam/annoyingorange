@@ -1,7 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import { gsap } from "../lib/gsap";
 import { STATIONS } from "../config/routes";
-import { STATION } from "../config/timings";
 import { STATION_HOVER_SEMITONES, semitonesToRate } from "../config/sounds";
 import { play } from "../audio/engine";
 import { onNavClick } from "../lib/router";
@@ -13,10 +11,10 @@ import "./transit.css";
 /** The label font's cap height / font size, so labels can be placed by their
  *  cap top as measured in the mockup. Fonts are loaded before first render. */
 let capRatio: number | null = null;
-function getCapRatio(): number {
+function getCapRatio(label: SVGTextElement): number {
   if (capRatio === null) {
     const ctx = document.createElement("canvas").getContext("2d")!;
-    ctx.font = `700 ${LABEL_BASE_SIZE}px "Inter Variable"`;
+    ctx.font = `700 ${LABEL_BASE_SIZE}px ${getComputedStyle(label).fontFamily}`;
     capRatio = ctx.measureText("H").actualBoundingBoxAscent / LABEL_BASE_SIZE;
   }
   return capRatio;
@@ -40,14 +38,14 @@ export default function TransitMap({ visible }: { visible: boolean }) {
     const line = lineRef.current!;
     line.setAttribute("d", `M${l.startX} ${l.upperY}H${l.bendX}L${l.x[1]} ${l.lowerY}H${l.endX}`);
     line.setAttribute("stroke-width", String(l.lineWidth));
-    const cap = getCapRatio();
+    const cap = getCapRatio(labelRefs.current[0]!);
     const scale = l.labelSize / LABEL_BASE_SIZE;
     STATIONS.forEach((_, i) => {
       groupRefs.current[i]!.setAttribute("transform", `translate(${l.x[i]} ${stationY(l, i)})`);
       dotRefs.current[i]!.setAttribute("r", String(l.dotR));
       dotRefs.current[i]!.setAttribute("stroke-width", String(l.dotRing));
       hitRefs.current[i]!.setAttribute("r", String(l.hitR));
-      focusRefs.current[i]!.setAttribute("r", String(l.dotR * STATION.HOVER_SCALE + 4));
+      focusRefs.current[i]!.setAttribute("r", String(l.dotR + l.dotRing / 2 + 4));
       const baseline = l.labelTop[i] + cap * l.labelSize;
       labelRefs.current[i]!.setAttribute("transform", `translate(0 ${baseline}) scale(${scale})`);
     });
@@ -65,14 +63,9 @@ export default function TransitMap({ visible }: { visible: boolean }) {
     return () => window.removeEventListener("resize", fit);
   }, []);
 
+  // The look (dot and label turn orange, like the Map card rows) is CSS
+  // (transit.css); this only plays the sound and prefetches.
   const hover = (i: number, on: boolean) => {
-    gsap.to(dotRefs.current[i], {
-      scale: on ? STATION.HOVER_SCALE : 1,
-      duration: STATION.HOVER_DURATION,
-      ease: STATION.HOVER_EASE,
-      transformOrigin: "50% 50%",
-      overwrite: "auto",
-    });
     if (!on) return;
     play("station.hover", { rate: semitonesToRate(STATION_HOVER_SEMITONES[i]), vary: false });
     prefetchRoute(STATIONS[i].path);

@@ -79,7 +79,7 @@ export function layoutHome(block: HTMLElement) {
 function fullLayoutBox(block: HTMLElement, W: number, H: number, vw: number): WhoBox | null {
   const bio = block.querySelector<HTMLElement>(".name-block__bio");
   const px = pxScale();
-  const ink = { x: 1168 * (vw / FRAME.W) - (W / 2) * px, y: 582 * px, w: W * px, h: H * px };
+  const ink = { x: 1168 * (vw / FRAME.W) - (W / 2) * px, y: 220 * px, w: W * px, h: H * px };
   // The bio is absolutely placed in the block, so measure it on its own.
   const textRight = block.offsetLeft + Math.max(block.offsetWidth, bio ? bio.offsetLeft + bio.offsetWidth : 0);
   const textBottom = block.offsetTop + (bio ? bio.offsetTop + bio.offsetHeight : block.offsetHeight);

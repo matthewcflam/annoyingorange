@@ -29,8 +29,10 @@ export interface Layout {
 export const LABEL_BASE_SIZE = 47;
 
 const FULL: Layout = {
-  upperY: 204.5,
-  lowerY: 365.5,
+  // Figma "Home Page" (node 376:3568): the map sits under the name block and
+  // "who?" (was 204.5 / 365.5, at the top, in Home Page (8).png).
+  upperY: 591.5,
+  lowerY: 752.5,
   startX: -20,
   endX: FRAME.W + 20, // stretched to the viewport's right edge at runtime
   bendX: 521,

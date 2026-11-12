@@ -31,6 +31,7 @@
 .station__dot {
   fill: var(--color-station-fill);
   stroke: var(--color-route);
+  transition: fill 0.15s ease-out;
 }
 
 .station__focus {
@@ -48,19 +49,19 @@
   font-family: var(--font-body);
   font-size: 47px; /* LABEL_BASE_SIZE; layouts scale from it */
   font-weight: 700;
-  /* Browser Inter sets wider than the mockup's; this matches label widths. */
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em; /* the project pages' tracking */
   text-anchor: middle;
   fill: var(--color-text);
 }
 
-/* "coming soon!" above a comingSoon station (TransitMap.tsx): font-size is
-   set from the layout, the home email toast's size. */
-.transit-map__soon {
-  font-family: var(--font-body);
-  text-anchor: middle;
-  fill: var(--color-text);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
+/* Hover (user request): only the dot's white fill turns orange; the blue
+   ring and the label stay as they are. */
+.station:focus-visible .station__dot {
+  fill: var(--color-orange);
+}
+
+@media (hover: hover) {
+  .station:hover .station__dot {
+    fill: var(--color-orange);
+  }
 }

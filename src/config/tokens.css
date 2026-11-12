@@ -6,12 +6,14 @@
  * readToken() from src/lib/tokens.ts, so there is one source of truth.
  */
 :root {
-  /* ---- Fonts (spec §5). Family names must match Fontsource exactly. ---- */
-  --font-body:    "Inter Variable", system-ui, sans-serif;
-  --font-name:    "Inter Variable", system-ui, sans-serif;
+  /* ---- Fonts (spec §5). Family names must match Fontsource exactly.
+     Home uses the project pages' Helvetica Rounded Bold (user
+     request; --font-rounded below). ---- */
+  --font-body:    var(--font-rounded);
+  --font-name:    var(--font-rounded);
   --font-station: "Fragment Mono", ui-monospace, monospace;
-  --font-sound:   "Inter Variable", system-ui, sans-serif;
-  --font-muted:   "Inter Variable", system-ui, sans-serif;
+  --font-sound:   var(--font-rounded);
+  --font-muted:   var(--font-rounded);
   /* Body text (user request): Nunito Medium, from @fontsource/nunito (only the
      500 weight is imported, main.tsx). The home bio, About and Experience
      copy, and the project text; the names, Map box, Connections card,

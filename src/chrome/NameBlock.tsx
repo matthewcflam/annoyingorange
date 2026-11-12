@@ -61,7 +61,7 @@ export default function NameBlock({ visible }: { visible: boolean }) {
           Web Development @ UBC Sailbot<br />
           Operations Lead @ Third Quadrant Design
         </p> */}
-        <p>currently: seeking winter 2027 opportunities!</p>
+        <p>Currently: Seeking Winter 2027 opportunities!</p>
         <SocialLinks />
       </div>
     </div>

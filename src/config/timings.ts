@@ -230,13 +230,6 @@ export const MAP_BOX = {
   HOVER_CLOSE_DELAY: 0.25,
 } as const;
 
-/** Station hover/click on the home map (§7.3). */
-export const STATION = {
-  HOVER_SCALE: 1.25,
-  HOVER_DURATION: 0.25,
-  HOVER_EASE: "back.out",
-} as const;
-
 /** The project poster beside the project list (pages/projects/ProjectList.tsx).
  *  It flows like the Map card: the flow durations and eases are MAP_BOX's. */
 export const PROJECT_POSTER = {
