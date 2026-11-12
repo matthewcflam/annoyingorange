@@ -43,7 +43,7 @@
   --iu:           calc(var(--type-small) / 20);
 
   /* ---- Base: --color-bg / --color-text follow data-theme (global.css) ---- */
-  --color-home-bg:      #FFFFF8;  /* home and the gate */
+  --color-home-bg:      #FFFFF8;  /* home */
   --color-home-text:    #000000;
   --color-station-bg:   #212121;  /* About, Experience, Projects */
   --color-station-text: #FFFFFF;

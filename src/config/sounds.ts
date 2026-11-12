@@ -28,8 +28,6 @@ export interface SoundDef {
 }
 
 export const SOUNDS = {
-  "gate.select":       { bus: "ui", gain: 0.8, placeholder: { type: "tone", wave: "triangle", freq: 660, dur: 0.35 } },
-  "gate.cursor":       { bus: "ui", gain: 0.15, placeholder: { type: "tone", wave: "sine", freq: 1200, dur: 0.04 } },
   // New noise sounds start quiet (≈0.05–0.1; overlapping bursts stack up); raise to taste.
   "spray.rattle":      { bus: "ambient", gain: 0.1, placeholder: { type: "noise", cutoff: 6000, dur: 0.18 } },
   "station.hover":     { bus: "ui", gain: 0.25, placeholder: { type: "tone", wave: "sine", freq: 880, dur: 0.06 } },
@@ -72,19 +70,19 @@ export const SPRAY_HISS = {
   bandpassQ: 0.8,
 } as const satisfies { bus: Bus; gain: number; highpassHz: number; bandpassHz: number; bandpassQ: number };
 
-/** Build-time discovery: "/assets-src/sounds/gate.select.m4a" → hashed URL. */
+/** Build-time discovery: "/assets-src/sounds/mute.toggle.m4a" → hashed URL. */
 const files = import.meta.glob("/assets-src/sounds/*.m4a", {
   eager: true,
   query: "?url",
   import: "default",
 }) as Record<string, string>;
 
-/** Map a file key ("gate.select", "paint.stroke.2") to its URL. */
+/** Map a file key ("mute.toggle", "paint.stroke.2") to its URL. */
 export const SOUND_FILES: ReadonlyMap<string, string> = new Map(
   Object.entries(files).map(([path, url]) => [path.slice(path.lastIndexOf("/") + 1, -".m4a".length), url]),
 );
 
-/** Every file key a sound can play: ["paint.stroke.1", …] or ["gate.select"]. */
+/** Every file key a sound can play: ["paint.stroke.1", …] or ["mute.toggle"]. */
 export function variantKeys(id: SoundId): string[] {
   const n = (SOUNDS[id] as SoundDef).variants;
   return n ? Array.from({ length: n }, (_, i) => `${id}.${i + 1}`) : [id];

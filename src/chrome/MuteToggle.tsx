@@ -1,27 +1,28 @@
 import { useEffect } from "react";
-import { play, setMuted, getContext } from "../audio/engine";
+import { play, setMuted, getContext, isUnlocked, unlock } from "../audio/engine";
 import { useMuted } from "../audio/useSound";
-import { saveSoundPref } from "../lib/prefs";
 import { AUDIO } from "../config/timings";
 
+/** Runs inside a click or keydown, so the first toggle-on can create the AudioContext. */
 function toggle(muted: boolean) {
   const next = !muted;
-  setMuted(next);
-  saveSoundPref(next ? "muted" : "sound");
+  // MUST stay synchronous in the gesture, before any await (§6.4).
+  if (!isUnlocked()) unlock({ muted: next });
+  else setMuted(next);
   // Plays on unmute only, once the master ramp is up (§9.6).
   const ctx = getContext();
   if (!next && ctx) play("mute.toggle", { when: ctx.currentTime + AUDIO.MUTE_RAMP });
 }
 
 /**
- * Persistent sound on/off control, shared chrome (spec §9.8). Placeholder
- * position and look: TODO(open-question #6). Shortcut: M.
+ * Sound on/off, home only (spec §9.8). Every load starts muted and the choice
+ * isn't saved (user decision). Placeholder look: TODO(open-question #6).
+ * Shortcut: M.
  */
-export default function MuteToggle({ enabled }: { enabled: boolean }) {
+export default function MuteToggle() {
   const muted = useMuted();
 
   useEffect(() => {
-    if (!enabled) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "m" && e.key !== "M") return;
       if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
@@ -31,7 +32,7 @@ export default function MuteToggle({ enabled }: { enabled: boolean }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enabled, muted]);
+  }, [muted]);
 
   return (
     <button

@@ -10,21 +10,19 @@ export const FONTS = {
   TIMEOUT_MS: 2000,
 } as const;
 
-/** Landing page / audio gate (§6.2–6.3). */
+/** Load (the sound gate was removed: user change). */
 export const GATE_UI = {
-  /** Gate fades in once fonts are ready. */
+  /** The app fades in once fonts are ready. */
   FADE_IN: 0.3,
-  /** `>` cursor slide between options. */
-  CURSOR_SLIDE: 0.12,
-  CURSOR_EASE: "power2.out",
 } as const;
 
-/** Gate → Home timeline (§6.5). Positions are seconds from the click. */
+/** Intro timeline on load (chrome/intro.ts). Positions are seconds from the
+ *  moment fonts are ready (the app's fade-in starts then too). */
 export const GATE = {
-  /** The options vanish at the click and unmount here. */
-  OPTIONS_UNMOUNT: 0,
+  /** whenPageShown() resolves here. */
+  PAGE_SHOWN: 0,
   /** The map starts here. Pull it (and the steps after) earlier if the blank
-   *  pause after the options vanish feels long. */
+   *  pause after load feels long. */
   ROUTE_IN: 0.6,
   ROUTE_IN_DURATION: 0.6,
   ROUTE_IN_EASE: "power2.out",
@@ -34,8 +32,8 @@ export const GATE = {
   STATION_FADE_DURATION: 0.4,
   STATION_SETTLE_PX: 6,
   STATION_EASE: "power2.out",
-  /** Measured from the click (user-confirmed). If it becomes "2s after the
-   *  stations finish", the timeline position becomes ">+2". */
+  /** Measured from load. If it becomes "2s after the stations finish", the
+   *  timeline position becomes ">+2". */
   WHO_DELAY: 2.0,
   /** TODO(open-question #1): deep link — the map and the requested page fade
    *  in (the name block fades out) instead of the home sequence. */
@@ -93,7 +91,7 @@ export const HOME = {
   TOAST_RISE_PX: 6,
   TOAST_HOLD: 1.6,
   TOAST_OUT: 0.4,
-  /** The bio and icons fade in after the gate, with the map's labels. */
+  /** The bio and icons fade in during the intro, with the map's labels. */
   BIO_IN: 0.8,
   BIO_IN_DURATION: 0.6,
 } as const;

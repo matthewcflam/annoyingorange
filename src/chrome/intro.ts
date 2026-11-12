@@ -1,9 +1,8 @@
 /**
- * Gate → Home (spec §6.5). One timeline, positions in seconds from the click,
- * all from GATE in timings.ts. Built when gatePhase becomes "leaving": by then
- * the page is mounted but hidden, the map is mounted with visibility: hidden,
- * the name's bio is hidden, and the gate options are still showing. The options
- * vanish at the click (user change: the grey-square paint-over was removed).
+ * The intro on load (spec §6.5, minus the gate: user change). One timeline,
+ * positions in seconds from load, all from GATE in timings.ts. Built once
+ * fonts are ready: by then the page is mounted, the map is mounted with
+ * visibility: hidden and the name's bio is hidden.
  */
 import { gsap } from "../lib/gsap";
 import { GATE, HOME } from "../config/timings";
@@ -16,29 +15,25 @@ interface Options {
   /** Landed on "/"; otherwise a deep link (open question #1). */
   home: boolean;
   reduced: boolean;
-  /** Unmount the gate options; gatePhase = "done". */
-  onOptionsGone: () => void;
 }
 
-export function gateToHome({ root, home, reduced, onOptionsGone }: Options): gsap.core.Timeline {
+export function introTimeline({ root, home, reduced }: Options): gsap.core.Timeline {
   const q = gsap.utils.selector(root);
   const map = q(".transit-map");
   const bio = q(".name-block__bio");
   const tl = gsap.timeline();
 
-  tl.set(q(".gate"), { autoAlpha: 0 }, 0);
-  tl.call(onOptionsGone, undefined, GATE.OPTIONS_UNMOUNT);
   // The page starts to appear here (deep link fade, or home's stagger).
-  tl.call(markPageShown, undefined, GATE.OPTIONS_UNMOUNT);
+  tl.call(markPageShown, undefined, GATE.PAGE_SHOWN);
 
   if (!home) {
     // TODO(open-question #1): placeholder deep-link reveal. The name block
-    // fades out on its own once the route isn't home.
+    // is hidden off home anyway.
     skipIntroSpray();
-    gsap.set(bio, { autoAlpha: 1 }); // the name block is hidden off home anyway
+    gsap.set(bio, { autoAlpha: 1 });
     const page = q(".layer--page");
     gsap.set(page, { autoAlpha: 0 });
-    tl.to([map, page], { autoAlpha: 1, duration: GATE.DEEP_LINK_FADE }, GATE.OPTIONS_UNMOUNT);
+    tl.to([map, page], { autoAlpha: 1, duration: GATE.DEEP_LINK_FADE }, GATE.PAGE_SHOWN);
     return tl;
   }
 
@@ -66,4 +61,3 @@ export function gateToHome({ root, home, reduced, onOptionsGone }: Options): gsa
     .call(introSpray, undefined, GATE.WHO_DELAY);
   return tl;
 }
-

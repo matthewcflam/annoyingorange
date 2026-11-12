@@ -7,11 +7,13 @@
  *            └─> ambient bus ────┘
  *
  * Lifecycle:
- * 1. preloadSounds() at app start, while the gate shows: fetch + decode every
- *    discovered file on an OfflineAudioContext (exempt from autoplay policy).
- * 2. unlock() inside the gate gesture, synchronously: creates the one real
- *    AudioContext and resumes it. Creating it earlier makes Chrome warn.
- * 3. play() anywhere after that.
+ * 1. preloadSounds() at app start: fetch + decode every discovered file on an
+ *    OfflineAudioContext (exempt from autoplay policy).
+ * 2. Sound starts muted on every load (user decision). unlock() runs inside
+ *    the first toggle-on gesture (home's sound toggle), synchronously: it
+ *    creates the one real AudioContext and resumes it. Creating it earlier
+ *    makes Chrome warn. A visitor who never turns sound on never gets one.
+ * 3. play() anywhere after that (a no-op before it).
  */
 import { MASTER_GAIN, SOUNDS, SOUND_FILES, variantKeys, type Bus, type SoundDef, type SoundId } from "../config/sounds";
 import { AUDIO } from "../config/timings";
@@ -27,7 +29,7 @@ interface Loaded {
   source: Source;
 }
 
-/** Keyed by file key: "gate.select", "paint.stroke.3". */
+/** Keyed by file key: "mute.toggle", "paint.stroke.3". */
 const buffers = new Map<string, Loaded>();
 let preloadStarted = false;
 
@@ -92,7 +94,7 @@ export function soundReport(): Record<string, Source | "decoding"> {
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let buses: Record<Bus, GainNode> | null = null;
-let muted = false;
+let muted = true; // every load starts muted
 const listeners = new Set<() => void>();
 
 function notify() {

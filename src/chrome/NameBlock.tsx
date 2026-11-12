@@ -7,10 +7,9 @@ import { onCompactChange } from "../lib/frame";
 import "./chrome.css";
 
 /**
- * "Matthew Lam" and the bio, shared chrome (spec §4.1) so the name stays put
- * from the gate to home (design/mockups-v2/Home Page (7).png). On the gate
- * only the name shows; the bio below it (`.name-block__bio`) is revealed by
- * the gate → home timeline. Faded out off home.
+ * "Matthew Lam" and the bio, shared chrome (spec §4.1)
+ * (design/mockups-v2/Home Page (7).png). The bio (`.name-block__bio`) is
+ * revealed by the intro timeline (chrome/intro.ts). Faded out off home.
  */
 export default function NameBlock({ visible }: { visible: boolean }) {
   const ref = useRef<HTMLDivElement>(null);

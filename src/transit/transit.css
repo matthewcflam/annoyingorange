@@ -7,7 +7,7 @@
   width: calc(1767 * var(--px));
   height: calc(1024 * var(--px));
   overflow: visible;
-  visibility: hidden; /* shown after the gate */
+  visibility: hidden; /* shown by the intro timeline */
 }
 
 .transit-map__line {

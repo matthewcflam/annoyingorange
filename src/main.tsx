@@ -24,12 +24,13 @@ document.documentElement.style.setProperty("--theme-fade", `${GATE.DEEP_LINK_FAD
 history.scrollRestoration = "manual";
 initScroll();
 
-// Fetch + decode every sound while the gate idles (spec §9.2). No AudioContext yet.
+// Fetch + decode every sound up front (spec §9.2). No AudioContext until the
+// visitor turns sound on (every load starts muted).
 void preloadSounds();
 
 setTransitionRunner(pageTransition);
 
-// A deep link's images (About photos, project heroes) download while the gate idles.
+// A deep link's images (About photos, project heroes) start downloading at once.
 prefetchRoute(location.pathname);
 // The other pages' code (small chunks), so no transition waits on a fetch.
 prefetchPages();

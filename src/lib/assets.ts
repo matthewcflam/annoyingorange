@@ -79,7 +79,7 @@ function routeUrls(path: string): string[] {
 }
 
 /** Station pages' chunks (pages/Outlet.tsx renders them). Home is in the
- *  main chunk: it's what the gate leads to. */
+ *  main chunk: it's what the site opens on. */
 export const PAGE_LOADERS = {
   about: () => import("../pages/About"),
   experience: () => import("../pages/Experience"),

@@ -32,8 +32,8 @@ function getCapRatio(): number {
 /**
  * The transit map on home (spec §7.1). Rendered once and never unmounted; its
  * layer is hidden off home (App.tsx). Geometry is set imperatively from
- * stations.ts. Hidden (CSS) until the gate → home timeline reveals it
- * (gate/gateToHome.ts).
+ * stations.ts. Hidden (CSS) until the intro timeline reveals it
+ * (chrome/intro.ts).
  */
 export default function TransitMap({ visible }: { visible: boolean }) {
   const lineRef = useRef<SVGPathElement>(null);

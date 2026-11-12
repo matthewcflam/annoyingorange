@@ -2,7 +2,7 @@
    frame (design/mockups-v2). Text is placed by its cap top: with
    line-height 1, Inter's cap top sits 0.136em below the box top. */
 
-/* ---- Name block (gate and home) ---- */
+/* ---- Name block (home) ---- */
 .name-block {
   position: absolute;
   left: calc(85 * var(--px));
@@ -20,7 +20,7 @@
 }
 
 /* Bio, 16/19 (Home Page (9).png: first cap top 632, a blank line between
-   paragraphs). Hidden on the gate; the gate → home timeline reveals it.
+   paragraphs). Hidden until the intro timeline (chrome/intro.ts) reveals it.
    Body text never drops below 16px: --bu is --px floored at 16/20. */
 .name-block__bio {
   --bu: max(var(--px), 16px / 20);

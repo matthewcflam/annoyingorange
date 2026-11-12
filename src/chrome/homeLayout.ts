@@ -9,7 +9,7 @@
  * The full layout keeps "who?" at its mockup spot (home.css) unless the text
  * would reach under it (fullLayoutBox).
  *
- * NameBlock runs this (it is mounted from the gate on, so the name never
+ * NameBlock runs this (it is mounted from load on, so the name never
  * jumps when home mounts); Home places the canvas from the result.
  */
 import { WHO_BOX } from "../spray/sprayEngine";

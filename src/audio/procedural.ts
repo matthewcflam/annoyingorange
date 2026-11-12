@@ -1,7 +1,7 @@
 /**
  * Procedural audio (spec §9.4, §9.5). Buffers are written sample by sample
  * with the AudioBuffer constructor, which needs no AudioContext, so all of this
- * is safe before the gate gesture. Live-synthesized sounds (the spray hiss)
+ * is safe before the first gesture. Live-synthesized sounds (the spray hiss)
  * build their node graphs on top of these buffers.
  */
 import type { Placeholder } from "../config/sounds";

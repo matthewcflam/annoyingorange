@@ -2,8 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "./lib/gsap";
 import { waitForFonts } from "./lib/fonts";
 import { GATE_UI } from "./config/timings";
-import Gate, { type GatePhase } from "./gate/Gate";
-import { gateToHome } from "./gate/gateToHome";
+import { introTimeline } from "./chrome/intro";
 import NameBlock from "./chrome/NameBlock";
 import MuteToggle from "./chrome/MuteToggle";
 import TransitMap from "./transit/TransitMap";
@@ -26,23 +25,19 @@ import { routeFor } from "./config/routes";
  *   z40 glass             — painted on the screen: Home portals "who?" here
  *   z50 transition        — the dither cover and its title, over everything
  *
- * The gate is a state, not a layer: while gatePhase !== "done" everything
- * outside the gate buttons is inert. The page mounts when the choice is made
- * ("leaving") so the gate → home timeline can reveal it; before that it
- * renders nothing, so nothing behind the gate is visible.
+ * There is no sound gate (user change): once fonts are ready everything
+ * mounts and the intro timeline (chrome/intro.ts) reveals it. Sound starts
+ * muted; home's toggle turns it on.
  */
 export default function App() {
   const [fontsReady, setFontsReady] = useState(false);
-  const [gatePhase, setGatePhase] = useState<GatePhase>("showing");
   const rootRef = useRef<HTMLDivElement>(null);
   // Set on the first commit, long before the page (and Home) can mount.
   const [glass, setGlass] = useState<HTMLDivElement | null>(null);
-  const gated = gatePhase !== "done";
   const route = useRoute();
   const home = route === "/";
-  // The gate is light; after it, the page's theme. A route commits under the
-  // transition cover, so the colours swap unseen.
-  const theme = gated ? "light" : routeFor(route).theme;
+  // A route commits under the transition cover, so the colours swap unseen.
+  const theme = routeFor(route).theme;
 
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -60,23 +55,16 @@ export default function App() {
     () => {
       if (!fontsReady) return;
       gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: GATE_UI.FADE_IN });
-    },
-    { dependencies: [fontsReady], scope: rootRef },
-  );
-
-  // Gate → home (§6.5). Runs once; later phase changes don't revert it.
-  useGSAP(
-    () => {
-      if (gatePhase !== "leaving") return;
-      const tl = gateToHome({
+      // The intro (§6.5). Runs once, for the route the visitor landed on.
+      const tl = introTimeline({
         root: rootRef.current!,
         home: route === "/",
         reduced: prefersReducedMotion(),
-        onOptionsGone: () => setGatePhase("done"),
       });
-      if (import.meta.env.DEV) Object.assign(window, { __gateToHome: tl });
+      if (import.meta.env.DEV) Object.assign(window, { __intro: tl });
     },
-    { dependencies: [gatePhase], scope: rootRef },
+    // Only fontsReady: the intro must not rebuild on a route change.
+    { dependencies: [fontsReady], scope: rootRef },
   );
 
   // Nothing renders until fonts are ready, so no swap can land mid-animation (§5.4).
@@ -87,25 +75,21 @@ export default function App() {
       <ScrollBar />
       {fontsReady && (
         <>
-          <main className="layer--page" inert={gated}>
-            {gatePhase !== "showing" && (
-              <GlassContext.Provider value={glass}>
-                <Outlet />
-              </GlassContext.Provider>
-            )}
+          <main className="layer--page">
+            <GlassContext.Provider value={glass}>
+              <Outlet />
+            </GlassContext.Provider>
           </main>
 
           <div className="layer layer--chrome">
-            {/* Name block: gate and home only (§4.1). */}
-            <NameBlock visible={gated || home} />
-            {gated && <Gate onSelect={() => setGatePhase("leaving")} />}
-            {/* Hidden on the gate: Sound / Muted is the choice there. */}
-            {!gated && home && <MuteToggle enabled />}
-            {!gated && !home && <StationChrome />}
+            {/* Name block: home only (§4.1). */}
+            <NameBlock visible={home} />
+            {home && <MuteToggle />}
+            {!home && <StationChrome />}
           </div>
 
-          <div className="layer layer--map" inert={gated} hidden={!home}>
-            <TransitMap visible={!gated} />
+          <div className="layer layer--map" hidden={!home}>
+            <TransitMap visible />
           </div>
 
           <div ref={setGlass} className="layer layer--glass" />

@@ -17,7 +17,7 @@ export interface Hiss {
 
 let noise: AudioBuffer | null = null;
 
-/** Null before the gate unlocks audio. Starts silent. */
+/** Null until sound is first turned on (no AudioContext). Starts silent. */
 export function startHiss(): Hiss | null {
   const ctx = getContext();
   const bus = getBus(SPRAY_HISS.bus);

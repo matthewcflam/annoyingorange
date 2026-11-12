@@ -51,7 +51,7 @@
 
 /* Page theme: light on home and the gate, dark on station pages. App sets
    data-theme while the transition cover hides the page (--theme-fade is set
-   from timings.ts in main.tsx; it only shows on a deep link's gate exit). */
+   from timings.ts in main.tsx; it only shows on a deep link's intro). */
 :root,
 :root[data-theme="light"] {
   --color-bg: var(--color-home-bg);
