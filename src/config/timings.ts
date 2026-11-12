@@ -111,13 +111,13 @@ export const CHROME = {
  * Defaults are 2xa's own values.
  */
 export const TRANSITION = {
-  /** Cover fills in (progress 0 → 1). expo.out: ~90% covered by 0.35s. */
-  SHOW: 1,
+  /** Cover fills in (progress 0 → 1). expo.out: ~90% covered by ~0.2s. Was 1 (2xa). */
+  SHOW: 0.6,
   SHOW_EASE: "expo.out",
   /** Cover stays solid after the page swap, before clearing. */
-  HOLD: 1,
-  /** Cover clears (progress 1 → 0). expo.out: mostly gone by ~0.8s. */
-  HIDE: 3,
+  HOLD: 0.5,
+  /** Cover clears (progress 1 → 0). expo.out: mostly gone by ~0.4s. Was 3 (2xa). */
+  HIDE: 1.5,
   HIDE_EASE: "expo.out",
   /** Input unlocks once the clearing cover's progress drops below this. */
   UNLOCK_PROGRESS: 0.05,
@@ -136,7 +136,9 @@ export const TRANSITION = {
   MAX_DPR: 2,
 
   // ---- Title scramble (2xa's typer) ----
-  TITLE_FPS: 20,
+  TITLE_FPS: 30,
+  /** Seconds to type the title in (and again out), before the per-char 1% stretch. Was 1 (2xa). */
+  TITLE_SECONDS: 0.6,
   /** Scramble variants each character passes through on its way in/out. */
   TITLE_CYCLES: 3,
   /** Fraction of the type-in spent scrambling (the rest is staggered starts). */

@@ -56,7 +56,7 @@
   font-family: var(--font-transition);
   font-size: var(--type-name);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   line-height: 1;
   color: var(--fg);
 }

@@ -107,7 +107,7 @@ export class ScrambleTitle {
     this.chars = [];
     const length = groups.join("").replace(/\s/g, "").length;
     const divisor = length > 1 ? length - 1 : 1;
-    this.frames = length ? T.TITLE_FPS * (1 + length * 0.01) : 0;
+    this.frames = length ? Math.round(T.TITLE_FPS * T.TITLE_SECONDS * (1 + length * 0.01)) : 0;
     this.denominator = this.frames - this.frames * T.TITLE_CYCLE_LENGTH || 1;
     let i = 0;
     groups.forEach((text, g) => {

@@ -57,8 +57,7 @@
   --color-cover-dark:        var(--color-station-bg);
   --color-cover-light:       var(--color-home-bg);
   --color-transition-accent: var(--color-route); /* 2xa uses its blue */
-  --font-transition: "Inter Variable", system-ui, sans-serif;
-  --font-key-meta:   "Jersey 25", ui-monospace, monospace;  /* "2026" and "Lam" on the key card */
+  --font-transition: var(--font-rounded);
 
   /* ---- Station chrome: the Map box (keychain/MapBox.tsx, Figma "Portfolio" /
      "Portfolio - Map Expanded") ---- */
