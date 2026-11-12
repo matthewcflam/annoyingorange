@@ -31,11 +31,6 @@ export function viewportInMockupPx() {
   return { w: window.innerWidth / px, h: window.innerHeight / px };
 }
 
-/** The project article (column, heroes, obstacle text) was designed in the old 1440×1024 frame. The Projects page draws
- *  it in its right pane at this many --px per old mockup px (project.css
- *  --apx must match). */
-export const ARTICLE_SCALE = 1.1;
-
 /** `<source sizes>` for an image box `w` mockup px wide in the --px frame. */
 export const frameSizes = (w: number) =>
   `(min-aspect-ratio: 1767/1024) ${((w / FRAME.H) * 100).toFixed(2)}vh, ${((w / FRAME.W) * 100).toFixed(2)}vw`;

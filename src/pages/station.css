@@ -1,189 +1,78 @@
 /*
- * Station pages (About, Experience, Projects), measured from
- * design/mockups-v2 at 1767×1024. Text is placed by its cap top as in the
- * mockups: with line-height 1, Inter's cap top sits 0.136em below the box top.
- * Body copy is Inter 22.5/29 (cap top 6.3px below its line box's top).
+ * About and Experience, in the project pages' style (page.css: the shell,
+ * Helvetica Rounded Bold at --type-project-body, the 9-column grid). Both
+ * lay out on the grid (tokens.css --grid-*): columns 1–2 for side notes
+ * (Experience's company and date), 3–4 for copy, 5–8 for photos.
  */
 .station-page {
-  position: relative;
-  min-height: 100vh;
+  /* The hand-drawn marks (line1–3.svg, anything.svg) are 1:1 at 16px; they
+     scale with the body size. A body line is 19 of them (--line), so the
+     marks' measured offsets need no extra leading. */
+  --cp: calc(var(--type-project-body) / 16);
+  /* From one column's left edge to the next. */
+  --col-step: calc(var(--grid-col) + var(--grid-gutter));
 }
 
-/* "Matthew Lam", a fixed 28px (--type-station-name, the home name's floor;
-   user request: it never scales): its left on the station edge, its caps
-   centred on the glyph and Map row (user request: in line with them; the
-   row's centre is 1.1 × --type-station-small below the edge, see
-   .station-chrome__row). Inter's cap top is 0.136em below the box and its
-   caps are 0.727em tall, so the cap centre is 0.4995em down. Fixed, on the
-   header bar, like the glyphs and Map (user request). */
-.station-page__title {
-  position: fixed;
-  left: var(--station-edge-len);
-  top: calc(var(--station-edge-len) + 1.1 * var(--type-station-small) - 0.4995em);
-  margin: 0;
-  font-size: var(--type-station-name);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  white-space: nowrap;
-  /* Above the header bar. */
-  z-index: 2;
+/* A full-width row on the grid, between the margins. */
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  padding: 0 var(--grid-margin);
 }
 
-/* The header row stays at the top (user request): a page-coloured bar the
-   content scrolls under, --station-head-h tall. The glyphs and Map
-   (.layer--chrome) sit above it; it fades with the page. */
-.station-page__bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--station-head-h);
-  background: var(--color-bg);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* The title goes home. */
-.station-page__home {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
-
-.station-page__home:hover {
-  opacity: 0.7;
-}
-
-.station-page__home:focus-visible {
-  outline: 2px solid var(--color-route);
-  outline-offset: 4px;
-}
-
-/* Credit line (About (7).png): --type-footer, a fixed 13px at every size
-   (user request), weight 300; ink right edge 39 from
-   the frame's right, its box's foot on the station edge. At the page's foot,
-   so on scrolling pages it sits under the content. */
-.station-page__footer {
-  position: absolute;
-  right: calc(39 * var(--px));
-  bottom: var(--station-edge-len);
-  margin: 0;
-  font-size: var(--type-footer);
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  white-space: nowrap;
-}
-
-/* The vertical line; trainDrop() grows it from its top. */
-.train-line {
-  position: absolute;
-  width: max(1px, calc(2 * var(--px)));
-  background: var(--color-divider);
-  will-change: transform;
-}
-
-/* Browser Inter sets ~4% wider than the mockup's; the tracking matches its
-   line breaks. */
-.station-copy {
-  font-size: calc(22.5 * var(--px));
-  line-height: calc(29 * var(--px));
-  letter-spacing: -0.02em;
-}
-
-.station-copy p {
-  margin: 0;
-}
-
-.station-copy p + p {
-  margin-top: calc(29 * var(--px));
-}
-
-/* ---- About (About (6).png) ---- */
-/* The copy and the photo are one group (copy left 356 to photo right 1388 in
-   the mockup), centred on the page. */
-.about {
-  /* The copy is 18px (user change; the mockup has 16): everything in it,
-     the hand-drawn SVGs included, is mockup px times 18/16, and never below
-     16px (body text floor), so it can outgrow its mockup share of the group. */
-  --cp: calc(var(--tu) * 18 / 16);
-  /* The group is laid out from the copy's width: the copy, then the 56.25 gap
-     and the 447 photo (503.25) in --px. Capped so the group fits with a 16px
-     gutter; past that the copy wraps into extra lines. At the reference size
-     the copy sits at 50% - 516 and the photo at 50% + 69, as in the mockup. */
-  --copy-w: min(470 * var(--cp), 100vw - 32px - 503.25 * var(--px));
-  --group-left: calc(50% - (var(--copy-w) + 503.25 * var(--px)) / 2);
-}
-
-/* The body size on the reference spacing (tokens.css: line-height 1.6, a
-   small gap between paragraphs, a wider one before "Connect"), with the
-   mockup's tracking (the home bio's). The block, however tall, stays
-   centred on mockup y 514, the photo's middle. */
-.about__copy {
-  position: absolute;
-  left: var(--group-left);
-  top: round(calc(514 * var(--px)), 1px);
-  translate: 0 round(-50%, 1px);
-  width: var(--copy-w);
-  font-size: var(--type-body);
-  line-height: var(--type-body-lh);
-  letter-spacing: -0.04em;
-}
-
-.about__copy p + p,
-.about__list {
-  margin: var(--type-para-gap) 0 0;
-}
-
-.about__copy .about__connect {
-  margin-top: var(--type-section-gap);
-}
-
-/* Hand-drawn dashes (line1–3.svg, 1:1 at 16px): no list markers, the text
-   15 in. Their offsets were measured in a 19 * --cp line box; --lead adds
-   the taller line's extra half-leading. The line grid and the dash offsets are rounded to whole px, so each
-   1px-ish stroke lands on the same pixel phase and the three match. */
-.about__list {
-  padding: 0;
-  list-style: none;
-}
-
-.about__list li {
-  --lead: calc((var(--type-body-lh) - 19 * var(--cp)) / 2);
-  position: relative;
-  padding-left: calc(15 * var(--cp));
-}
-
-.about__dash {
+/* Hand-drawn dashes (line1–3.svg) before list items and points. */
+.station-dash {
   position: absolute;
   left: calc(2 * var(--cp));
-  top: round(calc(var(--lead) + 10.2 * var(--cp)), 1px);
+  top: round(calc(10.2 * var(--cp)), 1px);
   width: calc(8 * var(--cp));
   height: calc(2 * var(--cp));
 }
 
-.about__list li:nth-child(2) .about__dash {
-  top: round(calc(var(--lead) + 9.2 * var(--cp)), 1px);
+.station-dash--mid {
+  top: round(calc(9.2 * var(--cp)), 1px);
 }
 
-.about__dash--thin {
-  top: round(calc(var(--lead) + 11.2 * var(--cp)), 1px);
+.station-dash--thin {
+  top: round(calc(11.2 * var(--cp)), 1px);
   height: calc(1 * var(--cp));
 }
 
-/* "anything" (anything.svg, 59×16, 1:1 at 16px), inline. */
+/* ---- About: the copy (columns 3–4) beside the photo (5–7), centred in the
+   first screen under the header; the footer follows. ---- */
+.about__main {
+  align-items: center;
+  min-height: 100svh;
+  padding-block: var(--station-head-h);
+}
+
+.about__copy {
+  position: relative;
+  grid-column: 3 / span 2;
+}
+
+.about__copy p + p,
+.about__list,
+.about__copy .about__connect {
+  margin-top: var(--line);
+}
+
+.about__list li {
+  position: relative;
+  padding-left: calc(15 * var(--cp));
+}
+
+/* "anything" (anything.svg, 59×16), inline, raised (user change). Relative,
+   so it doesn't grow the line box. */
 .about__anything {
   display: inline-block;
+  position: relative;
+  top: calc(-10 * var(--cp));
   width: calc(59 * var(--cp));
   height: calc(16 * var(--cp));
   margin: 0 calc(1 * var(--cp)) 0 calc(3.5 * var(--cp));
   vertical-align: calc(-8.4 * var(--cp));
-  /* Raised (user change): its baseline about 7 above the text's. Relative,
-     so it doesn't grow the line box. */
-  position: relative;
-  top: calc(-10 * var(--cp));
 }
 
 .about__link {
@@ -194,19 +83,22 @@
   font: inherit;
   letter-spacing: inherit;
   text-decoration: underline;
-  text-decoration-thickness: max(1px, calc(1.2 * var(--cp)));
-  text-underline-offset: calc(3.2 * var(--cp));
+  text-decoration-thickness: max(1px, calc(1 * var(--cp)));
+  text-underline-offset: calc(2.5 * var(--cp));
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: color 0.15s ease-out;
 }
 
-.about__link:hover {
-  opacity: 0.7;
-}
-
+/* Orange on hover, like the Connections rows. */
 .about__link:focus-visible {
-  outline: 2px solid var(--color-route);
-  outline-offset: 3px;
+  color: var(--color-orange);
+  outline: none;
+}
+
+@media (hover: hover) {
+  .about__link:hover {
+    color: var(--color-orange);
+  }
 }
 
 .about__smile {
@@ -216,198 +108,21 @@
 .about__copy .about__toast {
   position: absolute;
   left: 0;
-  top: calc(100% + 19 * var(--cp));
-  margin: 0;
+  top: calc(100% + var(--line));
+  color: var(--color-grey);
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
 }
 
-/* ---- Experience (Experience (2).png; scrolls) ---- */
-/* Headers (role, company), dates and copy are all the body size (user
-   choice). Rows flow: each job is a full-width band from its header's box
-   top to the foot of its copy (the photos' hover area), so the page is as
-   long as its content. With line-height 1, an 18px header's cap top sits 2.45
-   below its box. */
-.experience__list {
-  /* Body text never drops below 16px: --eu is --px floored at 16/18. The
-     column (and the photos right of it) grows by --grow to keep the design's
-     line breaks, into the space on the right, but never pushes the rightmost
-     photo edge (mockup 1698, tqd2) off screen; past that the copy wraps into
-     extra lines. 0 at the reference size. */
-  --eu: var(--tu);
-  --grow: clamp(0px, 640 * (var(--eu) - var(--px)), 100vw - 16px - 1698 * var(--px));
-  position: relative;
-  /* The first header's cap top at mockup y 238. */
-  padding: calc((238 - 2.45) * var(--px)) 0 calc(200 * var(--px));
-}
-
-.experience__job {
-  position: relative;
-  /* Contains the floated company block (below). */
-  display: flow-root;
-}
-
-/* Body foot to the next header's cap top: 61. */
-.experience__job + .experience__job {
-  margin-top: calc(58 * var(--px));
-}
-
-/* The last job's foot to the first extra's cap top: 140; extras every 75. */
-.experience__extras-group {
-  margin-top: calc(137 * var(--px));
-}
-
-.experience__extras-group .experience__job + .experience__job {
-  margin-top: calc(51 * var(--px));
-}
-
-/* Company and date, right-aligned to x 419 and sharing the role's cap top.
-   A company too long for the space left of x 419 (with a 16px gutter) wraps
-   instead of running off screen (user request: long names on small
-   screens, where headers stop shrinking at --tu).
-   Floated so a wrapped company pushes the next row down; the negative bottom
-   margin takes the date out of the row's height, so an unwrapped company adds
-   nothing (its title is the role's height). Clear of the role, whose
-   margin starts at 533. */
-.experience__company {
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  width: calc(419 * var(--px));
-  padding-left: 16px;
-  margin-bottom: calc(-23.8 * var(--px));
-  text-align: right;
-  white-space: nowrap;
-}
-
-.experience__company .experience__title {
-  white-space: normal;
-  text-wrap: balance;
-}
-
-.experience__title,
-.experience__role {
-  margin: 0;
-  font-size: var(--type-body);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-/* Cap top 29 below the company's. */
-.experience__date {
-  margin: calc(5.8 * var(--px)) 0 0;
-  color: var(--color-experience-date);
-  font-size: var(--type-body);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-/* extras.svg, 1:1 (126×34), its foot 19 above the first extra's cap top. */
-.experience__extras {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + (19 - 2.45) * var(--px));
-  width: calc(126 * var(--px));
-  height: calc(34 * var(--px));
-}
-
-.experience__role,
-.experience__para {
-  margin-left: calc(533 * var(--px));
-  width: calc(640 * var(--px) + var(--grow));
-}
-
-.experience__role {
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-/* The body size on the reference spacing (tokens.css), with the
-   paragraph gap between points. */
-.experience__para {
-  --lh: var(--type-body-lh);
-  margin-top: var(--type-para-gap);
-  /* The job is a flow root, so a <p>'s default bottom margin would no
-     longer collapse into the gap between jobs. */
-  margin-bottom: 0;
-  font-size: var(--type-body);
-  /* The home bio's weight and the dates' grey (user changes). */
-  font-weight: 300;
-  color: var(--color-experience-date);
-  line-height: var(--lh);
-  letter-spacing: -0.02em;
-}
-
-.experience__role + .experience__para {
-  margin-top: calc(19 * var(--eu));
-}
-
-/* Hand-drawn dashes (About's line1–3.svg, recycled; 1:1 at 16px, scaled to
-   the body size like About's), hanging 9 left of each point's first line with
-   About's vertical offsets. */
-.experience__para {
-  --cp: calc(var(--tu) * 18 / 16);
-  --lead: calc((var(--type-body-lh) - 19 * var(--cp)) / 2);
-  position: relative;
-}
-
-.experience__dash {
-  position: absolute;
-  left: calc(-17 * var(--cp));
-  top: round(calc(var(--lead) + 10.2 * var(--cp)), 1px);
-  width: calc(8 * var(--cp));
-  height: calc(2 * var(--cp));
-}
-
-.experience__dash--mid {
-  top: round(calc(var(--lead) + 9.2 * var(--cp)), 1px);
-}
-
-.experience__dash--thin {
-  top: round(calc(var(--lead) + 11.2 * var(--cp)), 1px);
-  height: calc(1 * var(--cp));
-}
-
-/* Hover photos: mockup box x from the page's left, dy from the header's cap
-   top. Hidden until the job is hovered (autoAlpha). A shown photo is part of
-   its job's hover area: it sits inside the <section>, so pointerleave waits
-   until the cursor leaves both. Hidden, visibility keeps it out of
-   hit-testing, so it can't start a hover on its own. */
-.experience__photo {
-  position: absolute;
-  left: calc(var(--x) * var(--px) + var(--grow));
-  top: calc((var(--dy) + 2.45) * var(--px));
-  width: calc(var(--w) * var(--px));
-  height: calc(var(--h) * var(--px));
-  /* User request: a fixed 5px (About keeps --image-radius). */
-  border-radius: 5px;
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  will-change: transform, opacity;
-}
-
-.experience__photo picture,
-.experience__photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.experience__photo img {
-  object-fit: cover;
-}
-
-/* ---- About: the photo ---- */
-/* A photo box in mockup px (--x, --y, --w, --h from content/aboutPhotos.ts);
-   x follows the copy's right edge (mockup 884.75). */
+/* The photo: three columns wide, or less on a short window so it fits the
+   first screen under the header, at its own aspect (--w, --h from
+   content/aboutPhotos.ts). */
 .about-photo {
-  position: absolute;
-  left: calc(var(--group-left) + var(--copy-w) + (var(--x) - 884.75) * var(--px));
-  top: calc(var(--y) * var(--px));
-  width: calc(var(--w) * var(--px));
-  height: calc(var(--h) * var(--px));
+  position: relative;
+  grid-column: 5 / span 3;
+  width: min(100%, (100svh - 2 * var(--station-head-h)) * var(--w) / var(--h));
+  aspect-ratio: var(--w) / var(--h);
   border-radius: var(--image-radius);
   overflow: hidden;
   /* Clips the overscaled heavy frost. */
@@ -460,62 +175,135 @@
   will-change: opacity;
 }
 
-/* ---- Compact layout (global.css): stacked and scrolling. The header row
-   (title, glyphs, Map) hangs from --station-edge-len; the content runs under it
-   on a centred column (--compact-w), the footer under the content. ---- */
+/* ---- Experience: one grid row per job. Company and date in columns 1–2,
+   the role and its points in 3–4, the hover photos over 5–8. Each job is a
+   full-width band (the photos' hover area). ---- */
+.experience__list {
+  /* The photo unit: 1px of the Experience mockup, shrinking so the widest
+     collage (435 wide, from x 1263) fits columns 5–8. */
+  --pu: min(1px, (4 * var(--grid-col) + 3 * var(--grid-gutter)) / 435);
+  padding-top: calc(var(--station-head-h) + 120 * var(--pp));
+}
+
+.experience__job,
+.experience__extras-group {
+  position: relative;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: start;
+}
+
+/* The project sections' gap. */
+.experience__job + .experience__job {
+  margin-top: calc(135 * var(--pp));
+}
+
+/* Company (black) over its date (grey), cap tops level with the role's. */
+.experience__company {
+  grid-column: 1 / span 2;
+  text-box: trim-both cap alphabetic;
+}
+
+.experience__date {
+  color: var(--color-grey);
+}
+
+.experience__text {
+  grid-column: 3 / span 2;
+}
+
+.experience__role {
+  text-box: trim-both cap alphabetic;
+}
+
+/* A blank line under the role and between points (the project paragraphs'). */
+.page .experience__para {
+  position: relative;
+  margin-top: var(--line);
+}
+
+/* The hand-drawn dash hangs left of each point's first line. */
+.experience__para .station-dash {
+  left: calc(-17 * var(--cp));
+}
+
+/* The extras: a project-style heading, then a row each, closer together. */
+.experience__extras-group {
+  margin-top: calc(194 * var(--pp));
+}
+
+.experience__extras {
+  grid-column: 3 / span 2;
+  text-box: trim-both cap alphabetic;
+}
+
+.experience__extras-group .experience__job {
+  margin-top: calc(2 * var(--line));
+}
+
+/* Hover photos: mockup boxes (content/experience.ts: x from the mockup's
+   left, dy from the role's cap top) in --pu, from column 5's left edge.
+   Hidden until the job is hovered (autoAlpha). A shown photo is part of its
+   job's hover area: it sits inside the <section>, so pointerleave waits
+   until the cursor leaves both. Hidden, visibility keeps it out of
+   hit-testing. */
+.experience__photo {
+  position: absolute;
+  left: calc(4 * var(--col-step) + (var(--x) - 1263) * var(--pu));
+  top: calc(var(--dy) * var(--pu));
+  width: calc(var(--w) * var(--pu));
+  height: calc(var(--h) * var(--pu));
+  border-radius: 5px;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.experience__photo picture,
+.experience__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.experience__photo img {
+  object-fit: cover;
+}
+
+/* ---- Compact layout (global.css): one column under the (scrolling)
+   header. ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
-  .station-page {
-    padding: 88px 0 calc(var(--station-edge-len) + 48px);
-  }
-
-  /* The glyphs and Map keep their fixed size (user request), so on narrow
-     phones the name gives way instead: it shrinks to fit the space left of
-     the chrome row (237.4 units of --type-station-small / 20: glyphs 118.4,
-     gap 27, Map 92) with a 12px gap. "Matthew Lam" is ~6.25em wide. */
-  .station-page__title {
-    font-size: min(var(--type-station-name),
-      (100vw - 2 * var(--station-edge-len)
-        - 237.4 * var(--type-station-small) / 20 - 12px) / 6.25);
-  }
-
-  /* About: the photo, then the copy. */
-  .about {
-    --copy-w: var(--compact-w);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 32px;
-  }
-
-  .about__copy {
-    position: relative;
-    left: auto;
-    top: auto;
-    translate: none;
-  }
-
-  /* Centred on the viewport (user request), at most 400 wide (a tablet's
-     column is 640) and 55svh tall. The height cap goes through the width, so
-     the box always keeps the photo's aspect (a max-height alone squashed it
-     on short windows). */
-  .about-photo {
-    position: relative;
-    left: auto;
-    top: auto;
-    order: -1;
-    align-self: center;
-    width: min(var(--compact-w), 400px, 55svh * var(--w) / var(--h));
-    height: auto;
-    aspect-ratio: var(--w) / var(--h);
-  }
-
-  /* Experience: each job is the role, the company and date, its photos (a
-     strip, always shown: touch has no hover; user decision), then the copy. */
-  .experience__list {
-    --grow: 0px;
+  .station-grid {
+    display: block;
     width: var(--compact-w);
     margin: 0 auto;
     padding: 0;
+  }
+
+  /* About: the photo, then the copy. */
+  .about__main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+    min-height: 0;
+    padding-block: 32px 0;
+  }
+
+  /* Centred, at most 400 wide and 55svh tall, at the photo's aspect. */
+  .about-photo {
+    order: -1;
+    align-self: center;
+    width: min(100%, 400px, 55svh * var(--w) / var(--h));
+  }
+
+  /* Experience: each job is the role, the company and date, its photos (a
+     strip, always shown: touch has no hover; user decision), then the
+     points. */
+  .experience__list {
+    padding-top: 40px;
   }
 
   .experience__job {
@@ -525,12 +313,24 @@
     gap: 8px;
   }
 
-  .experience__job > * {
+  .experience__extras-group {
+    display: block;
+    margin-top: 72px;
+  }
+
+  .experience__job > *,
+  .experience__text > * {
     flex: 0 0 100%;
   }
 
+  /* The role and points join the job's flex row, so the photos can sit
+     between them. */
+  .experience__text {
+    display: contents;
+  }
+
   .experience__job + .experience__job,
-  .experience__extras-group .experience__job + .experience__job {
+  .experience__extras-group .experience__job {
     margin-top: 48px;
   }
 
@@ -539,42 +339,18 @@
   }
 
   .experience__company {
-    position: static;
     order: 2;
-    float: none;
-    width: auto;
-    padding: 0;
-    margin: 0;
-    text-align: left;
-    white-space: normal;
-  }
-
-  .experience__company .experience__title {
-    text-wrap: wrap;
-  }
-
-  .experience__date {
-    margin-top: 6px;
-  }
-
-  .experience__role,
-  .experience__para {
-    width: auto;
-    margin-left: 0;
   }
 
   /* The gutter can't hold a hanging dash: indent the points (About's list). */
-  .experience__para {
+  .page .experience__para {
     order: 4;
+    margin-top: 8px;
     padding-left: calc(15 * var(--cp));
   }
 
-  .experience__dash {
+  .experience__para .station-dash {
     left: calc(2 * var(--cp));
-  }
-
-  .experience__role + .experience__para {
-    margin-top: 12px;
   }
 
   /* !important: the hover tweens (Experience.tsx) leave inline styles. */
@@ -592,18 +368,5 @@
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
-  }
-
-  .experience__extras-group {
-    margin-top: calc(48px + 48 * var(--m));
-  }
-
-  /* "Extras", above the first extra (the job is its containing block). */
-  .experience__extras {
-    left: 0;
-    right: auto;
-    bottom: calc(100% + 12px);
-    width: calc(100 * var(--m));
-    height: auto;
   }
 }

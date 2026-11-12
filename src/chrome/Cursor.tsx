@@ -6,7 +6,7 @@ import { prefersReducedMotion } from "../lib/motion";
 import "./cursor.css";
 
 /** What counts as clickable: the ring shows over these. */
-const CLICKABLE = 'a[href]:not([aria-current]), button:not(:disabled), [role="button"]';
+const CLICKABLE = 'a[href]:not([aria-current]), button:not(:disabled), [role="button"], [data-clickable]';
 
 /**
  * Replaces the native cursor with a dot that opens into a hollow ring over

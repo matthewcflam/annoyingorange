@@ -6,12 +6,12 @@
  * Cover: ditherCover.ts. Title: scrambleTitle.ts. Timings: TRANSITION.
  *
  * Cover colour (user decision): the opposite of the page being left. Leaving
- * the light home it is dark (the station pages' colour, light text); leaving
- * a dark station page it is light (black text), whether the next page is
- * another station or home.
+ * a light page (home, the project pages) it is dark, with light text; leaving
+ * a dark one (About, Experience) it is light, with black text. Home ↔
+ * projects uses the same dark as every other dark cover (user request).
  *
- * Switching between projects is not a station change (§10.1), so it only
- * crossfades the project content; the list, map and page stay put.
+ * Switching between projects is not a station change, so it only crossfades
+ * the project's content; the name, list and Map box stay put.
  */
 import { gsap } from "../lib/gsap";
 import { play } from "../audio/engine";
@@ -21,6 +21,7 @@ import { getRoute, type TransitionRunner } from "../lib/router";
 import { preloadRoute } from "../lib/assets";
 import { markPageHidden, markPageShown } from "../lib/pageReveal";
 import { prefersReducedMotion } from "../lib/motion";
+import { projectScale } from "../lib/tokens";
 import { cover } from "./ditherCover";
 import { title } from "./scrambleTitle";
 
@@ -36,6 +37,10 @@ function titleFor(path: string): string[] {
 /** Cover tone for leaving `from`: opposite to its page theme. */
 const toneLeaving = (from: string) => (routeFor(from).theme === "light" ? "dark" : "light");
 
+/** The cover's colour token: the dark or light page colour. */
+const coverColor = (tone: "dark" | "light"): `--${string}` =>
+  tone === "light" ? "--color-cover-light" : "--color-cover-dark";
+
 /** The next page's images, or give up after PRELOAD_MAX_MS. */
 function imagesReady(to: string): Promise<void> {
   return Promise.race([preloadRoute(to), new Promise<void>((r) => setTimeout(r, TRANSITION.PRELOAD_MAX_MS))]);
@@ -47,14 +52,15 @@ export const pageTransition: TransitionRunner = async (to, commit) => {
 
   const reduced = prefersReducedMotion();
   const tone = toneLeaving(getRoute());
-  cover.setTone(tone);
+  const color = coverColor(tone);
+  cover.setTone(tone, color);
   play("station.click");
 
   // The title runs on its own clock: its type-out outlasts the cover, like 2xa's.
   if (reduced) title.showStatic(titleFor(to));
   else void title.run(titleFor(to));
 
-  await cover.show(reduced, tone === "dark" ? "--color-cover-dark" : "--color-cover-light");
+  await cover.show(reduced, color);
   await ready;
   markPageHidden();
   commit(); // the map morph and name-block fade start here, under the cover
@@ -75,8 +81,8 @@ export const pageTransition: TransitionRunner = async (to, commit) => {
 
 /** TODO(open-question #3): placeholder project switch (§10.1). */
 async function projectSwitch(ready: Promise<void>, commit: () => void) {
-  const offset = prefersReducedMotion() ? 0 : PROJECT.SWITCH_OFFSET_PX;
-  const swap = () => document.querySelector(".project__swap");
+  const offset = prefersReducedMotion() ? 0 : PROJECT.SWITCH_OFFSET_PX * projectScale();
+  const swap = () => document.querySelectorAll(".project__swap");
   play("project.select");
   await gsap.to(swap(), {
     autoAlpha: 0,

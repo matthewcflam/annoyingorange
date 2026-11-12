@@ -1,92 +1,195 @@
 /**
- * Per-project copy and media (spec §10). Sizes are article px: the article
- * was designed in the old 1440×1024 frame and is drawn at ARTICLE_SCALE
- * (lib/frame.ts) in the right pane of the Projects page.
- * Page-specific extras (obstacles, the Portfolio circles)
- * live with each page in pages/projects/.
+ * Per-project copy and media for the Projects station (Figma "Portfolio",
+ * pages/projects/). Every project uses the same template: a tools list, two
+ * tilted heroes, rows of text sections beside a piece of media.
  */
 import type { Picture } from "../lib/assets";
-import oysterNewsMap from "../../assets-src/images/oyster-news.png?hero";
-import mangoMineMotion from "../../assets-src/images/mango.png?hero";
+import heroPlaceholder from "../../assets-src/images/project-hero-placeholder.png?hero";
 
-export type ProjectSlug = "oyster-news" | "mango" | "portfolio";
+export type ProjectSlug = "portfolio" | "oyster-news" | "remind" | "mango";
 
-export type Hero =
-  | {
-      kind: "image";
-      picture: Picture;
-      alt: string;
-      height: number;
-      /** Fraction of the source's height to hide at the top (window chrome). */
-      cropTop?: number;
-    }
-  /** Art that hasn't been supplied yet (design/ASSETS.md "Missing"). */
-  | { kind: "placeholder"; label: string; height: number };
+/** A block of copy in a section. */
+export type Block =
+  | { kind: "p"; text: string }
+  /** A sub-heading inside a section ("Design Decisions"). */
+  | { kind: "sub"; text: string }
+  | { kind: "ol"; items: string[] };
+
+export interface Section {
+  heading: string;
+  blocks: Block[];
+}
+
+/**
+ * Media beside a row. Only placeholders for now (the labelled grey boxes in
+ * the Figma file); real kinds (video, image, embed) slot in here and in
+ * pages/projects/Media.tsx. `w` / `h` are the box in the 1640 frame: its
+ * aspect ratio.
+ */
+export type Media = { kind: "placeholder"; label: string; w: number; h: number };
+
+/** Text sections stacked in the text columns, beside one piece of media. */
+export interface Row {
+  sections: Section[];
+  media: Media | null;
+  /** Sits right under the row above (16px), like the Figma board and timeline. */
+  tight?: boolean;
+}
+
+/** One of the two tilted images above the copy. */
+export interface Hero {
+  picture: Picture;
+  alt: string;
+}
 
 export interface Project {
   slug: ProjectSlug;
-  title: string;
-  /** Name in the Projects list (design/mockups-v2). */
+  /** Name in the project list. */
   listTitle: string;
+  /** What it was, centred in the project list ("Project", "Hackathon"). */
+  category: string;
   year: string;
   path: string;
-  /** Stacked in the center column, 600 wide. Empty = the page draws its own. */
-  heroes: Hero[];
-  /** One string per paragraph. */
-  body: string[];
-  date: string;
-  link: { href: string; label: string } | null;
+  /** Groups of tools; a blank line separates the groups. */
+  tools: string[][];
+  /** The poster beside the list while the row is hovered (Figma "… Hover"):
+   *  its colour (a tokens.css custom property) and paragraphs of lines. */
+  poster: { color: string; text: string[][] };
+  /** Exactly two: the lower-left one, then the upper-right one. */
+  heroes: [Hero, Hero];
+  rows: Row[];
 }
 
-// The copy in all three mockups. Mango and Portfolio reuse Oyster News's text.
-const OYSTER_BODY = [
-  "PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER"
+/** TODO(heroes): placeholder art from the Figma file, for every project. */
+const HEROES: [Hero, Hero] = [
+  { picture: heroPlaceholder, alt: "" },
+  { picture: heroPlaceholder, alt: "" },
 ];
 
-/** List order (design/mockups-v2): Portfolio, Oyster News, Mango. */
+const para = (text: string): Block => ({ kind: "p", text });
+
+/** TODO(open-question #12/#14): real copy, tools and media for this project. */
+const PLACEHOLDER_ROWS: Row[] = [
+  {
+    sections: [
+      { heading: "DESCRIPTION", blocks: [para("PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER")] },
+      { heading: "FEATURES", blocks: [para("PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER")] },
+    ],
+    media: { kind: "placeholder", label: "Video", w: 707, h: 495 },
+  },
+  {
+    sections: [{ heading: "HOW I BUILT IT", blocks: [para("PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER")] }],
+    media: { kind: "placeholder", label: "Figma Board", w: 710, h: 327 },
+  },
+  {
+    sections: [{ heading: "USE OF AI", blocks: [para("PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER")] }],
+    media: { kind: "placeholder", label: "Timeline", w: 711, h: 173 },
+    tight: true,
+  },
+];
+const PLACEHOLDER_TOOLS = [["Placeholder", "Placeholder", "Placeholder"]];
+
+/** List order (Figma): This Portfolio, Oyster News, ReMind, Mango. */
 export const PROJECTS: readonly Project[] = [
   {
     slug: "portfolio",
-    title: "Portfolio",
     listTitle: "This Portfolio",
+    category: "Project",
     year: "2026",
     path: "/projects/portfolio",
-    heroes: [],
-    // TODO(open-question #14): real Portfolio copy, date and link.
-    body: OYSTER_BODY,
-    date: "Date: Aug. 2026 - Sept. 2026",
-    link: null,
+    // "Seven" … "Ten" are the Figma file's own placeholders.
+    tools: [
+      ["React.js", "TypeScript", "WebGL", "Seven", "Eight", "Nine", "Ten"],
+      ["Claude Code", "Figma"],
+    ],
+    poster: { color: "--color-poster-portfolio", text: [[":)"]] },
+    heroes: HEROES,
+    rows: [
+      {
+        sections: [
+          {
+            heading: "DESCRIPTION",
+            blocks: [
+              para(
+                "One day I thought to myself... I want something of my own to represent who I am. So I sat for a ridiculous amount of time on my Figma Board and got to cooking. The result is this transit and Studio Ghibli inspired website.",
+              ),
+              para("I hope you enjoy!"),
+            ],
+          },
+          {
+            heading: "FEATURES",
+            blocks: [
+              para(
+                "I chose transit because I love the peace that comes with taking transit. You have the freedom to look out the window and focus on what’s around you.",
+              ),
+              // Unfinished in the Figma file.
+              para("transition screen: a modified version of 2XA Studio’s wonderful transition, intended to make"),
+              para("who? spray"),
+              para("defrosting photos"),
+              para("sound"),
+            ],
+          },
+        ],
+        media: { kind: "placeholder", label: "Video", w: 707, h: 495 },
+      },
+      {
+        sections: [
+          {
+            heading: "HOW I BUILT IT",
+            blocks: [
+              { kind: "sub", text: "Design Decisions" },
+              { kind: "ol", items: ["Optimizing for speed", "Custom everything"] },
+              { kind: "sub", text: "Technical Challenges" },
+              { kind: "ol", items: ["Making the who? spray look human", "Recreating 2XA Studio’s Transition"] },
+            ],
+          },
+        ],
+        media: { kind: "placeholder", label: "Figma Board", w: 710, h: 327 },
+      },
+      {
+        sections: [
+          {
+            heading: "USE OF AI",
+            blocks: [para("I used AI to evaluate tech stack, system design, implementation, and testing.")],
+          },
+        ],
+        media: { kind: "placeholder", label: "Timeline", w: 711, h: 173 },
+        tight: true,
+      },
+    ],
+  },
+  {
+    slug: "remind",
+    listTitle: "ReMind",
+    category: "Hackathon",
+    year: "2026",
+    path: "/projects/remind",
+    tools: PLACEHOLDER_TOOLS,
+    poster: { color: "--color-poster-remind", text: [["Conversational", "AI for Dementia"], ["DubHacks 2x", "Winner"]] },
+    heroes: HEROES,
+    rows: PLACEHOLDER_ROWS,
   },
   {
     slug: "oyster-news",
-    title: "Oyster News",
     listTitle: "Oyster News",
+    category: "Project",
     year: "2026",
     path: "/projects/oyster-news",
-    heroes: [
-      // TODO(open-question #13): world news map hero is missing.
-      { kind: "placeholder", label: "world news map (art missing)", height: 150 },
-      { kind: "image", picture: oysterNewsMap, alt: "Oyster News: a map of Vancouver with news headlines pinned where they happened", height: 377 },
-    ],
-    body: OYSTER_BODY,
-    date: "Date: Aug. 2026 - Sept. 2026",
-    link: { href: "https://oysternews.xyz/", label: "https://oysternews.xyz/" },
+    tools: PLACEHOLDER_TOOLS,
+    poster: { color: "--color-poster-oyster-news", text: [["Worldwide News,", "Mapped"]] },
+    heroes: HEROES,
+    rows: PLACEHOLDER_ROWS,
   },
   {
     slug: "mango",
-    title: "Mango",
     listTitle: "Mango",
+    category: "Hackathon",
     year: "2025",
     path: "/projects/mango",
-    heroes: [
-      // TODO(open-question #12): the mockup's first hero is Oyster News's world map.
-      { kind: "placeholder", label: "Mango hero (art missing)", height: 150 },
-      { kind: "image", picture: mangoMineMotion, alt: "MineMotion: webcam body tracking beside the Minecraft game it controls", height: 372, cropTop: 31 / 1028 },
-    ],
-    // TODO(open-question #12): real Mango copy, date and link.
-    body: OYSTER_BODY,
-    date: "Date: Aug. 2026 - Sept. 2026",
-    link: null,
+    tools: PLACEHOLDER_TOOLS,
+    poster: { color: "--color-poster-mango", text: [["Gesture Controlled", "Minecraft"], ["HelloHacks Winner"]] },
+    heroes: HEROES,
+    rows: PLACEHOLDER_ROWS,
   },
 ];
 

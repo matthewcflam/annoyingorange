@@ -5,7 +5,6 @@
  * aspect, so object-fit: cover crops nothing.
  */
 import type { Picture } from "../lib/assets";
-import { frameSizes } from "../lib/frame";
 import enersys1 from "../../assets-src/images/enersys1.png?hero";
 import enersys2 from "../../assets-src/images/enersys2.png?hero";
 import sailbot1 from "../../assets-src/images/sailbot1.png?hero";
@@ -38,7 +37,8 @@ const photo = (picture: Picture, alt: string, x: number, dy: number, w: number, 
   dy,
   w,
   h,
-  sizes: frameSizes(w),
+  // Shown at mockup size (--pu, at most 1px; station.css).
+  sizes: `${w}px`,
 });
 
 export const JOBS: Job[] = [

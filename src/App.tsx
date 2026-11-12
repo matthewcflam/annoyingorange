@@ -14,13 +14,14 @@ import TransitionLayer from "./transition/TransitionLayer";
 import StationChrome from "./chrome/StationChrome";
 import Cursor from "./chrome/Cursor";
 import ScrollBar from "./chrome/ScrollBar";
+import GridOverlay from "./chrome/GridOverlay";
 import { routeFor } from "./config/routes";
 
 /**
  * Layer stack (spec §4.1), bottom to top:
  *   z0  page layer        — swaps per route
- *   z10 shared chrome     — name block, gate options, mute toggle (home);
- *                           Map pill, keychain, "Matthew Lam" (station pages)
+ *   z10 shared chrome     — name block, mute toggle (home); Map box
+ *                           (station pages)
  *   z20 transit map       — home only
  *   z40 glass             — painted on the screen: Home portals "who?" here
  *   z50 transition        — the dither cover and its title, over everything
@@ -73,6 +74,7 @@ export default function App() {
       {/* Portals into <body>, outside this fading root. */}
       <Cursor />
       <ScrollBar />
+      <GridOverlay />
       {fontsReady && (
         <>
           <main className="layer--page">

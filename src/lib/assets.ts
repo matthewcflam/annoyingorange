@@ -14,8 +14,8 @@ export interface Picture {
   img: { src: string; w: number; h: number };
 }
 
-/** Rendered width of a hero: 600 article px = 660 × --px (project.css, global.css). */
-export const HERO_SIZES = "(min-aspect-ratio: 1767/1024) 64.5vh, 37.4vw";
+/** Rendered width of a project hero: at most 502px, less under 1640 wide (project.css --hu). */
+export const HERO_SIZES = "(max-width: 1640px) 31vw, 502px";
 
 interface RouteImage {
   picture: Picture;
@@ -28,7 +28,7 @@ function routeImages(path: string): RouteImage[] {
   if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   const heroes = projectByPath(path)?.heroes ?? [];
-  return heroes.flatMap((h) => (h.kind === "image" ? [{ picture: h.picture, sizes: HERO_SIZES }] : []));
+  return heroes.map((h) => ({ picture: h.picture, sizes: HERO_SIZES }));
 }
 
 const loads = new Map<Picture, Promise<void>>();

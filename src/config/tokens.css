@@ -12,31 +12,24 @@
   --font-station: "Fragment Mono", ui-monospace, monospace;
   --font-sound:   "Inter Variable", system-ui, sans-serif;
   --font-muted:   "Inter Variable", system-ui, sans-serif;
+  /* Body text (user request): Nunito Medium, from @fontsource/nunito (only the
+     500 weight is imported, main.tsx). The home bio, About and Experience
+     copy, and the project text; the names, Map box, Connections card,
+     project list, orange headings, footer and transition stay Helvetica
+     Rounded Bold. */
+  --font-text:    "Nunito", "Inter Variable", system-ui, sans-serif;
+  --weight-text:  500;
 
   /* ---- Type scale (user request): text that should match uses these, so
      it is the same size and scales the same way on every page. Each role is
      its mockup size times --px, with its own floor (user request: legible on
      phones, and the floors keep the hierarchy name > label > head > body >
      small). The floors are in rem, so browser zoom and a larger default
-     font size still apply. --tu is --px floored so 18-unit body text never
-     drops below 16px. ---- */
+     font size still apply. --tu is --px floored at 1rem / 18. ---- */
   --tu:           max(var(--px), 1rem / 18);
   --type-name:    max(1.75rem, 48 * var(--px));   /* "Matthew Lam" (home, station header), transition title: floor 28 */
   --type-label:   max(1.125rem, 30 * var(--px));  /* home map labels: floor 18 */
-  --type-head:    max(1.25rem, 24 * var(--tu));   /* gate options: floor 20 */
-  --type-body:    calc(18 * var(--tu));           /* body copy (and Experience role and company): max(16px, 18 * --px) */
-  /* Body spacing from the user's references, scaled to the body size: lines
-     on a 24px pitch for 15px text; from one paragraph (point) to the next,
-     34px line to line (the gap is that minus a line); a closing line ("Connect")
-     sits one more body size further. */
-  --type-body-lh:     round(calc(var(--type-body) * 1.6), 1px);
-  --type-para-gap:    calc(round(var(--type-body) * 34 / 15, 1px) - var(--type-body-lh));
-  --type-section-gap: calc(var(--type-para-gap) + round(var(--type-body), 1px));
   --type-small:   max(0.8125rem, 20 * var(--px)); /* Map / Close, toasts: floor 13 */
-  --type-footer:  0.8125rem;                      /* the footer: fixed 13, never scales (user request) */
-  /* The station header at its floors, fixed (user request): never scales. */
-  --type-station-name:  1.75rem;                  /* station "Matthew Lam": fixed 28 */
-  --type-station-small: 1rem;                     /* station glyphs and Map / Close: fixed 16 */
   /* Social glyphs: the unit of the 36-unit icon box. It is --type-small / 20,
      the Map button's own unit (user request), so the glyphs and the button
      always scale together and share its floor. */
@@ -45,10 +38,8 @@
   /* ---- Base: --color-bg / --color-text follow data-theme (global.css) ---- */
   --color-home-bg:      #FFFFF8;  /* home */
   --color-home-text:    #000000;
-  --color-station-bg:   #212121;  /* About, Experience, Projects */
+  --color-station-bg:   #212121;  /* the dark cover (every page is light now) */
   --color-station-text: #FFFFFF;
-  --color-divider:      #909090;  /* the station pages' vertical line */
-  --color-experience-date: #A8A8A8;  /* Experience dates (sampled) and body copy */
 
   /* ---- Brand ---- */
   --color-orange: #FF7700;          /* "who?", scribbles, Portfolio hero */
@@ -59,27 +50,27 @@
   --color-station-active: #FFA62A;  /* mini-map current dot, sampled */
 
   /* ---- Page transition (2xa.studio dither cover) ----
-     The cover is the opposite of the page being left: dark leaving home,
-     light leaving a station page. Each matches the page it reveals or covers. */
+     The cover is the opposite of the page being left: dark leaving a light
+     page, light leaving a dark one (transition/pageTransition.ts). */
   --color-cover-dark:        var(--color-station-bg);
   --color-cover-light:       var(--color-home-bg);
   --color-transition-accent: var(--color-route); /* 2xa uses its blue */
   --font-transition: "Inter Variable", system-ui, sans-serif;
   --font-key-meta:   "Jersey 25", ui-monospace, monospace;  /* "2026" and "Lam" on the key card */
 
-  /* ---- Station chrome ---- */
-  --color-map-pill:      #D9D9D9;
-  --color-map-pill-text: #000000;
-  --color-map-open:      var(--color-station-bg);  /* "Close" while the keychain is open: matches the page (user change) */
-  --color-map-open-text: #FFFFFF;
+  /* ---- Station chrome: the Map box (keychain/MapBox.tsx, Figma "Portfolio" /
+     "Portfolio - Map Expanded") ---- */
+  --color-map-box:      var(--color-route);
+  --color-map-box-text: #FFFFFF;
+  --color-map-dot:      #FFFFFF;
+  --color-map-here:     var(--color-orange);  /* the current station's dot and label */
 
-  /* ---- Keychain (keychain/) ---- */
-  --color-key-card:        #FFFFFF;  /* the station key card, under its paper texture (Group 67.png) */
-  --color-key-card-text:   #000000;
-  --color-key-bubble:      #FFFFFF;  /* station bubbles, measured */
-  --color-key-here:        #FFA62A;  /* the current station's bubble (user change; was the route blue, then pink) */
-  --color-key-band:        var(--color-route);  /* the bands across the card's top and bottom */
-  --color-key-strip:       color-mix(in srgb, var(--color-route) 10%, transparent);  /* the faint strip across the middle */
+  /* ---- Project posters (pages/projects/ProjectList.tsx, Figma "… Hover") ---- */
+  --color-poster-portfolio:   var(--color-orange);
+  --color-poster-remind:      #4DAE44;
+  --color-poster-oyster-news: #D24F39;
+  --color-poster-mango:       #F89E21;
+  --color-poster-text:        #FFFFFF;
 
   /* ---- Home ---- */
 
@@ -87,12 +78,40 @@
   --color-frost-wash: rgba(226, 232, 240, 0.38);  /* milky, slightly cool */
   --frost-grain:      0.14;
 
-  /* ---- Project pages ---- */
-  --color-link-underline: #BE4525;  /* spec said ≈#C8452F; sampled. Asset missing */
-  --color-obstacle-oyster: #D24F39; /* spec said ≈#D9503A; sampled */
-  --color-mango:       #FFA62A;     /* from mango.svg */
-  --color-mango-stem:  #76C933;     /* from mango.svg */
-  --color-portfolio-grey: #77736F;  /* Portfolio hero back circle, sampled */
-  --color-hero-placeholder: #172131; /* missing world-map hero: its ocean, sampled */
+  /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */
+  /* Helvetica Rounded Bold: supplied by the user as
+     assets-src/fonts/helvetica-rounded-bold.woff2 (lib/fonts.ts registers it
+     when the file exists). Until then "Rounded Fallback" (global.css: a local
+     copy, else Arial Rounded), then Inter. */
+  --font-rounded: "Helvetica Rounded", "Rounded Fallback", "Inter Variable", system-ui, sans-serif;
+  /* Project scale (user request): the project pages and the Map box were
+     judged at 67% browser zoom, so every fixed size on them is × --ps (the
+     compact layout keeps 1). --pp is one project px. Tune --ps here. */
+  --ps: 0.6667;
+  --pp: calc(var(--ps) * 1px);
+  /* The layout grid (Figma: 9 stretched columns, 15 margin, 15 gutter). The
+     project page lays out on it and chrome/GridOverlay.tsx draws it (Shift+G). */
+  --grid-cols:   9;
+  --grid-margin: calc(15 * var(--pp));
+  --grid-gutter: calc(15 * var(--pp));
+  --grid-col:    calc((100vw - 2 * var(--grid-margin) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
+  --grid-span2:  calc(2 * var(--grid-col) + var(--grid-gutter));
+  --color-grid:  rgba(200, 75, 33, 0.1);
+  /* Type: fixed px × --ps (the columns stretch, the type doesn't). */
+  --type-project-title: calc(3rem * var(--ps));    /* 32 (48 × 2/3; 48 compact): "Matthew Lam" and "Let's chat!" (user request: they meet in the middle) */
+  --type-project-name:  calc(2.25rem * var(--ps)); /* 24 (36 compact): media labels */
+  --type-project-card:  calc(24 * var(--map-k)); /* 21 (24 compact): the Map box, matching Connections (24 × --ft) */
+  --type-project-body:  calc(1.5rem * var(--ps));  /* 16 (24 compact): everything else, footer credits included (user request; 16 in Figma) */
+  --type-project-small: max(11px, 1rem * var(--ps)); /* 11 (16 compact): the copy toast */
+  --project-lh:         1.1875;    /* 19px lines at 16 (measured from the frame) */
+  --color-grey:  #939393;          /* inactive projects, tools, list rules */
+  --color-media: #C6C6C6;          /* media placeholders */
 
+}
+
+/* The compact layout (global.css) keeps the project pages at full size. */
+@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  :root {
+    --ps: 1;
+  }
 }

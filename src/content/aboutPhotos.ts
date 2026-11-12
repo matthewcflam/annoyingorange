@@ -4,7 +4,6 @@
  * (me1–me4.jpg were the About (5) photos; they are unused now.)
  */
 import type { Picture } from "../lib/assets";
-import { frameSizes } from "../lib/frame";
 import meFinal from "../../assets-src/images/me-final.png?hero";
 import meFinalFrost from "../../assets-src/images/me-final.png?frost";
 import meFinalFrostLight from "../../assets-src/images/me-final.png?frostlight";
@@ -22,7 +21,7 @@ export interface AboutPhoto {
   y: number;
   w: number;
   h: number;
-  /** <source sizes>: the box width in the --px frame. */
+  /** <source sizes> (station.css: three grid columns, 400px max on compact). */
   sizes: string;
 }
 
@@ -34,7 +33,9 @@ const photo = (
   y: number,
   w: number,
   h: number,
-): AboutPhoto => ({ id, picture, frost, frostLight, alt, x, y, w, h, sizes: frameSizes(w) });
+): AboutPhoto => ({ id, picture, frost, frostLight, alt, x, y, w, h, sizes: ABOUT_SIZES });
+
+const ABOUT_SIZES = "(max-width: 760px) min(100vw, 400px), 33vw";
 
 /** In reveal order, top first. */
 export const ABOUT_PHOTOS: AboutPhoto[] = [

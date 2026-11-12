@@ -1,7 +1,7 @@
 // Fonts first, before anything renders (spec §5.2).
 import "@fontsource/fragment-mono";
 import "@fontsource-variable/inter";
-import "@fontsource/jersey-25";
+import "@fontsource/nunito/500.css"; // body text, Medium (tokens.css --font-text)
 
 import "./config/tokens.css";
 import "./global.css";
@@ -15,8 +15,11 @@ import { pageTransition } from "./transition/pageTransition";
 import { GATE } from "./config/timings";
 import { initScroll } from "./lib/scroll";
 import { prefetchPages, prefetchRoute } from "./lib/assets";
+import { registerRoundedFont } from "./lib/fonts";
 
-// Page theme changes fade (only visible on a deep link's gate exit; elsewhere
+registerRoundedFont();
+
+// Page theme changes fade (only visible on a deep link's intro; elsewhere
 // they happen under the transition cover).
 document.documentElement.style.setProperty("--theme-fade", `${GATE.DEEP_LINK_FADE}s`);
 

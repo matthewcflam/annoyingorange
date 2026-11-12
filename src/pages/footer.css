@@ -1,0 +1,192 @@
+/*
+ * The site footer (SiteFooter.tsx), on every station page: About, Experience
+ * and the project pages. It relies on the page shell (page.css: .page, --line,
+ * --head-clear).
+ */
+/* ---- Footer (SiteFooter.tsx): one rigid composition (the user's
+   reference, the Figma frame's y 2295 on), centred on the Connections card
+   and scaled as a whole by --ft (1 = Figma size). --ft is pinned to the title
+   size (48 / 36, so "Let's chat!" matches "Matthew Lam"; user request) and
+   only shrinks when the window can't hold the composition. Its centre is the
+   card's centre (frame x 820, y 203 from the cat top), at (50%, --fy), and
+   every piece is placed from it in frame units: x(n) = 50% + (n - 820) * --ft.
+   The composition reaches 607 left of that centre (the cat) and 254 below it
+   (the cat's foot), so --ft fits 1214 × 508 into the window (the right side
+   keeps the extra space). The footer is a screen tall with the centre
+   mid-screen, unless the cat's ear-high tail (203 above the centre) would
+   reach the fixed header (--head-clear): then the centre
+   moves down and the footer grows to fit, rather than the type shrinking. ---- */
+.site-footer {
+  --footer-pad: calc(48 * var(--pp));
+  --ft: min(
+    var(--type-project-title) / 36,
+    (100vw - 2 * var(--grid-margin)) / 1214,
+    (100svh - 2 * var(--footer-pad)) / 508
+  );
+  --fy: max(50svh, var(--head-clear) + 16 * var(--pp) + 203 * var(--ft));
+  position: relative;
+  height: max(100svh, var(--fy) + 254 * var(--ft) + var(--footer-pad));
+  margin-top: calc(289 * var(--pp));
+}
+
+/* The cat: 334.9×457 at (213, 0). */
+.site-footer__cat {
+  position: absolute;
+  left: calc(50% + (213 - 820) * var(--ft));
+  top: calc(var(--fy) + (0 - 203) * var(--ft));
+  /* Drawn over "Let's chat!" (user request). */
+  z-index: 1;
+  width: calc(334.894 * var(--ft));
+  pointer-events: none;
+}
+
+.site-footer__cat svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The cat's hit area: each stroke's implied fill (its ends joined), which
+   covers the body, legs, head and tail, plus the stroke itself. A click there
+   redraws the cat (ProjectFooter). The box around it stays click-through. */
+.site-footer__cat path {
+  pointer-events: all;
+}
+
+/* "Let's chat!": 36 × --ft (the title size), cap top 108, at x 432 (over the cat's head). */
+.page .site-footer__chat {
+  position: absolute;
+  left: calc(50% + (432 - 820) * var(--ft));
+  top: calc(var(--fy) + (108 - 203) * var(--ft));
+  font-size: calc(36 * var(--ft));
+  letter-spacing: -0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* Credits: body size (user request; 16 in Figma), one body line apart,
+   right edge at x 1374, cap top 336. */
+.page .site-footer__credits {
+  position: absolute;
+  right: calc(50% - (1374 - 820) * var(--ft));
+  top: calc(var(--fy) + (336 - 203) * var(--ft));
+  font-size: var(--type-project-body);
+  line-height: var(--line);
+  text-align: right;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- Connections: the Map box's open card (346×196, same rows) at
+   (647, 105), centred on the footer. The logos (21 boxes) stand where the
+   Map card has its dots. ---- */
+.connections {
+  position: absolute;
+  left: calc(50% + (647 - 820) * var(--ft));
+  top: calc(var(--fy) + (105 - 203) * var(--ft));
+  width: calc(346 * var(--ft));
+  height: calc(196 * var(--ft));
+  padding-top: calc(64 * var(--ft));
+  background: var(--color-map-box);
+  color: var(--color-map-box-text);
+  font-size: calc(24 * var(--ft));
+  line-height: 1;
+}
+
+.page .connections__title {
+  position: absolute;
+  top: calc(9 * var(--ft));
+  right: calc(9 * var(--ft));
+  text-box: trim-both cap alphabetic;
+}
+
+.page .connections__toast {
+  position: absolute;
+  top: calc(9 * var(--ft));
+  left: calc(11 * var(--ft));
+  font-size: calc(16 * var(--ft));
+  text-box: trim-both cap alphabetic;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.connections__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: calc(31 * var(--ft));
+  padding: 0 calc(9 * var(--ft)) 0 calc(11 * var(--ft));
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease-out;
+}
+
+.connections__icon {
+  flex: none;
+  width: calc(21 * var(--ft));
+  height: calc(21 * var(--ft));
+}
+
+.connections__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hover (user request: no sound, no grow): the logo (currentColor) and the
+   label turn orange. */
+.connections__row:focus-visible {
+  color: var(--color-orange);
+}
+
+@media (hover: hover) {
+  .connections__row:hover {
+    color: var(--color-orange);
+  }
+}
+
+.connections__label {
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- Compact layout (global.css): the footer stacks. ---- */
+@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .site-footer {
+    --ft: 1px;
+    height: auto;
+    padding-inline: var(--grid-margin);
+    margin-top: 96px;
+    padding-bottom: 40px;
+  }
+
+  .site-footer__cat {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: min(230px, 60vw);
+  }
+
+  .page .site-footer__chat {
+    left: min(150px, 39vw);
+    top: 74px;
+  }
+
+  .connections {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: min(346px, 100%);
+    margin-top: 32px;
+  }
+
+  .page .site-footer__credits {
+    position: static;
+    right: auto;
+    margin-top: 40px;
+    /* Body size no longer fits a phone on one line. */
+    white-space: normal;
+  }
+}

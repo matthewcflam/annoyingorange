@@ -9,16 +9,16 @@ import { prefersReducedMotion } from "../lib/motion";
 import { whenPageShown } from "../lib/pageReveal";
 import { isUnderPointer } from "../lib/pointer";
 import { EXPERIENCE } from "../config/timings";
-import extras from "../../assets-src/svg/extras.svg";
 import line1 from "../../assets-src/svg/line1.svg";
 import line2 from "../../assets-src/svg/line2.svg";
 import line3 from "../../assets-src/svg/line3.svg";
+import "./station.css";
 
 /** About's hand-drawn dashes, recycled down each job's points. */
 const DASHES = [
   { src: line1, mod: "" },
-  { src: line2, mod: " experience__dash--mid" },
-  { src: line3, mod: " experience__dash--thin" },
+  { src: line2, mod: " station-dash--mid" },
+  { src: line3, mod: " station-dash--thin" },
 ];
 
 /** Show or hide a job's photos (the later one lands on top, second). */
@@ -53,12 +53,12 @@ function setPhotos(els: HTMLElement[], on: boolean) {
 const noHover = () => window.matchMedia("(hover: none)").matches;
 
 /**
- * One job: a full-width band from its header's top to the foot of its copy.
- * The company and date hang left of the copy; the photos show only while the
+ * One job: a full-width grid row from its header's top to the foot of its
+ * copy. The company and date sit in columns 1–2, the role and points in 3–4; the photos show only while the
  * cursor is over the band or a shown photo (a tap toggles them on touch
  * screens).
  */
-function JobRow({ job, extrasMark }: { job: Job; extrasMark?: boolean }) {
+function JobRow({ job }: { job: Job }) {
   const sectionRef = useRef<HTMLElement>(null);
   const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
   const shown = useRef(false);
@@ -110,19 +110,20 @@ function JobRow({ job, extrasMark }: { job: Job; extrasMark?: boolean }) {
       onClick={hasPhotos ? () => noHover() && toggle(!shown.current) : undefined}
     >
       <div className="experience__company" data-reveal>
-        {extrasMark && <img className="experience__extras" src={extras} alt="Extras" />}
         <p className="experience__title">{job.company}</p>
         <p className="experience__date">{job.date}</p>
       </div>
-      <h2 className="experience__role" data-reveal>
-        {job.role}
-      </h2>
-      {job.body.map((para, i) => (
-        <p key={para} className="experience__para" data-reveal>
-          <img className={"experience__dash" + DASHES[i % 3].mod} src={DASHES[i % 3].src} alt="" />
-          {para}
-        </p>
-      ))}
+      <div className="experience__text">
+        <h2 className="experience__role" data-reveal>
+          {job.role}
+        </h2>
+        {job.body.map((para, i) => (
+          <p key={para} className="experience__para" data-reveal>
+            <img className={"station-dash" + DASHES[i % 3].mod} src={DASHES[i % 3].src} alt="" />
+            {para}
+          </p>
+        ))}
+      </div>
       {job.photos.map((p, i) => (
         <div
           key={p.picture.img.src}
@@ -139,22 +140,25 @@ function JobRow({ job, extrasMark }: { job: Job; extrasMark?: boolean }) {
   );
 }
 
-/** Experience (design/mockups-v2/Experience (2).png): jobs, then the extras.
+/** Experience: jobs on the grid, then the extras, then the site footer.
  *  Everything fades up as it's scrolled into view (lib/scrollReveal.ts). */
 export default function Experience() {
-  const listRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => revealOnScroll([...listRef.current!.closest(".station-page")!.querySelectorAll<HTMLElement>("[data-reveal]")]), []);
+  useLayoutEffect(() => revealOnScroll([...rootRef.current!.querySelectorAll<HTMLElement>("[data-reveal]")]), []);
 
   return (
-    <StationLayout className="experience" footerReveal>
-      <div ref={listRef} className="experience__list">
+    <StationLayout className="station-page experience" rootRef={rootRef} bar>
+      <div className="station-grid experience__list">
         {JOBS.map((job) => (
           <JobRow key={job.company} job={job} />
         ))}
         <div className="experience__extras-group">
-          {EXTRAS.map((job, i) => (
-            <JobRow key={job.company} job={job} extrasMark={i === 0} />
+          <h2 className="page-heading experience__extras" data-reveal>
+            EXTRAS
+          </h2>
+          {EXTRAS.map((job) => (
+            <JobRow key={job.company} job={job} />
           ))}
         </div>
       </div>

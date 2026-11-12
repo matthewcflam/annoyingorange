@@ -12,23 +12,17 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `line1.svg`, `line2.svg`, `line3.svg` | About | hand-drawn list dashes, one per list item, static | 8×2 / 8×2 / 8×1, `#FF7700`, drawn 1:1 |
 | `anything.svg` | About | the word "anything" inline in the Connect line, raised above the text, static | 59×16, `#FF7700`, drawn 1:1 |
 | `extras.svg` | Experience | the hand-drawn word "extras" above the extra jobs, static | 126×34, `#FF7700`, drawn 1:1, right edge at x 419 |
-| `portfolio-scribble.svg` | station pages (Map pill) | squiggle drawn under "Map" on hover | 119×49, 1 path, `#FF7700`; stretched to the mockup's 78×85 box (non-scaling stroke) |
-| `new-portfolio.svg` | Projects list | orange loop around "This Portfolio" (active) | 212×139, 1 path; DrawSVG in |
-| `new-oyster.svg` | Projects list | orange speech-box outline around "Oyster News" (active) | 224×124, 1 path; DrawSVG in |
-| `new-mango.svg` | Projects list | orange loop around "Mango" (active) | 180×131, 1 path; DrawSVG in |
+| `portfolio-scribble.svg`, `new-portfolio.svg`, `new-oyster.svg`, `new-mango.svg` | (unused) | the old Map pill squiggle and project-list scribbles | **Unused** since the Projects redesign |
+| `chat-cat.svg` | project pages (footer) | the orange cat beside "Let's chat!"; draws itself in (DrawSVG) | 335×459, 3 stroked paths, `#FF7700`, 5px stroke. Exported from the Figma file (Group 100) |
 | `speech.svg` | station pages | the orange speech bubble from "Matthew Lam" | 173×137: a 162×80 rect (r 6) + tail. **Unused**: the speech bubble was removed (user request) |
-| `doug-keychain.svg` | keychain | Doug, the dog charm, with his chain and split ring | 304×252, placed 1:1 at keychain box (102, −160) as in `Menu Open (3).png`. `?charm` → AVIF/WebP 300/600w |
-| `compass-keychain.svg` | keychain | the Compass Card charm, with its ring | 387×354, placed 1:1 at keychain box (302, 120). `?charm` like Doug |
-| `mango.svg` | Mango | **draggable obstacle** in the body text | 39×67. Two filled ellipses (`#FFA62A`) plus a green stem stroke (`#76C933`). The text wraps around the ellipse union (spec §11.4). |
+| `mango.svg` | (unused) | the old draggable obstacle | **Unused**: the obstacle text was removed |
 
 ## Images (`assets-src/images/`)
 
 | File | Page | Role | Notes |
 |---|---|---|---|
-| `oyster-news.png` | Oyster News | hero #2 (Vancouver news map) | 1771×996 RGBA |
-| `mango.png` | Mango | hero #2 (MineMotion gesture control + Minecraft screenshot) | 1716×1028 RGBA. This is **not** the draggable mango. |
-| `portfolio-orange.png` | Portfolio | unused for now | 380×380 orange circle. The Portfolio hero circles are built in CSS/SVG. Possible drag obstacle; see open question #4. |
-| `texture.png` | keychain | paper texture laid over the whole key card | 509×289, the card's own size, uniform 30% alpha (it sits on top of everything, labels and bands included). `?paper` → WebP |
+| `project-hero-placeholder.png` | project pages | both tilted heroes of every project, until real art is supplied | 445×466, exported from the Figma file (image 109). `?hero` |
+| `oyster-news.png`, `mango.png`, `portfolio-orange.png`, `texture.png` | (unused) | the old article heroes, the draggable orange, the key card's paper | **Unused** since the Projects redesign |
 | `me-final.png` | About | the photo: thumbs up on the seawall | 2134×2222. Box (941, 278) 447×465 in `About (6).png` |
 | `enersys1.png` | Experience (EnerSys) | hover photo: selfie by the EnerSys logo | 2305×1728. Box (1288, header cap −45) 235×176 in `Experience (2).png` |
 | `enersys2.png` | Experience (EnerSys) | hover photo: meeting-room demo, on top | 2736×2060. Box (1432, +55) 229×173 |
@@ -49,10 +43,6 @@ Empty for now. Files are discovered at build time (spec §9.5), so adding one ne
 
 | Needed | Page | Seen in mockup |
 |---|---|---|
-| World news map hero (#1, wide strip) | Oyster News (and Mango, though probably copy-paste there) | `06`, `07` top image |
-| "VERY important headline" tilted card | Oyster News | `06` left edge |
-| "News" wordmark (large grey) | Oyster News | `06` bottom-left |
-| "the world is yours" newspaper clipping | Oyster News | `06` bottom-left |
-| Oyster logo / "Oyster" wordmark | Oyster News | `06` top-right |
-| Link underline stroke (red-brown, ≈`#C8452F`) | all project pages | `06`–`07` bottom-right |
-| Real Mango hero #1, link and date | Mango | open question #12 |
+| Helvetica Rounded Bold (`assets-src/fonts/helvetica-rounded-bold.woff2`) | project pages, Map box | the Figma file's typeface |
+| Two heroes per project | project pages | Figma "image 109" / "image 110" (placeholders) |
+| Video, Figma board, timeline media per project | project pages | the grey boxes in Figma |

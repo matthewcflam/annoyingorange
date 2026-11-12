@@ -13,28 +13,40 @@ export const FAMILY = {
   muted: "Inter Variable",
 } as const;
 
-/** Project body text (spec §10.1; 15px measured from the mockups, see
- *  pages/project.css). Integer px: Firefox rounds canvas sizes. */
-export const BODY_TEXT = {
-  weight: 400,
-  sizePx: 15,
-  lineHeightPx: 19,
-} as const;
-
-/**
- * Build a CSS `font` shorthand. Use this for BOTH the DOM style and the Pretext
- * prepare() call, so the measured font can never drift from the rendered one.
- */
+/** Build a CSS `font` shorthand. */
 export function fontString(weight: number, sizePx: number, family: string): string {
   return `${weight} ${sizePx}px "${family}"`;
 }
 
-export const BODY_FONT = fontString(BODY_TEXT.weight, BODY_TEXT.sizePx, FAMILY.body);
+/**
+ * Helvetica Rounded Bold (the project pages and the Map box): a licensed
+ * font the user supplies as assets-src/fonts/helvetica-rounded-bold.woff2
+ * (or .woff / .otf / .ttf). Discovered at build time, so the build passes
+ * without it; then --font-rounded falls back (tokens.css, global.css).
+ */
+const ROUNDED = "Helvetica Rounded";
+const roundedFiles = import.meta.glob("/assets-src/fonts/helvetica-rounded-bold.{woff2,woff,otf,ttf}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+let roundedRegistered = false;
+
+/** Register the supplied file as "Helvetica Rounded" 700. Call once, before render. */
+export function registerRoundedFont(): void {
+  const url = Object.values(roundedFiles)[0];
+  if (!url || roundedRegistered) return;
+  roundedRegistered = true;
+  const face = new FontFace(ROUNDED, `url("${url}")`, { weight: "700", style: "normal" });
+  document.fonts.add(face);
+  void face.load().catch(() => undefined);
+}
 
 /**
  * Resolve once every font the first screens need is loaded, or after the
- * timeout (spec §5.4). The gate waits for this so no font swap lands
- * mid-animation or after Pretext has measured. Only Inter: Fragment Mono
+ * timeout (spec §5.4). Nothing renders until this, so no font swap lands
+ * mid-animation. Inter, and Helvetica Rounded if supplied: Fragment Mono
  * (the mute toggle, hero placeholder labels) loads on use and may swap in. The
  * Inter latin file is preloaded from index.html (vite.config.ts).
  */
@@ -44,6 +56,8 @@ export async function waitForFonts(timeoutMs = FONTS.TIMEOUT_MS): Promise<void> 
       document.fonts.load(`1em "${FAMILY.sound}"`),
       document.fonts.load(`1em "${FAMILY.muted}"`),
       document.fonts.load(fontString(400, 16, FAMILY.body)),
+      document.fonts.load(fontString(500, 16, "Nunito")), // body text (tokens.css --font-text)
+      roundedRegistered ? document.fonts.load(fontString(700, 16, ROUNDED)) : null,
     ]),
     new Promise((resolve) => setTimeout(resolve, timeoutMs)),
   ]);

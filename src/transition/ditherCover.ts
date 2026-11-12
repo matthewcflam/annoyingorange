@@ -191,11 +191,14 @@ export class DitherCover {
     return this.mode === "dither" && this.progress > 0;
   }
 
-  /** Tone of the next transition: the layer's title and fade colours follow it
-   *  (transition.css). Set before show(). */
-  setTone(tone: "dark" | "light"): void {
+  /** Tone of the next transition: the layer's title colours follow it
+   *  (transition.css), and the CSS fade takes the cover's colour token. Set
+   *  before show(). */
+  setTone(tone: "dark" | "light", color: `--${string}`): void {
     const layer = this.canvas.parentElement;
-    if (layer) layer.dataset.tone = tone;
+    if (!layer) return;
+    layer.dataset.tone = tone;
+    layer.style.setProperty("--bg", `var(${color})`);
   }
 
   /** Dither in, bottom to top, in the colour of token `color`. Resolves when

@@ -1,0 +1,226 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { gsap } from "../../lib/gsap";
+import { onNavClick } from "../../lib/router";
+import { prefetchRoute } from "../../lib/assets";
+import { prefersReducedMotion } from "../../lib/motion";
+import { isCompact } from "../../lib/frame";
+import { flowShape, shapePath, type Shape } from "../../lib/waterFlow";
+import { play } from "../../audio/engine";
+import { MAP_BOX as M, PROJECT_POSTER as P } from "../../config/timings";
+import { PROJECTS, type Project, type ProjectSlug } from "../../content/projects";
+
+const ZERO: Shape = { w: 0, h: 0, bl: 0, bb: 0, r: 0 };
+
+/**
+ * The project list (fixed in columns 1–2) and its poster (Figma "Portfolio
+ * Hover", "ReMind Hover", …): while a row is hovered (mouse) or focused
+ * (keyboard), that row is black, the others grey, and a box in the project's
+ * colour with its tagline hangs right of the list.
+ *
+ * The poster flows like the Map card (lib/waterFlow.ts, MAP_BOX): out from
+ * its top-left corner, right then down; the text fades in as the water
+ * reaches it. Row to row, the new colour floods over the old poster (the
+ * back path) from the same corner. Leaving the list drains it back to the
+ * corner after PROJECT_POSTER.HOVER_CLOSE_DELAY. Silent; no poster on touch
+ * or the compact layout (project.css hides it).
+ */
+export default function ProjectList({ current }: { current: Project }) {
+  const [peek, setPeek] = useState<ProjectSlug | null>(null);
+  const posterRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<SVGPathElement>(null);
+  const frontRef = useRef<SVGPathElement>(null);
+  const textRefs = useRef(new Map<ProjectSlug, HTMLDivElement>());
+  const back = useRef<Shape>({ ...ZERO });
+  const front = useRef<Shape>({ ...ZERO });
+  /** Whose colour the front path holds. */
+  const frontSlug = useRef<ProjectSlug | null>(null);
+  const tl = useRef<gsap.core.Timeline | null>(null);
+
+  const drawBack = () => backRef.current!.setAttribute("d", shapePath(back.current));
+  const drawFront = () => frontRef.current!.setAttribute("d", shapePath(front.current));
+  const fill = (path: SVGPathElement, slug: ProjectSlug) => {
+    path.style.fill = `var(${PROJECTS.find((p) => p.slug === slug)!.poster.color})`;
+  };
+  /** A project's poster: the box's CSS size, taller if its text needs it. */
+  const sizeFor = (slug: ProjectSlug) => {
+    const box = posterRef.current!;
+    const text = textRefs.current.get(slug)!;
+    return { w: box.offsetWidth, h: Math.max(box.offsetHeight, text.offsetHeight) };
+  };
+  const texts = () => [...textRefs.current.values()];
+
+  // Hover in / out, with a short grace period off the list.
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const show = (slug: ProjectSlug) => {
+    clearTimeout(timer.current);
+    setPeek(slug);
+  };
+  const hide = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setPeek(null), P.HOVER_CLOSE_DELAY * 1000);
+  };
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  useLayoutEffect(() => {
+    tl.current?.kill();
+    const s = front.current;
+    const text = peek && textRefs.current.get(peek)!;
+
+    if (!peek) {
+      // Drain the front back to the corner; the text cuts out.
+      gsap.set(texts(), { opacity: 0 });
+      Object.assign(back.current, ZERO);
+      drawBack();
+      if (s.w === 0 && s.h === 0) return;
+      if (prefersReducedMotion()) {
+        Object.assign(s, ZERO);
+        drawFront();
+        return;
+      }
+      const flow = flowShape(s, { w: 0, h: 0 }, gsap.parseEase(M.CLOSE_EASE));
+      const drive = { p: 0 };
+      const t = gsap.to(drive, {
+        p: 1,
+        duration: M.CLOSE,
+        ease: "none",
+        onUpdate: () => {
+          flow(drive.p);
+          drawFront();
+        },
+      });
+      tl.current = gsap.timeline().add(t);
+      return;
+    }
+
+    if (isCompact()) return;
+    const target = sizeFor(peek);
+
+    if (prefersReducedMotion()) {
+      fill(frontRef.current!, peek);
+      frontSlug.current = peek;
+      Object.assign(s, target, { bl: 0, bb: 0, r: 0 });
+      drawFront();
+      gsap.set(texts(), { opacity: 0 });
+      gsap.set(text, { opacity: 1 });
+      return;
+    }
+
+    // A different colour floods over what is there: the front becomes the
+    // back, frozen, and the front restarts from the corner. The same colour
+    // (back on the row while it drains) carries on from where it is.
+    if (frontSlug.current !== peek) {
+      if (frontSlug.current && (s.w > 0 || s.h > 0)) {
+        fill(backRef.current!, frontSlug.current);
+        Object.assign(back.current, s);
+      } else {
+        Object.assign(back.current, ZERO);
+      }
+      drawBack();
+      Object.assign(s, ZERO);
+      fill(frontRef.current!, peek);
+      frontSlug.current = peek;
+    }
+
+    const flow = flowShape(s, target, gsap.parseEase(M.OPEN_EASE));
+    const drive = { p: 0 };
+    const t = gsap.timeline();
+    tl.current = t;
+    t.to(drive, {
+      p: 1,
+      duration: P.OPEN,
+      ease: "none",
+      onUpdate: () => {
+        flow(drive.p);
+        drawFront();
+      },
+      onComplete: () => {
+        Object.assign(back.current, ZERO);
+        drawBack();
+      },
+    }, 0);
+
+    // The text swaps as the water reaches its first line (cap height ≈ 0.72em).
+    const first = text!.firstElementChild as HTMLElement;
+    const capBottom = text!.offsetTop + first.offsetTop + 0.72 * parseFloat(getComputedStyle(first).fontSize);
+    const textIn = flow.reach("h", capBottom) * P.OPEN;
+    const others = texts().filter((el) => el !== text);
+    if (Number(gsap.getProperty(text, "opacity")) < 1) {
+      t.set(others, { opacity: 0 }, textIn);
+      t.fromTo(text, { opacity: 0 }, { opacity: 1, duration: P.TEXT_FADE, ease: P.TEXT_FADE_EASE }, textIn);
+    } else {
+      gsap.set(others, { opacity: 0 });
+    }
+    return () => void t.kill();
+  }, [peek]);
+
+  // The sizes are CSS: refit on resize.
+  useEffect(() => {
+    const fit = () => {
+      tl.current?.progress(1);
+      Object.assign(back.current, ZERO);
+      drawBack();
+      if (peek && !isCompact()) Object.assign(front.current, sizeFor(peek));
+      else Object.assign(front.current, ZERO);
+      drawFront();
+    };
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [peek]);
+
+  return (
+    <nav className="project-list" aria-label="Projects" data-peek={peek || undefined}>
+      <ul onPointerLeave={(e) => e.pointerType === "mouse" && hide()}>
+        {PROJECTS.map((p) => {
+          const isActive = p.slug === current.slug;
+          return (
+            <li key={p.slug} data-peek={p.slug === peek || undefined}>
+              <a
+                href={p.path}
+                className="project-list__link"
+                aria-current={isActive ? "page" : undefined}
+                onClick={(e) => (isActive ? e.preventDefault() : onNavClick(e, p.path))}
+                onPointerEnter={(e) => {
+                  prefetchRoute(p.path);
+                  if (e.pointerType === "touch") return;
+                  if (!isActive) play("link.hover");
+                  if (e.pointerType === "mouse") show(p.slug);
+                }}
+                // Keyboard only: a tap or click also focuses the link.
+                onFocus={(e) => e.currentTarget.matches(":focus-visible") && show(p.slug)}
+                onBlur={hide}
+              >
+                <span>{p.listTitle}</span>
+                <span>{p.category}</span>
+                <span>{p.year}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      <div ref={posterRef} className="project-poster" aria-hidden="true">
+        <svg className="project-poster__shape" viewBox="0 0 1 1">
+          <path ref={backRef} />
+          <path ref={frontRef} />
+        </svg>
+        {PROJECTS.map((p) => (
+          <div
+            key={p.slug}
+            ref={(el) => {
+              if (el) textRefs.current.set(p.slug, el);
+              else textRefs.current.delete(p.slug);
+            }}
+            className="project-poster__text"
+          >
+            {p.poster.text.map((lines, i) => (
+              <p key={i}>
+                {lines.map((line, l) => (
+                  <span key={l}>{line}</span>
+                ))}
+              </p>
+            ))}
+          </div>
+        ))}
+      </div>
+    </nav>
+  );
+}

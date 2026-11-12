@@ -1,0 +1,450 @@
+/*
+ * Project pages (Projects.tsx), measured from the Figma frame "Portfolio":
+ * 1640 wide, on the 9-column grid. The shell (font, the fixed name, the
+ * element resets, --line, --fx) is page.css; the footer is footer.css.
+ */
+.project {
+  /* Where TOOLS locks while the page scrolls: one list row below the last
+     project, i.e. the name's cap top (20) and cap height, the list's 10px gap,
+     four rows (20px padding + a body cap height; Helvetica's cap is 0.72em)
+     and a gap below the list (user request: 40, was 10, the row padding, so
+     TOOLS reads as its own block). 194 in Figma at 16px. */
+  --tools-stick: calc((20 + 10 + 4 * 20 + 40) * var(--pp) + 0.72 * var(--type-project-title) + 4 * 0.72 * var(--type-project-body));
+  /* The footer's cat stays clear of the list too. */
+  --head-clear: var(--tools-stick);
+  /* TOOLS heading + its lines, with 13px between groups (Figma). */
+  --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * 13 * var(--pp));
+  /* Cap top of TOOLS and DESCRIPTION. 731 in the frame; less on a shorter
+     window, so the whole TOOLS list shows before any scrolling. */
+  --content-top: clamp(var(--tools-stick) + 66 * var(--pp), 100svh - var(--tools-h) - 24 * var(--pp), 731 * var(--pp));
+  /* The heroes' unit: 1 frame px, shrinking with a narrow window and with
+     the space above the copy. */
+  --hu: min(var(--pp), var(--fx), var(--content-top) / 731);
+}
+
+.project-list__link:focus-visible {
+  outline: 2px solid var(--color-route);
+  outline-offset: 4px;
+}
+
+/* Rows 32 apart (cap tops 66, 98, 130, 162), a hairline between them; three
+   columns: the name left, what it was (Project, Hackathon) centred, the year
+   right-aligned to the column edge. The current project is black, the
+   others grey. */
+.project-list {
+  position: relative;
+  margin-top: calc(10 * var(--pp));
+  /* As wide as the table, so the poster hangs off its real right edge. */
+  width: max-content;
+  min-width: 100%;
+}
+
+/* One table: every row shares the column widths (subgrid), so the categories
+   line up, centred in the space between the longest name and the year. */
+.project-list ul {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  column-gap: calc(14 * var(--pp));
+  /* Never squeezed: on windows narrower than ~1640 the text is wider than
+     columns 1-2, so the table grows to the right. */
+  width: max-content;
+  min-width: 100%;
+}
+
+.project-list li {
+  position: relative;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.project-list li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-grey);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+
+.project-list__link {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding: calc(10 * var(--pp)) 0;
+  color: var(--color-grey);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.project-list__link span {
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+.project-list__link span:nth-child(2) {
+  justify-self: center;
+}
+
+.project-list__link span:last-child {
+  justify-self: end;
+}
+
+/* Black: the current project, unless another row is hovered or focused
+   (ProjectList.tsx data-peek); then only that row. */
+.project-list:not([data-peek]) .project-list__link[aria-current],
+.project-list li[data-peek] .project-list__link {
+  color: var(--color-text);
+}
+
+/* ---- The poster (ProjectList.tsx; Figma "… Hover"): right of the list, one
+   gutter out, from the first row's cap top to the last row's cap bottom,
+   155 wide at 16px type (× 1.5 for the list's 24). The colour is an SVG path
+   flowing from the top-left corner (the Map card's water). ---- */
+.project-poster {
+  position: absolute;
+  left: calc(100% + var(--grid-gutter));
+  top: calc(10 * var(--pp));
+  width: calc(232.5 * var(--pp));
+  min-height: calc(100% - 20 * var(--pp));
+  pointer-events: none;
+  color: var(--color-poster-text);
+}
+
+/* Drawn from a top-right origin (lib/waterFlow.ts), mirrored to flow right. */
+.project-poster__shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  transform: scaleX(-1);
+  transform-origin: 0 0;
+}
+
+/* Every project's text, stacked in the same spot; only the shown one is
+   visible. Inset 7 at 16px. */
+.project-poster__text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: calc(10.5 * var(--pp));
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* Trimmed to the first cap top and the last baseline, like the list. */
+.project-poster__text p {
+  text-box: trim-both cap alphabetic;
+}
+
+.project-poster__text p + p {
+  margin-top: 0.5em;
+}
+
+.project-poster__text span {
+  display: block;
+}
+
+/* ---- The two tilted heroes, in the space above the copy ----
+   Their boxes (445×466 and 502×525.7) are placed by their centres:
+   (548.9, 469.6) and (1005.6, 259.8) in the frame, i.e. 261.4 and 471.2
+   above the copy's top. Projects.tsx tilts them, settles them in and moves
+   them with the scroll. 40% opacity, as in the frame. */
+.project__heroes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+}
+
+.project-hero {
+  position: absolute;
+  opacity: 0.4;
+  will-change: transform;
+}
+
+.project-hero--0 {
+  left: calc(548.9 * var(--fx) - 222.5 * var(--hu));
+  top: calc(var(--content-top) - (261.4 + 233) * var(--hu));
+  width: calc(445 * var(--hu));
+  height: calc(466 * var(--hu));
+}
+
+.project-hero--1 {
+  left: calc(1005.6 * var(--fx) - 251 * var(--hu));
+  top: calc(var(--content-top) - (471.2 + 262.85) * var(--hu));
+  width: calc(502 * var(--hu));
+  height: calc(525.7 * var(--hu));
+}
+
+.project-hero__tilt,
+.project-hero picture,
+.project-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.project-hero img {
+  object-fit: cover;
+}
+
+/* ---- The scrolling body, on the grid ---- */
+.project__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  padding: var(--content-top) var(--grid-margin) 0;
+}
+
+/* TOOLS, columns 1–2 (text at x 17). It locks under the project list while
+   the rows scroll, then leaves with the body (the footer sits after the body,
+   so the cat never meets it). */
+.project__tools {
+  grid-column: 1 / span 2;
+  grid-row: 1;
+  align-self: start;
+  position: sticky;
+  top: var(--tools-stick);
+  z-index: 1;
+  padding-left: calc(2 * var(--pp));
+  color: var(--color-grey);
+  text-box: trim-both cap alphabetic;
+}
+
+.project__tools h2,
+.project-section h2 {
+  color: var(--color-orange);
+}
+
+.project__tools ul + ul {
+  margin-top: calc(13 * var(--pp));
+}
+
+/* Columns 3–9: rows of text (3–4) beside media (5–8). */
+.project__main {
+  grid-column: 3 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-content: start;
+}
+
+/* Rows are 194 apart (FEATURES' foot to HOW I BUILT IT); a tight row sits 16
+   under the one above (see .project-row__media). */
+.project-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: start;
+  margin-top: calc(194 * var(--pp));
+}
+
+.project-row:first-child {
+  margin-top: 0;
+}
+
+/* A row's media column: a tight row's media (Projects.tsx folds it into
+   the row above) stacks 16 under (the Figma board and the timeline). */
+.project-row__media {
+  grid-column: 3 / span 4;
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--pp));
+}
+
+/* A row's sections, 135 apart (DESCRIPTION's foot to FEATURES). */
+.project-row__text {
+  grid-column: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: calc(135 * var(--pp));
+}
+
+.project-section {
+  text-box: trim-both cap alphabetic;
+}
+
+/* A blank line between paragraphs; 43 before a second sub-heading. */
+.project-section p + p {
+  margin-top: var(--line);
+}
+
+.project-section ol + h3 {
+  margin-top: calc(43 * var(--pp));
+}
+
+.project-section ol {
+  padding-left: 1.5em;
+}
+
+/* ---- Media (Media.tsx): columns 5–8, at its frame aspect ratio ---- */
+.media {
+  grid-column: 3 / span 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--color-media);
+  color: var(--color-home-text);
+  font: inherit;
+  letter-spacing: inherit;
+  overflow: hidden;
+}
+
+/* Expanded: the lightbox's copy stands in for it. */
+.media[data-open] {
+  visibility: hidden;
+}
+
+.media:focus-visible,
+.lightbox__close:focus-visible,
+.connections__row:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+.media__label {
+  font-size: var(--type-project-name);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  transition: scale 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.media:hover .media__label {
+  scale: 1.06;
+}
+
+/* The expanded media, over the page and its chrome, under the transition
+   cover. Media.tsx sizes the frame: from the tile's box to the window. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  color: var(--color-home-text);
+}
+
+/* The expanded label matches the tile's (Nunito Medium, page.css); Close
+   keeps the Map box's Helvetica Rounded Bold. */
+.lightbox__frame .media__label {
+  font-family: var(--font-text);
+  font-weight: var(--weight-text);
+}
+
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg);
+}
+
+.lightbox__frame {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-media);
+  overflow: hidden;
+}
+
+/* "Close", where the Map box is, in its shape. */
+.lightbox__close {
+  position: absolute;
+  top: var(--map-top);
+  right: var(--grid-margin);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: var(--map-w);
+  height: var(--map-h);
+  padding: 0.31em;
+  background: var(--color-map-box);
+  color: var(--color-map-box-text);
+  font-size: var(--type-project-card);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.lightbox__close span {
+  text-box: trim-both cap alphabetic;
+}
+
+html.is-scroll-locked {
+  overflow: hidden;
+}
+
+/* ---- Compact layout (global.css): one column. The name and list scroll
+   with the page (page.css), TOOLS no longer sticks, each row's
+   media follows its text (the header: page.css; the footer: footer.css). ---- */
+@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .project {
+    --content-top: calc(56vw + 40px);
+    --hu: calc(100vw / 860);
+  }
+
+  .project-list {
+    margin-top: 20px;
+  }
+
+  .project-poster {
+    display: none;
+  }
+
+  .project__heroes {
+    position: relative;
+    height: var(--content-top);
+  }
+
+  .project-hero--0 {
+    left: 4vw;
+    top: calc(var(--content-top) - 470 * var(--hu));
+  }
+
+  .project-hero--1 {
+    left: 40vw;
+    top: 16px;
+  }
+
+  .project__body {
+    display: block;
+    padding-top: 24px;
+  }
+
+  .project__tools {
+    position: static;
+    margin-bottom: 56px;
+  }
+
+  .project__main,
+  .project-row {
+    display: block;
+  }
+
+  .project-row__media {
+    display: block;
+  }
+
+  .project-row {
+    margin-top: 72px;
+  }
+
+  .project-row__text {
+    gap: 56px;
+  }
+
+  .media {
+    margin-top: 28px;
+  }
+
+}

@@ -35,10 +35,22 @@
   --station-edge: 30;
   /* The same as a length: the compact layout replaces it with its own. */
   --station-edge-len: calc(var(--station-edge) * var(--px));
-  /* The fixed header bar (user request): the edge, the Map button (2.2em of
-     --type-station-small, the row's tallest item), then the edge again, so
-     the margin below the row matches the one above. */
-  --station-head-h: calc(2 * var(--station-edge-len) + 2.2 * var(--type-station-small));
+  /* The Map box (keychain/MapBox.tsx; Figma "Portfolio" and "Portfolio - Map
+     Expanded"): closed 102×66 in Figma, enlarged to the user's reference (box 5.7 × 3.7 cap heights of "Map": 98×64 × --map-k), open 346×196, 20 from the top (all × --ps, tokens.css), its right edge
+     on the grid margin. Fixed px, on every station page. The open card and
+     its text scale by --map-k, the footer Connections card's --ft cap (24 ×
+     --map-k = 32px; user request: the same type size as Connections). */
+  --map-k: calc(var(--type-project-title) / 36);
+  --map-top: calc(20 * var(--pp));
+  --map-w: calc(98 * var(--map-k));
+  --map-h: calc(64 * var(--map-k));
+  --map-open-w: min(346 * var(--map-k), 100vw - 2 * var(--grid-margin));
+  --map-open-h: calc(196 * var(--map-k));
+  /* The centre line of the header row: the glyphs and the name's caps sit on it. */
+  --station-row-mid: calc(var(--map-top) + var(--map-h) / 2);
+  /* The fixed header bar (user request): the Map box with the same margin
+     below it as above. */
+  --station-head-h: calc(2 * var(--map-top) + var(--map-h));
   /* Corner rounding on every photo (user request): 10 mockup px. */
   --image-radius: calc(10 * var(--px));
 }
@@ -46,10 +58,25 @@
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   :root {
     --station-edge-len: var(--gutter);
+    --map-top: 14px;
+    --map-k: 1px;
   }
 }
 
-/* Page theme: light on home and the gate, dark on station pages. App sets
+/* Helvetica Rounded Bold, until (or without) the supplied file
+   (lib/fonts.ts): a copy installed on this machine, else Arial Rounded
+   (Windows, macOS). Declared as weight 700 so the browser doesn't
+   synthesize a second bold on top of a bold face. */
+@font-face {
+  font-family: "Rounded Fallback";
+  src: local("Helvetica Rounded Bold"), local("HelveticaRounded-Bold"), local("Helvetica Rounded LT Std Bold"),
+    local("Arial Rounded MT Bold"), local("ArialRoundedMTBold");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Page theme: light on home and the project pages, dark on About
+   and Experience. App sets
    data-theme while the transition cover hides the page (--theme-fade is set
    from timings.ts in main.tsx; it only shows on a deep link's intro). */
 :root,
@@ -80,6 +107,7 @@ body {
   transition: background-color var(--theme-fade, 0s), color var(--theme-fade, 0s);
   color: var(--color-text);
   font-family: var(--font-body);
+  letter-spacing: -0.04em; /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -117,6 +145,7 @@ html.lenis body {
 }
 
 button {
+  letter-spacing: inherit;
   font: inherit;
   color: inherit;
   background: none;

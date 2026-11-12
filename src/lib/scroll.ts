@@ -1,8 +1,8 @@
 /**
  * Smooth wheel scrolling (Lenis, added at the user's request). Module-level
  * singleton on the window scroller, driven by the GSAP ticker so scroll
- * frames and tweens land in the same frame. Touch stays native (iOS momentum,
- * and no fight with the obstacle Draggable). Reduced motion: no Lenis at all.
+ * frames and tweens land in the same frame. Touch stays native (iOS
+ * momentum). Reduced motion: no Lenis at all.
  */
 import Lenis from "lenis";
 import { gsap } from "./gsap";

@@ -1,7 +1,0 @@
-/* Oyster News (OysterNews.tsx). */
-
-/* The draggable circle in the body text (textflow/ObstacleText). */
-.oy-circle {
-  border-radius: 50%;
-  background: var(--color-obstacle-oyster);
-}

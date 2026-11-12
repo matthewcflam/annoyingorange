@@ -106,7 +106,8 @@ export const CHROME = {
  * Page transition between pages (transition/pageTransition.ts), copied from
  * 2xa.studio: a cover dithers in over everything, "Now arriving at: <name>"
  * scramble-types on it, the page swaps underneath, then the cover dithers away
- * bottom to top. The cover is dark leaving home, light leaving a station page.
+ * bottom to top. The cover is dark leaving a light page (home, projects),
+ * light leaving a dark one (About, Experience).
  * Defaults are 2xa's own values.
  */
 export const TRANSITION = {
@@ -147,21 +148,6 @@ export const TRANSITION = {
   // ---- Under the cover ----
   /** The page swap waits up to this long for the next page's images (§10.3). */
   PRELOAD_MAX_MS: 800,
-} as const;
-
-/**
- * The vertical lines on station pages drop in like a train leaving a station
- * (lib/trainLine.ts): they accelerate, cruise at top speed, then brake.
- * Distances are mockup px, so the feel doesn't change with the window size;
- * a longer line (Experience) cruises for longer.
- */
-export const LINE = {
-  /** Acceleration and braking, mockup px/s². */
-  ACCEL_PX_S2: 1500,
-  /** Top speed, mockup px/s. */
-  TOP_SPEED_PX_S: 900,
-  /** After the page starts to appear, before the line sets off. */
-  DELAY: 0.15,
 } as const;
 
 /** About photos: the frosted glass melts clear once the page is on screen
@@ -206,27 +192,42 @@ export const EXPERIENCE = {
   PHOTO_EASE: "power3.out",
 } as const;
 
-/** Station-page chrome: the Map pill (top-right). */
-export const MAP_BUTTON = {
-  /** portfolio-scribble.svg draws under "Map" on hover, undraws on leave. */
-  SCRIBBLE_DRAW: 0.4,
-  SCRIBBLE_UNDRAW: 0.25,
-  SCRIBBLE_EASE: "power2.out",
-  /** Pill colour change between Map and Close. */
-  COLOR: 0.2,
-} as const;
-
 /**
- * The keychain the Map pill opens (keychain/): a static picture
- * (design/mockups-v2/Menu Open (3).png) that drops in from above as one piece.
+ * The Map box, top-right on station pages (keychain/MapBox.tsx; Figma
+ * "Portfolio" → "Portfolio - Map Expanded"). Opening, the blue box flows out
+ * like poured liquid (soft corners, the moving edges bowed outward, width
+ * leading height), then hardens into the square-cornered card, and only then
+ * its rows appear. Sizes are in tokens (global.css --map-*).
  */
-export const KEYCHAIN = {
-  /** Open: the keychain slides in diagonally from the top-right corner,
-   *  SLIDE_PX (mockup px) along each axis; close: it slides back out.
-   *  Both directions share one duration and ease. */
-  SLIDE_PX: 500,
-  SLIDE: 0.5,
-  SLIDE_EASE: "power2.out",
+export const MAP_BOX = {
+  // ---- Flow (one rush, like water: no overshoot, never outside the new box) ----
+  /** The fill runs out from the top-right corner in one tween. */
+  OPEN: 0.55,
+  OPEN_EASE: "expo.out",
+  /** Height starts this fraction of the tween after width, so the front runs
+   *  diagonally down and left. */
+  H_LAG: 0.12,
+  /** Each moving edge bows toward where it is going by this fraction of the
+   *  distance it has left (0 on arrival; above 2 it would cross the edge). */
+  FRONT_BOW: 0.7,
+  /** The leading corners round up to this while moving, square on arrival. */
+  FRONT_RADIUS_PX: 26,
+  // ---- Text ----
+  /** Each row starts as the water reaches it, at least this far apart. */
+  ROW_STAGGER: 0.04,
+  DOT_POP: 0.3,
+  DOT_POP_EASE: "power3.out",
+  /** Each label fades in as its row is reached (user request: was typed). */
+  LABEL_FADE: 0.3,
+  LABEL_FADE_EASE: "power3.out",
+  // ---- Close (drains back to the corner, same rule, edges bow inward) ----
+  CLOSE: 0.32,
+  CLOSE_EASE: "power3.inOut",
+  // ---- Hover (mouse: the box opens on hover; touch and keyboard still click) ----
+  /** How long the pointer rests on "Map" before it opens (skips fly-overs). */
+  HOVER_OPEN_DELAY: 0.06,
+  /** How long the pointer can be off the card before it closes. */
+  HOVER_CLOSE_DELAY: 0.25,
 } as const;
 
 /** Station hover/click on the home map (§7.3). */
@@ -236,47 +237,56 @@ export const STATION = {
   HOVER_EASE: "back.out",
 } as const;
 
-/** Project pages (§10). */
+/** The project poster beside the project list (pages/projects/ProjectList.tsx).
+ *  It flows like the Map card: the flow durations and eases are MAP_BOX's. */
+export const PROJECT_POSTER = {
+  /** How long the pointer can be off the list before the poster drains. */
+  HOVER_CLOSE_DELAY: 0.25,
+  /** The fill (user request: nearly instant; the Map card's is MAP_BOX.OPEN). */
+  OPEN: 0.25,
+  /** The text fades in as the water reaches its first line. */
+  TEXT_FADE: 0.12,
+  TEXT_FADE_EASE: "power3.out",
+} as const;
+
+/** Project pages (pages/projects/). */
 export const PROJECT = {
-  /** Orange scribble around the active project draws in (DrawSVG). */
-  SCRIBBLE_DRAW: 0.5,
-  SCRIBBLE_EASE: "power2.inOut",
-  /** The previous project's scribble fades out. */
-  SCRIBBLE_OUT: 0.2,
-  /** Placeholder project switch crossfade (§15 #3): the center column and
-   *  link fade out drifting up, then fade in rising from below. */
+  /** Placeholder project switch crossfade (§15 #3): the project's content
+   *  fades out drifting up, then fades in rising from below. */
   SWITCH_OUT: 0.35,
   SWITCH_IN: 0.45,
   SWITCH_OFFSET_PX: 8,
   SWITCH_EASE_OUT: "power2.in",
   SWITCH_EASE_IN: "power2.out",
-  /** Link underline redraws on hover. */
-  LINK_UNDERLINE_DRAW: 0.4,
-  LINK_UNDERLINE_EASE: "power2.out",
+  /** The tilted heroes settle in when the page shows: from this much extra
+   *  tilt (degrees) and drop (px), one after the other. */
+  HERO_IN: 1.1,
+  HERO_IN_EASE: "power3.out",
+  HERO_IN_TILT_DEG: 5,
+  HERO_IN_Y_PX: 40,
+  HERO_STAGGER: 0.12,
+  /** Scroll parallax: each hero moves up this fraction of the scroll faster
+   *  (positive) or slower (negative) than the page. One value per hero. */
+  HERO_PARALLAX: [-0.12, 0.1],
+  /** The footer cat draws itself when it scrolls into view. */
+  CAT_DRAW: 2.2,
+  CAT_DRAW_EASE: "power2.inOut",
+  /** Connections rows: the logo grows on hover, like a station dot. */
+  ROW_HOVER_SCALE: 1.2,
 } as const;
 
-/** Obstacle text (§11). Distances are mockup px (scaled with the column). */
-export const OBSTACLE = {
-  /** Gap left between the obstacle and the text on each side. */
-  PADDING_PX: 10,
-  /** A slot narrower than this is skipped (too narrow for a word). */
-  MIN_SLOT_PX: 40,
-  /** The obstacle only splits a line if it reaches this far into the line
-   *  box (glyphs don't fill its top and bottom), so a shape that grazes a
-   *  line doesn't cut it. */
-  BAND_INSET_PX: 2,
-  /** Don't justify a fragment whose gaps would exceed this × a normal space. */
-  MAX_JUSTIFY_RATIO: 3,
-  /** Arrow keys move the focused obstacle (Shift = the larger step). */
-  NUDGE_PX: 10,
-  NUDGE_SHIFT_PX: 40,
-  NUDGE_DURATION: 0.15,
-  NUDGE_EASE: "power2.out",
-  /** drag.grain loop: full level at this obstacle speed (mockup px/s),
-   *  smoothed with this time constant, faded out over GRAIN_FADE. */
-  GRAIN_FULL_SPEED_PX: 1500,
-  GRAIN_TIME_CONSTANT: 0.05,
-  GRAIN_FADE: 0.15,
+/** Project media (pages/projects/Media.tsx): a tile expands to cover the page. */
+export const MEDIA = {
+  OPEN: 0.7,
+  OPEN_EASE: "expo.out",
+  CLOSE: 0.5,
+  CLOSE_EASE: "expo.out",
+  /** The page-coloured backdrop behind the growing tile. */
+  BACKDROP: 0.3,
+  /** Hover: the tile's label lifts. */
+  HOVER_SCALE: 1.06,
+  HOVER: 0.3,
+  HOVER_EASE: "power3.out",
 } as const;
 
 /** Sound engine (§9). */
