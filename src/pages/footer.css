@@ -12,21 +12,23 @@
    every piece is placed from it in frame units: x(n) = 50% + (n - 820) * --ft.
    The composition reaches 607 left of that centre (the cat) and 254 below it
    (the cat's foot), so --ft fits 1214 × 508 into the window (the right side
-   keeps the extra space). The footer is a screen tall with the centre
-   mid-screen, unless the cat's ear-high tail (203 above the centre) would
-   reach the fixed header (--head-clear): then the centre
-   moves down and the footer grows to fit, rather than the type shrinking. ---- */
+   keeps the extra space). The footer is no longer a screen tall (user
+   request): it is the composition with the same gap above the cat's tail as
+   below its foot (--footer-gap, 120 frame units: 83px in the user's
+   reference at --ft 0.70), so at full scroll the page's last content shows
+   above it. --ft also shrinks so the whole footer fits under the fixed
+   header (--head-clear). ---- */
 .site-footer {
-  --footer-pad: calc(48 * var(--pp));
   --ft: min(
     var(--type-project-title) / 36,
     (100vw - 2 * var(--grid-margin)) / 1214,
-    (100svh - 2 * var(--footer-pad)) / 508
+    (100svh - var(--head-clear)) / 697
   );
-  --fy: max(50svh, var(--head-clear) + 16 * var(--pp) + 203 * var(--ft));
+  --footer-gap: calc(120 * var(--ft));
+  --fy: calc(var(--footer-gap) + 203 * var(--ft));
   position: relative;
-  height: max(100svh, var(--fy) + 254 * var(--ft) + var(--footer-pad));
-  margin-top: calc(289 * var(--pp));
+  height: calc(2 * var(--footer-gap) + 457 * var(--ft));
+  margin-top: 0;
 }
 
 /* The cat: 334.9×457 at (213, 0). */

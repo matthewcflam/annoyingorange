@@ -1,14 +1,9 @@
 import "./footer.css";
-import { useEffect, useRef } from "react";
-import { gsap } from "../lib/gsap";
-import { prefersReducedMotion } from "../lib/motion";
-import { whenPageShown } from "../lib/pageReveal";
 import { useCopyEmail } from "../chrome/useCopyEmail";
 import Icon from "../chrome/Icon";
 import type { ICONS } from "../chrome/icons";
 import { DEVPOST, EMAIL, GITHUB, LINKEDIN, LAST_UPDATED } from "../content/contact";
-import { PROJECT } from "../config/timings";
-import catSvg from "../../assets-src/svg/chat-cat.svg?raw";
+import DrawnCat from "../chrome/DrawnCat";
 
 /** The Connections rows, top to bottom (Figma). Email copies the address. */
 const LINKS: { label: string; icon: keyof typeof ICONS; href: string | null }[] = [
@@ -26,50 +21,11 @@ const LINKS: { label: string; icon: keyof typeof ICONS; href: string | null }[] 
  * scrolls into view.
  */
 export default function SiteFooter() {
-  const catRef = useRef<HTMLDivElement>(null);
   const { copyEmail, toastRef, copied } = useCopyEmail();
-
-  useEffect(() => {
-    const cat = catRef.current!;
-    const paths = cat.querySelectorAll("path");
-    if (prefersReducedMotion()) return;
-    gsap.set(paths, { drawSVG: "0%" });
-    let alive = true;
-    let tween: gsap.core.Tween | null = null;
-    let io: IntersectionObserver | null = null;
-    void whenPageShown().then(() => {
-      if (!alive) return;
-      io = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) return;
-          io!.disconnect();
-          draw();
-        },
-        { threshold: 0.3 },
-      );
-      io.observe(cat);
-    });
-    const draw = () => {
-      tween?.kill();
-      tween = gsap.fromTo(paths, { drawSVG: "0%" }, { drawSVG: "100%", duration: PROJECT.CAT_DRAW, ease: PROJECT.CAT_DRAW_EASE });
-    };
-    // A click inside the cat (the area its strokes enclose; footer.css) draws it again.
-    const replay = () => {
-      io?.disconnect();
-      draw();
-    };
-    cat.addEventListener("click", replay);
-    return () => {
-      alive = false;
-      io?.disconnect();
-      tween?.kill();
-      cat.removeEventListener("click", replay);
-    };
-  }, []);
 
   return (
     <footer className="site-footer">
-      <div ref={catRef} className="site-footer__cat" aria-hidden="true" data-clickable dangerouslySetInnerHTML={{ __html: catSvg }} />
+      <DrawnCat className="site-footer__cat" drawOnView />
       <p className="site-footer__chat" data-reveal>
         Let’s chat!
       </p>
