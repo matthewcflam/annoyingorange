@@ -7,10 +7,6 @@ import { FONTS } from "../config/timings";
  */
 export const FAMILY = {
   body: "Inter Variable",
-  name: "Inter Variable",
-  station: "Fragment Mono",
-  sound: "Inter Variable",
-  muted: "Inter Variable",
 } as const;
 
 /** Build a CSS `font` shorthand. */
@@ -43,20 +39,32 @@ export function registerRoundedFont(): void {
   void face.load().catch(() => undefined);
 }
 
+/** Body text on the station pages (tokens.css --font-text). */
+const NUNITO = fontString(500, 16, "Nunito");
+
+/** Load the station pages' body font (Nunito). preloadRoute() calls it, so a
+ *  page transition never swaps fonts on screen. Never rejects. */
+export function loadTextFont(): Promise<void> {
+  return document.fonts.load(NUNITO).then(
+    () => undefined,
+    () => undefined,
+  );
+}
+
 /**
- * Resolve once every font the first screens need is loaded, or after the
- * timeout (spec §5.4). Nothing renders until this, so no font swap lands
- * mid-animation. Inter, and Helvetica Rounded if supplied: Fragment Mono
- * (the mute toggle, hero placeholder labels) loads on use and may swap in. The
- * Inter latin file is preloaded from index.html (vite.config.ts).
+ * Resolve once every font the landing route's first screen needs is loaded,
+ * or after the timeout (spec §5.4). Nothing renders until this, so no font
+ * swap lands mid-animation. Always Helvetica Rounded (if supplied) and Inter
+ * (its fallback until the file arrives; preloaded from index.html,
+ * vite.config.ts). Nunito only when landing on a station page: home doesn't
+ * use it, so it never holds up home's first paint.
  */
-export async function waitForFonts(timeoutMs = FONTS.TIMEOUT_MS): Promise<void> {
+export async function waitForFonts(route: string, timeoutMs = FONTS.TIMEOUT_MS): Promise<void> {
   await Promise.race([
     Promise.all([
-      document.fonts.load(`1em "${FAMILY.sound}"`),
-      document.fonts.load(`1em "${FAMILY.muted}"`),
       document.fonts.load(fontString(400, 16, FAMILY.body)),
-      document.fonts.load(fontString(500, 16, "Nunito")), // body text (tokens.css --font-text)
+      document.fonts.load(fontString(700, 16, FAMILY.body)),
+      route === "/" ? null : loadTextFont(),
       roundedRegistered ? document.fonts.load(fontString(700, 16, ROUNDED)) : null,
     ]),
     new Promise((resolve) => setTimeout(resolve, timeoutMs)),

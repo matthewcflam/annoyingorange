@@ -11,7 +11,6 @@
      request; --font-rounded below). ---- */
   --font-body:    var(--font-rounded);
   --font-name:    var(--font-rounded);
-  --font-station: "Fragment Mono", ui-monospace, monospace;
   --font-sound:   var(--font-rounded);
   --font-muted:   var(--font-rounded);
   /* Body text (user request): Nunito Medium, from @fontsource/nunito (only the

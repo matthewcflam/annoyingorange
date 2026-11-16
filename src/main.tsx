@@ -1,5 +1,4 @@
 // Fonts first, before anything renders (spec §5.2).
-import "@fontsource/fragment-mono";
 import "@fontsource-variable/inter";
 import "@fontsource/nunito/500.css"; // body text, Medium (tokens.css --font-text)
 

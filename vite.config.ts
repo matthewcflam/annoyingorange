@@ -31,10 +31,13 @@ const PRESETS: Record<string, Record<string, string>> = {
   sheet: { w: '1526', h: '442', fit: 'fill', allowUpscale: 'true', format: 'webp', quality: '80', paperFill: '--paper-sheet', paperFibre: '763' },
 }
 
-/** Preloads the fonts the gate waits for (src/lib/fonts.ts), so they download
- *  alongside the JS instead of after it has run and injected the CSS. Build
- *  only: the files are hashed, so they're found in the bundle. */
-const PRELOAD_FONTS = [/\/inter-latin-wght-normal-[\w-]+\.woff2$/, /\/nunito-latin-500-normal-[\w-]+\.woff2$/]
+/** Preloads the fonts the first render waits for (src/lib/fonts.ts
+ *  waitForFonts), so they download alongside the JS instead of after it has
+ *  run and injected the CSS: Inter, and Helvetica Rounded once the user
+ *  supplies it. Nunito (station body text) isn't preloaded: home never uses
+ *  it, and a station landing loads it with the page. Build only: the files
+ *  are hashed, so they're found in the bundle. */
+const PRELOAD_FONTS = [/\/inter-latin-wght-normal-[\w-]+\.woff2$/, /\/helvetica-rounded-bold-[\w-]+\.woff2$/]
 
 function preloadFonts(): Plugin {
   return {

@@ -38,7 +38,8 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    waitForFonts().then(() => !cancelled && setFontsReady(true));
+    // Fonts for the route the visitor landed on (home skips the body font).
+    waitForFonts(location.pathname).then(() => !cancelled && setFontsReady(true));
     return () => {
       cancelled = true;
     };

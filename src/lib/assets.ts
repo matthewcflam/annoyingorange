@@ -8,6 +8,7 @@ import { ABOUT_PHOTOS } from "../content/aboutPhotos";
 import { EXPERIENCE_PHOTOS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
 import { isCompact } from "./frame";
+import { loadTextFont } from "./fonts";
 import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
 /** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
@@ -121,7 +122,9 @@ function pageLoader(path: string) {
 export function preloadRoute(path: string): Promise<void> {
   const code = pageLoader(path)?.().then(() => undefined, () => undefined);
   const skyline = path === "/" ? loadSkyline().catch(() => undefined) : undefined;
-  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline]).then(() => undefined);
+  // Station pages set their body text in Nunito, which home never loads.
+  const font = pageLoader(path) ? loadTextFont() : undefined;
+  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline, font]).then(() => undefined);
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */
