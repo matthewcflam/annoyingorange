@@ -190,18 +190,6 @@ canvas {
   pointer-events: none;
 }
 
-.layer--map {
-  z-index: 20;
-  pointer-events: none;
-}
-
-/* Glass: what's painted on the screen (the "who?" spray), above the map. */
-.layer--glass {
-  z-index: 40;
-  pointer-events: none;
-}
-
-
 /* Interactive elements inside pass-through layers opt back in individually. */
 .interactive {
   pointer-events: auto;

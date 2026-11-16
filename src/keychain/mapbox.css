@@ -127,3 +127,42 @@
     background: var(--color-orange);
   }
 }
+
+/* ---- Home's centre card (variant="home"; Figma "Home Page Final", 444×366
+   at (662, 321)) ----
+   The same card, larger and pinned open (MapBox.tsx). Placed by its slot
+   (home.css), right edge on the slot's. Figma px × --hk: "Map" 36px, its cap
+   top 18 and right edge 14 from the corner; four 56px rows starting 119 down
+   (dot and label centres at 147, 203, 259, 315), 42px dots 18 from the left,
+   labels right-aligned 18 from the right. Closed, it's a "Map" box in the
+   station box's proportions (98×64 at 24px type), so the rush starts from the
+   same shape. */
+.map-box[data-variant="home"] {
+  --hk: var(--home-card-k, var(--px));
+  top: 0;
+  right: 0;
+  z-index: auto;
+  width: calc(147 * var(--hk));
+  height: calc(96 * var(--hk));
+  font-size: calc(36 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__toggle {
+  padding: calc(18 * var(--hk)) calc(14 * var(--hk)) 0 0;
+}
+
+.map-box[data-variant="home"] .map-box__panel {
+  width: calc(444 * var(--hk));
+  height: calc(366 * var(--hk));
+  padding-top: calc(119 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__row {
+  height: calc(56 * var(--hk));
+  padding: 0 calc(18 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__dot {
+  width: calc(42 * var(--hk));
+  height: calc(42 * var(--hk));
+}

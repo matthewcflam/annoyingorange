@@ -73,7 +73,25 @@
   --color-poster-mango:       #F89E21;
   --color-poster-text:        #FFFFFF;
 
-  /* ---- Home ---- */
+  /* ---- Home's paper (Figma "Home Page Final"; pages/paper/): the prints
+     are see-through like the reference (opacity), warmed by Figma's 10%
+     orange. The tape is a little more orange than Figma's (user request:
+     realistic masking tape), and the photo under it shows through. The
+     skyline's sheet is plain paper, a hair darker than the page.
+     --paper-sheet and --tape-tint are baked into the images at build time
+     (scripts/paperBake.ts; restart the dev server after changing them); the
+     fibre and halftone are PAPER in timings.ts. One small drop shadow,
+     straight down (Figma's 0/4/4), lighter under the faded posters and the
+     thin tape. --ps-u is the sheet's unit (home.css). */
+  --paper-sheet:   #FBFAF3;
+  --photo-opacity: 0.8;
+  --photo-tint:    rgba(255, 119, 0, 0.1);
+  --tape-opacity:  0.9;
+  --tape-tint:     rgba(255, 140, 30, 0.14);
+  --home-poster-opacity: 0.4;
+  --paper-shadow:        0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.18);
+  --paper-shadow-poster: 0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.11);
+  --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
 
   /* ---- About photos: frosted glass (pages/AboutPhoto.tsx) ---- */
   --color-frost-wash: rgba(226, 232, 240, 0.38);  /* milky, slightly cool */

@@ -19,7 +19,8 @@ const TOTAL_MS = 2500;
 const LEAD_MS = 250;
 /** Can lifts after w, h, o and the ?-hook. */
 const LIFTS_MS = [110, 120, 100, 140];
-/** The ?-dot: the nozzle dwells and builds a blob. */
+/** The ?-dot: the nozzle dwells and builds a blob (spread over its little
+ *  loop's segments in proportion to the model's time for each). */
 const DOT_MS = 150;
 const LETTERS = ["w", "h", "o", "?", "."];
 
@@ -35,10 +36,17 @@ const strokeRaw = raw.flat().filter((x) => x !== null).reduce((a, b) => a + b, 0
 const fixed = LEAD_MS + LIFTS_MS.reduce((a, b) => a + b, 0) + DOT_MS;
 const k = strokeRaw / ((TOTAL_MS - fixed) / 1000);
 
+/** The dot's segments, summing to DOT_MS. */
+function dotMs(g) {
+  const t = segmentTimes(g, speedShape(g, { finish: false }));
+  const sum = t.reduce((a, b) => a + b, 0) || 1;
+  return t.map((x) => Math.max(1, Math.round((x / sum) * DOT_MS)));
+}
+
 const lines = [];
 let total = LEAD_MS;
 guides.forEach((g, i) => {
-  const ms = raw[i] ? raw[i].map((t) => Math.max(1, Math.round((t / k) * 1000))) : [DOT_MS];
+  const ms = raw[i] ? raw[i].map((t) => Math.max(1, Math.round((t / k) * 1000))) : dotMs(g);
   const rows = ms.map((m, s) => {
     const len = g.anchors[s + 1] - g.anchors[s];
     const name = `${LETTERS[i]}${s} → ${LETTERS[i]}${s + 1}`;

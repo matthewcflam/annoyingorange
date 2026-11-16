@@ -1,71 +1,7 @@
-/* Shared chrome (z10). Positions are mockup coordinates in the 1767×1024
-   frame (design/mockups-v2). Text is placed by its cap top: `text-box`
-   trims the name and the bio's first line to their cap tops (as on the
-   project pages, page.css). Type is the project pages' Helvetica Rounded
-   Bold (user request). */
+/* Shared chrome: the social glyphs (home's row; their positions are
+   mockup px times --s). */
 
-/* ---- Name block (home) ---- */
-.name-block {
-  position: absolute;
-  left: calc(85 * var(--px));
-  top: calc(270 * var(--px)); /* Figma "Home Page": top-left, above the map (was 579, under it) */
-}
-
-.name-block__name {
-  margin: 0;
-  font-family: var(--font-name);
-  font-size: var(--type-name);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.08em;
-  white-space: nowrap;
-  color: var(--color-text); /* user request: black again (was orange) */
-  text-box: trim-both cap alphabetic;
-}
-
-/* Bio, 16/19 (Home Page (9).png: first cap top 632, a blank line between
-   paragraphs). Hidden until the intro timeline (chrome/intro.ts) reveals it.
-   Body text never drops below 16px: --bu is --px floored at 16/20. */
-.name-block__bio {
-  --bu: max(var(--px), 16px / 20);
-  position: absolute;
-  left: 0;
-  top: calc((632 - 579) * var(--px));
-  font-size: calc(20 * var(--bu));
-  font-family: var(--font-text);
-  font-weight: var(--weight-text);
-  line-height: calc(24 * var(--bu));
-  letter-spacing: -0.04em;
-  white-space: nowrap;
-  visibility: hidden;
-  text-box: trim-start cap alphabetic;
-}
-
-.name-block__bio p {
-  margin: 0 0 calc(19 * var(--bu));
-}
-
-/* Home's glyphs at 0.8 (user change; the mockup's are
-   0.69). */
-.name-block .social-links {
-  --icon-scale: 0.8;
-  left: calc(3 * var(--px));
-}
-
-.name-block .social-links .social-links__toast {
-  left: calc(136 * var(--s));
-  margin-top: calc(-7 * var(--px));
-  font-size: max(0.8125rem, 14 * var(--px));
-}
-
-/* The chrome layer ignores the pointer (clicks reach the map); opt the text
-   back in so it can be selected. */
-.name-block__name,
-.name-block__bio p {
-  pointer-events: auto;
-}
-
-/* ---- Social glyphs (SocialLinks.tsx): under the bio on home.
+/* ---- Social glyphs (SocialLinks.tsx): beside the cat on home.
    Sizes times --icon-scale. ---- */
 .social-links {
   /* --iu: the Map button's unit (--type-small / 20), so they scale alike. */
@@ -134,9 +70,17 @@
   height: calc(40 * var(--s));
 }
 
+/* sound (MuteToggle.tsx, user decision: the row's fourth glyph) */
+.social-links__icon--sound {
+  left: calc(160 * var(--s));
+  top: calc(-1 * var(--s));
+  width: calc(38 * var(--s));
+  height: calc(38 * var(--s));
+}
+
 .social-links .social-links__toast {
   position: absolute;
-  left: calc(162 * var(--s));
+  left: calc(212 * var(--s));
   top: 50%;
   margin: calc(-9 * var(--px)) 0 0;
   font-size: max(0.8125rem, 18 * var(--px));
@@ -144,51 +88,4 @@
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-}
-
-/* ---- Mute toggle, home only (open question #6) ---- */
-.mute-toggle {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  font-family: var(--font-station);
-  font-size: 14px;
-  padding: 6px 8px;
-  color: var(--color-text);
-  opacity: 0.55;
-  transition: opacity 0.15s;
-}
-
-.mute-toggle:hover,
-.mute-toggle:focus-visible {
-  opacity: 1;
-}
-
-.mute-toggle:focus-visible {
-  outline: 2px solid var(--color-route);
-  outline-offset: 2px;
-}
-
-/* ---- Compact layout (global.css): the name block stacks under the map
-   (--map-foot, set by TransitMap.tsx), left-anchored at the full layout's x
-   (user request: it never jumps sideways when the layout switches); the bio
-   flows under the name and wraps. ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
-  .name-block {
-    --home-col: max(var(--gutter), 85 * var(--px));
-    left: var(--home-col);
-    /* --home-shift: Home.tsx centres the name and "who?" under the map. */
-    top: calc(var(--map-foot, 170px) + 32 * var(--m) + var(--home-shift, 0px));
-    max-width: min(var(--compact-w), 100vw - var(--home-col) - var(--gutter));
-  }
-
-  .name-block__bio {
-    position: static;
-    margin-top: 0.4em;
-    white-space: normal;
-  }
-
-  .name-block .social-links {
-    left: 0;
-  }
 }

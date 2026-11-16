@@ -8,12 +8,13 @@ None of these SVGs has element IDs. Reference paths by document order.
 
 | File | Page | Role | Notes |
 |---|---|---|---|
-| `who-spray.svg` | home | **guide paths** for the "who?" spray engine; not displayed | 910×302, 5 stroked paths, `#FF7700`, 30px stroke. Draw order = document order: 0 `w`, 1 `h`, 2 `o`, 3 `?` hook, 4 `?` dot |
+| `who-spray.svg` | home | **guide paths** for the "who?" spray engine; not displayed | 221×99, 5 stroked paths, `#FF7700`, 10px stroke, from Figma "Home Page Final" (node 450:4922; the w's `Z` removed, the ?-hook moved before the dot). Draw order = document order: 0 `w`, 1 `h`, 2 `o`, 3 `?` hook, 4 `?` dot |
+| `home-skyline.svg` | home | the orange Vancouver skyline line drawing; its lines draw themselves from the peak down during the intro | 664×143, 507 stroked paths (1px, `#FF7700`; stroke set on the root) in two groups: `[data-part=mountain]` (73 ridge lines, Figma Group 116) and `[data-part=city]` (434, Group 117). Exported from Figma "Home Page Final" (Group 118), background rects removed, coordinates rounded to 2 decimals. Fetched and inlined at runtime (not `?raw`, to keep it out of the JS bundle) |
 | `line1.svg`, `line2.svg`, `line3.svg` | About | hand-drawn list dashes, one per list item, static | 8×2 / 8×2 / 8×1, `#FF7700`, drawn 1:1 |
 | `anything.svg` | About | the word "anything" inline in the Connect line, raised above the text, static | 59×16, `#FF7700`, drawn 1:1 |
 | `extras.svg` | Experience | the hand-drawn word "extras" above the extra jobs, static | 126×34, `#FF7700`, drawn 1:1, right edge at x 419 |
 | `portfolio-scribble.svg`, `new-portfolio.svg`, `new-oyster.svg`, `new-mango.svg` | (unused) | the old Map pill squiggle and project-list scribbles | **Unused** since the Projects redesign |
-| `chat-cat.svg` | project pages (footer) | the orange cat beside "Let's chat!"; draws itself in (DrawSVG) | 335×459, 3 stroked paths, `#FF7700`, 5px stroke. Exported from the Figma file (Group 100) |
+| `chat-cat.svg` | station pages (footer), home | the orange cat beside "Let's chat!"; draws itself in (DrawSVG) | 335×459, 3 stroked paths, `#FF7700`, 5px stroke. Exported from the Figma file (Group 100) |
 | `speech.svg` | station pages | the orange speech bubble from "Matthew Lam" | 173×137: a 162×80 rect (r 6) + tail. **Unused**: the speech bubble was removed (user request) |
 | `mango.svg` | (unused) | the old draggable obstacle | **Unused**: the obstacle text was removed |
 
@@ -21,8 +22,13 @@ None of these SVGs has element IDs. Reference paths by document order.
 
 | File | Page | Role | Notes |
 |---|---|---|---|
-| `project-hero-placeholder.png` | project pages | both tilted heroes of every project, until real art is supplied | 445×466, exported from the Figma file (image 109). `?hero` |
-| `oyster-news.png`, `mango.png`, `portfolio-orange.png`, `texture.png` | (unused) | the old article heroes, the draggable orange, the key card's paper | **Unused** since the Projects redesign |
+| `project-hero-placeholder.png` | project pages, home | both tilted heroes of every project, and home's two faded corner posters, until real art is supplied | 445×466, exported from the Figma file (image 109). `?print` (was `?hero`) |
+| `home-photo.png` | home | the three taped prints (one photo, cropped alike): thumbs up by the water | 2048×1536, from Figma "Home Page Final" (image 122). `?print` (AVIF/WebP 400/800/1200) |
+| `tape-long.png`, `tape-short.png` | home | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
+| `tape-skyline.png` | home | the strip holding the skyline's sheet (Figma "tape1", 452:4941) | 320 wide, cut from the same tape sheet at Figma's crop. Baked like the other tape |
+| `paper-sheet.png` | home | a stub (8×8 white) for the skyline's blank sheet: the `?sheet` preset fills it with `--paper-sheet` and bakes the fibre in (scripts/paperBake.ts) | not art; don't replace |
+| `texture.png` | home | faint paper grain over the taped prints | |
+| `oyster-news.png`, `mango.png`, `portfolio-orange.png` | (unused) | the old article heroes, the draggable orange | **Unused** since the Projects redesign |
 | `me-final.png` | About | the photo: thumbs up on the seawall | 2134×2222. Box (941, 278) 447×465 in `About (6).png` |
 | `enersys1.png` | Experience (EnerSys) | hover photo: selfie by the EnerSys logo | 2305×1728. Box (1288, header cap −45) 235×176 in `Experience (2).png` |
 | `enersys2.png` | Experience (EnerSys) | hover photo: meeting-room demo, on top | 2736×2060. Box (1432, +55) 229×173 |

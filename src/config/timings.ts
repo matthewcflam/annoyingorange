@@ -21,27 +21,47 @@ export const GATE_UI = {
 export const GATE = {
   /** whenPageShown() resolves here. */
   PAGE_SHOWN: 0,
-  /** The map starts here. Pull it (and the steps after) earlier if the blank
-   *  pause after load feels long. */
-  ROUTE_IN: 0.6,
-  ROUTE_IN_DURATION: 0.6,
-  ROUTE_IN_EASE: "power2.out",
-  STATIONS_IN: 0.7,
-  LABELS_IN: 0.8,
-  STATION_STAGGER: 0.08,
-  STATION_FADE_DURATION: 0.4,
-  STATION_SETTLE_PX: 6,
-  STATION_EASE: "power2.out",
-  /** Measured from load. If it becomes "2s after the stations finish", the
-   *  timeline position becomes ">+2". */
+  // ---- Home (Figma "Home Page Final"; chrome/intro.ts) ----
+  /** "Matthew Lam" fades up. */
+  NAME_IN: 0.25,
+  NAME_IN_DURATION: 0.5,
+  /** The centre card rushes open (its flow is MAP_BOX.OPEN / OPEN_EASE). */
+  CARD_OPEN: 0.45,
+  /** The social glyphs fade up. */
+  ICONS_IN: 1.0,
+  FADE_DURATION: 0.6,
+  /** The cat draws itself (like the footer's). */
+  CAT_IN: 0.9,
+  CAT_DRAW: 1.6,
+  /** The skyline draws itself (pages/skylineDraw.ts, user request): from the
+   *  peak down the ridges, then the city top to bottom. Distances are the
+   *  SVG's own px (664×143 at the reference size). */
+  SKYLINE_IN: 1.0,
+  /** Ridge lines start this much later per px their near end is from the peak. */
+  SKYLINE_MOUNTAIN_S_PER_PX: 0.003,
+  /** The city starts this long after the peak… */
+  SKYLINE_CITY_START: 0.3,
+  /** …then each path later per px its top is below the city's top… */
+  SKYLINE_CITY_S_PER_PX: 0.012,
+  /** …and per px it is out to the side of the peak. */
+  SKYLINE_CITY_S_PER_PX_X: 0.0015,
+  /** Each line's own draw: its length × this, clamped. */
+  SKYLINE_SEG_S_PER_PX: 0.006,
+  SKYLINE_SEG_MIN: 0.15,
+  SKYLINE_SEG_MAX: 0.7,
+  SKYLINE_SEG_EASE: "power1.inOut",
+  /** "who?" sprays (measured from load). */
   WHO_DELAY: 2.0,
-  /** TODO(open-question #1): deep link — the map and the requested page fade
-   *  in (the name block fades out) instead of the home sequence. */
+  /** TODO(open-question #1): deep link — the requested page fades in
+   *  instead of the home sequence. */
   DEEP_LINK_FADE: 0.4,
 } as const;
 
 /** "who?" spray engine (§7.2). Distances are mockup px (the 1767×1024 frame),
- *  which are also the units of who-spray.svg. */
+ *  which are also the units of who-spray.svg. Since "Home Page Final" the word
+ *  is 213 wide with a 10px stroke (it was 910 wide, 30px), so every spread
+ *  below is a third of its old value, the dots are ~0.6×, and the flow keeps
+ *  about the same paint per area of stroke. */
 export const SPRAY = {
   // The nozzle's speed, the lifts and the lead (so the spray's length) are
   // set per segment in config/sprayPace.ts, shaped by spray/paceModel.ts.
@@ -50,34 +70,35 @@ export const SPRAY = {
   /** Paint the can emits, in dots per second of stroke. Flow is constant, so
    *  slow parts of a stroke get heavier paint per px (density ∝ 1/speed), and
    *  a slower sprayPace means more paint overall. (18000 before the pace
-   *  table; 21000 keeps the same total paint at its starting values.) */
-  FLOW_DOTS_PER_S: 21000,
+   *  table; 21000 kept the same total paint at its starting values; 6000
+   *  for the smaller "Home Page Final" word.) */
+  FLOW_DOTS_PER_S: 6000,
   /** Dots per stamp are clamped to this range. */
   DOTS_MIN: 30,
   DOTS_MAX: 80,
-  /** Core σ ≈ 7–8px so ±2σ ≈ the 30px guide stroke. */
-  CORE_SIGMA_PX: 7.5,
-  CORE_DOT_RADIUS_PX: [0.7, 1.8],
+  /** Core σ ≈ 2.5px so ±2σ ≈ the 10px guide stroke. */
+  CORE_SIGMA_PX: 2.5,
+  CORE_DOT_RADIUS_PX: [0.4, 1.1],
   CORE_ALPHA: [0.45, 0.9],
-  OVERSPRAY_SIGMA_PX: 18,
+  OVERSPRAY_SIGMA_PX: 6,
   /** Share of each stamp's dots that are overspray. */
   OVERSPRAY_SHARE: 0.2,
-  OVERSPRAY_DOT_RADIUS_PX: [0.5, 1.2],
+  OVERSPRAY_DOT_RADIUS_PX: [0.3, 0.7],
   OVERSPRAY_ALPHA: [0.08, 0.3],
   /** 1 in N stamps spits a larger droplet. */
   SPIT_CHANCE: 1 / 40,
-  SPIT_SIGMA_PX: 12,
-  SPIT_RADIUS_PX: [2, 3.8],
+  SPIT_SIGMA_PX: 4,
+  SPIT_RADIUS_PX: [0.9, 1.6],
   /** Chance that a stroke end grows a drip (the nozzle lingers there). */
   DRIP_CHANCE: 0.35,
   /** At most this many drips per spray. */
   DRIP_MAX: 2,
   DRIP_DURATION: 1.0,
   DRIP_EASE: "power2.out",
-  DRIP_LENGTH_PX: [14, 40],
-  DRIP_WIDTH_PX: [1.8, 3],
-  /** Canvas margin around the 910×302 guide box, for overspray and drips. */
-  CANVAS_PAD_PX: 60,
+  DRIP_LENGTH_PX: [5, 13],
+  DRIP_WIDTH_PX: [0.9, 1.3],
+  /** Canvas margin around the 221×99 guide box, for overspray and drips. */
+  CANVAS_PAD_PX: 20,
   /** Hiss gain smoothing (setTargetAtTime time constant). */
   HISS_TIME_CONSTANT: 0.015,
   /** Hiss level (0–1 of its max) at zero nozzle speed; full at peak speed. */
@@ -91,15 +112,6 @@ export const HOME = {
   TOAST_RISE_PX: 6,
   TOAST_HOLD: 1.6,
   TOAST_OUT: 0.4,
-  /** The bio and icons fade in during the intro, with the map's labels. */
-  BIO_IN: 0.8,
-  BIO_IN_DURATION: 0.6,
-} as const;
-
-/** Shared chrome visibility (§4.1). */
-export const CHROME = {
-  /** Name block fades out off home and back in on home. */
-  NAME_FADE: 0.3,
 } as const;
 
 /**
@@ -337,4 +349,19 @@ export const SCROLLBAR = {
   FADE_OUT: 0.4,
   /** Seconds after the last scroll frame before it fades out. */
   IDLE: 0.8,
+} as const;
+
+/** Home's paper texture, baked into the poster, tape and skyline-sheet images
+ *  at build time (scripts/paperBake.ts, the `paper*` directives in
+ *  vite.config.ts): flat, matte paper (user request: no glass, no blur, no
+ *  lighting). Restart the dev server after changing these. The drop shadows
+ *  are CSS (--paper-shadow* in tokens.css). */
+export const PAPER = {
+  /** Paper fibre: luminance wobble (± fraction), on the posters, tape and the
+   *  skyline's sheet. */
+  FIBRE: 0.035,
+  /** A fine halftone screen over the posters: CSS px per cell at their shown
+   *  size, mixed at this strength. */
+  HALFTONE_PX: 3,
+  HALFTONE_MIX: 0.32,
 } as const;

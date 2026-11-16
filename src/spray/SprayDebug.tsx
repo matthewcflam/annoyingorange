@@ -50,7 +50,7 @@ export default function SprayDebug({ glass }: { glass: HTMLElement }) {
   return createPortal(
     <svg
       key={version}
-      className="home__who spray-debug"
+      className="home__who-canvas spray-debug"
       viewBox={`${-pad} ${-pad} ${WHO_BOX.width + 2 * pad} ${WHO_BOX.height + 2 * pad}`}
       style={
         {
@@ -63,7 +63,7 @@ export default function SprayDebug({ glass }: { glass: HTMLElement }) {
       }
       aria-hidden="true"
     >
-      <text x={0} y={-pad + 14} fontSize={12} fill="#000">
+      <text x={0} y={-pad + 5} fontSize={4} fill="#000">
         sprayPace: {total} ms · {Math.round(lo)}–{Math.round(hi)} px/s (blue → red) · R to replay
       </text>
       {strokes.map(({ g, speeds }, i) => {
@@ -83,14 +83,14 @@ export default function SprayDebug({ glass }: { glass: HTMLElement }) {
                 x2={g.pts[j * 2 + 2]}
                 y2={g.pts[j * 2 + 3]}
                 stroke={colour(v)}
-                strokeWidth={4}
+                strokeWidth={1.4}
                 strokeLinecap="round"
               />
             ))}
             {g.anchors.slice(0, -1).map((a, s) => {
               const [mx, my] = at((a + g.anchors[s + 1]) / 2);
               return (
-                <text key={`ms${s}`} x={mx + 6} y={my + 16} fontSize={10} fill="#555">
+                <text key={`ms${s}`} x={mx + 2} y={my + 5} fontSize={3.3} fill="#555">
                   {ms[s] ?? "?"}ms
                 </text>
               );
@@ -99,8 +99,8 @@ export default function SprayDebug({ glass }: { glass: HTMLElement }) {
               const [x, y] = at(a);
               return (
                 <g key={`p${s}`}>
-                  <circle cx={x} cy={y} r={3.5} fill="#fff" stroke="#000" strokeWidth={1.5} />
-                  <text x={x + 5} y={y - 5} fontSize={11} fontWeight={700} fill="#000">
+                  <circle cx={x} cy={y} r={1.2} fill="#fff" stroke="#000" strokeWidth={0.5} />
+                  <text x={x + 1.7} y={y - 1.7} fontSize={3.7} fontWeight={700} fill="#000">
                     {letter}
                     {s}
                   </text>

@@ -3,13 +3,9 @@ import { gsap, useGSAP } from "./lib/gsap";
 import { waitForFonts } from "./lib/fonts";
 import { GATE_UI } from "./config/timings";
 import { introTimeline } from "./chrome/intro";
-import NameBlock from "./chrome/NameBlock";
-import MuteToggle from "./chrome/MuteToggle";
-import TransitMap from "./transit/TransitMap";
 import Outlet from "./pages/Outlet";
 import { useRoute } from "./lib/router";
 import { prefersReducedMotion } from "./lib/motion";
-import { GlassContext } from "./lib/glass";
 import TransitionLayer from "./transition/TransitionLayer";
 import StationChrome from "./chrome/StationChrome";
 import Cursor from "./chrome/Cursor";
@@ -19,11 +15,9 @@ import { routeFor } from "./config/routes";
 
 /**
  * Layer stack (spec §4.1), bottom to top:
- *   z0  page layer        — swaps per route
- *   z10 shared chrome     — name block, mute toggle (home); Map box
- *                           (station pages)
- *   z20 transit map       — home only
- *   z40 glass             — painted on the screen: Home portals "who?" here
+ *   z0  page layer        — swaps per route (home holds its own card,
+ *                           glyphs, sound toggle and "who?")
+ *   z10 shared chrome     — the Map box (station pages)
  *   z50 transition        — the dither cover and its title, over everything
  *
  * There is no sound gate (user change): once fonts are ready everything
@@ -33,8 +27,6 @@ import { routeFor } from "./config/routes";
 export default function App() {
   const [fontsReady, setFontsReady] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  // Set on the first commit, long before the page (and Home) can mount.
-  const [glass, setGlass] = useState<HTMLDivElement | null>(null);
   const route = useRoute();
   const home = route === "/";
   // A route commits under the transition cover, so the colours swap unseen.
@@ -78,23 +70,10 @@ export default function App() {
       {fontsReady && (
         <>
           <main className="layer--page">
-            <GlassContext.Provider value={glass}>
-              <Outlet />
-            </GlassContext.Provider>
+            <Outlet />
           </main>
 
-          <div className="layer layer--chrome">
-            {/* Name block: home only (§4.1). */}
-            <NameBlock visible={home} />
-            {home && <MuteToggle />}
-            {!home && <StationChrome />}
-          </div>
-
-          <div className="layer layer--map" hidden={!home}>
-            <TransitMap visible />
-          </div>
-
-          <div ref={setGlass} className="layer layer--glass" />
+          <div className="layer layer--chrome">{!home && <StationChrome />}</div>
 
           <TransitionLayer />
         </>

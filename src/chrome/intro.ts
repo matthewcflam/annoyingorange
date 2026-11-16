@@ -1,12 +1,20 @@
 /**
  * The intro on load (spec §6.5, minus the gate: user change). One timeline,
  * positions in seconds from load, all from GATE in timings.ts. Built once
- * fonts are ready: by then the page is mounted, the map is mounted with
- * visibility: hidden and the name's bio is hidden.
+ * fonts are ready: by then the page is mounted.
+ *
+ * On home (Figma "Home Page Final"): the paper (posters, photos, tape, the
+ * skyline's sheet) is simply there, sharp, from the first frame
+ * (pages/paper/); the name fades up, the centre card rushes
+ * open, the cat draws itself, the skyline draws itself from the peak down
+ * into the city, the glyphs fade up, and "who?" sprays. Every later visit
+ * shows all of it finished.
  */
 import { gsap } from "../lib/gsap";
-import { GATE, HOME } from "../config/timings";
+import { GATE } from "../config/timings";
 import { introSpray, skipIntroSpray } from "../spray/who";
+import { openHomeCard } from "../pages/homeIntro";
+import { skipSkyline, startSkyline } from "../pages/skylineDraw";
 import { markPageShown } from "../lib/pageReveal";
 
 interface Options {
@@ -19,45 +27,39 @@ interface Options {
 
 export function introTimeline({ root, home, reduced }: Options): gsap.core.Timeline {
   const q = gsap.utils.selector(root);
-  const map = q(".transit-map");
-  const bio = q(".name-block__bio");
   const tl = gsap.timeline();
 
   // The page starts to appear here (deep link fade, or home's stagger).
   tl.call(markPageShown, undefined, GATE.PAGE_SHOWN);
 
   if (!home) {
-    // TODO(open-question #1): placeholder deep-link reveal. The name block
-    // is hidden off home anyway.
+    // TODO(open-question #1): placeholder deep-link reveal.
     skipIntroSpray();
-    gsap.set(bio, { autoAlpha: 1 });
+    openHomeCard();
+    skipSkyline();
     const page = q(".layer--page");
     gsap.set(page, { autoAlpha: 0 });
-    tl.to([map, page], { autoAlpha: 1, duration: GATE.DEEP_LINK_FADE }, GATE.PAGE_SHOWN);
+    tl.to(page, { autoAlpha: 1, duration: GATE.DEEP_LINK_FADE }, GATE.PAGE_SHOWN);
     return tl;
   }
 
-  const line = q(".transit-map__line");
-  const dots = q(".station__dot"); // DOM order is line order, left to right
-  const labels = q(".station__label");
-  gsap.set([line, dots, labels, bio], { autoAlpha: 0 });
-  gsap.set(map, { autoAlpha: 1 });
+  const name = q(".home__name");
+  const catPaths = q(".home__cat path");
+  const icons = q(".home__social");
 
-  tl.to(line, { autoAlpha: 1, duration: GATE.ROUTE_IN_DURATION, ease: GATE.ROUTE_IN_EASE }, GATE.ROUTE_IN)
-    .fromTo(
-      dots,
-      { y: reduced ? 0 : GATE.STATION_SETTLE_PX },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: GATE.STATION_FADE_DURATION,
-        ease: GATE.STATION_EASE,
-        stagger: GATE.STATION_STAGGER,
-      },
-      GATE.STATIONS_IN,
-    )
-    .to(labels, { autoAlpha: 1, duration: GATE.STATION_FADE_DURATION, stagger: GATE.STATION_STAGGER }, GATE.LABELS_IN)
-    .to(bio, { autoAlpha: 1, duration: HOME.BIO_IN_DURATION }, HOME.BIO_IN)
-    .call(introSpray, undefined, GATE.WHO_DELAY);
+  gsap.set([name, icons], { autoAlpha: 0 });
+
+  tl.to(name, { autoAlpha: 1, duration: GATE.NAME_IN_DURATION, ease: "power2.out" }, GATE.NAME_IN)
+    .call(openHomeCard, undefined, GATE.CARD_OPEN)
+    .to(icons, { autoAlpha: 1, duration: GATE.FADE_DURATION }, GATE.ICONS_IN);
+
+  if (!reduced) {
+    gsap.set(catPaths, { drawSVG: "0%" });
+    tl.to(catPaths, { drawSVG: "100%", duration: GATE.CAT_DRAW, ease: "power2.inOut" }, GATE.CAT_IN);
+  }
+  // The skyline draws itself from the peak down (pages/skylineDraw.ts).
+  tl.call(startSkyline, undefined, GATE.SKYLINE_IN);
+
+  tl.call(introSpray, undefined, GATE.WHO_DELAY);
   return tl;
 }

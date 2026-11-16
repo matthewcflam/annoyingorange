@@ -25,13 +25,28 @@ const ROWS = [
  * Hovering a row turns its dot and label orange (mapbox.css; no sound).
  * The blue is one SVG path redrawn from a tweened shape; the box's sizes come
  * from CSS (global.css --map-*), read back from the DOM.
+ *
+ * `variant="home"`: home's centre card (Figma "Home Page Final"), the same
+ * card at its own size (mapbox.css). Home drives `open` (the intro opens it
+ * and it stays open), so "Map" is a plain label and nothing closes it: no
+ * hover, Escape or outside press.
  */
-export default function MapBox({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export default function MapBox({
+  open,
+  onOpenChange,
+  variant = "corner",
+}: {
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  variant?: "corner" | "home";
+}) {
+  const pinned = variant === "home";
   const route = useRoute();
-  const current = routeFor(route).station;
+  // Home has no station: its own row is the current one there.
+  const current = routeFor(route).station ?? "home";
   const boxRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
+  const toggleRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -113,9 +128,9 @@ export default function MapBox({ open, onOpenChange }: { open: boolean; onOpenCh
     openNow.current = open;
   }, [open]);
   const setOpen = (v: boolean) => {
-    if (v === openNow.current) return;
+    if (pinned || v === openNow.current) return;
     openNow.current = v;
-    onOpenChange(v);
+    onOpenChange?.(v);
   };
 
   // Mouse hover opens and closes it, each after a short delay (MAP_BOX.HOVER_*):
@@ -130,7 +145,7 @@ export default function MapBox({ open, onOpenChange }: { open: boolean; onOpenCh
 
   // Escape or a press outside closes it.
   useEffect(() => {
-    if (!open) return;
+    if (!open || pinned) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       clearTimeout(hoverTimer.current);
@@ -157,27 +172,48 @@ export default function MapBox({ open, onOpenChange }: { open: boolean; onOpenCh
       ref={boxRef}
       className="map-box interactive"
       data-open={open || undefined}
-      onPointerEnter={(e) => e.pointerType === "mouse" && hoverTo(true)}
-      onPointerLeave={(e) => e.pointerType === "mouse" && hoverTo(false)}
+      data-variant={variant}
+      onPointerEnter={pinned ? undefined : (e) => e.pointerType === "mouse" && hoverTo(true)}
+      onPointerLeave={pinned ? undefined : (e) => e.pointerType === "mouse" && hoverTo(false)}
     >
       <svg className="map-box__shape" viewBox="0 0 1 1" aria-hidden="true">
         <path ref={pathRef} />
       </svg>
-      <button
-        ref={toggleRef}
-        type="button"
-        className="map-box__toggle"
-        aria-expanded={open}
-        aria-controls="map-box-nav"
-        onPointerDown={(e) => (pressType.current = e.pointerType)}
-        onClick={(e) => {
-          clearTimeout(hoverTimer.current);
-          setOpen(e.detail > 0 && pressType.current === "mouse" ? true : !open);
-        }}
+      {pinned ? (
+        <span
+          ref={(el) => {
+            toggleRef.current = el;
+          }}
+          className="map-box__toggle"
+          aria-hidden="true"
+        >
+          <span className="map-box__title">Map</span>
+        </span>
+      ) : (
+        <button
+          ref={(el) => {
+            toggleRef.current = el;
+          }}
+          type="button"
+          className="map-box__toggle"
+          aria-expanded={open}
+          aria-controls="map-box-nav"
+          onPointerDown={(e) => (pressType.current = e.pointerType)}
+          onClick={(e) => {
+            clearTimeout(hoverTimer.current);
+            setOpen(e.detail > 0 && pressType.current === "mouse" ? true : !open);
+          }}
+        >
+          <span className="map-box__title">Map</span>
+        </button>
+      )}
+      <nav
+        ref={panelRef}
+        id={pinned ? undefined : "map-box-nav"}
+        className="map-box__panel"
+        aria-label={pinned ? "Map" : "Stations"}
+        inert={!open}
       >
-        <span className="map-box__title">Map</span>
-      </button>
-      <nav ref={panelRef} id="map-box-nav" className="map-box__panel" aria-label="Stations" inert={!open}>
         {ROWS.map((row, i) => {
           const isCurrent = row.id === current;
           const enter = () => !isCurrent && prefetchRoute(row.path);

@@ -6,6 +6,9 @@
 import { HEROES } from "../content/projects";
 import { ABOUT_PHOTOS } from "../content/aboutPhotos";
 import { EXPERIENCE_PHOTOS } from "../content/experience";
+import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
+import { isCompact } from "./frame";
+import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
 /** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
 export interface Picture {
@@ -25,6 +28,8 @@ interface RouteImage {
 /** Images per route that must be decoded before it shows (above the fold,
  *  or Experience's hover photos, which must not pop in). */
 function routeImages(path: string): RouteImage[] {
+  // Home: the prints, and the posters unless compact hides them.
+  if (path === "/") return HOME_PICTURES.filter((p) => !(isCompact() && p.sizes === POSTER_SIZES));
   if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   if (path === "/projects") return HEROES.map((h) => ({ picture: h.picture, sizes: HERO_SIZES }));
@@ -75,8 +80,28 @@ export function decodeUrl(src: string): Promise<void> {
 
 /** Plain image URLs per route (decoded alongside its pictures). */
 function routeUrls(path: string): string[] {
+  if (path === "/") return HOME_URLS;
   return path === "/about" ? ABOUT_PHOTOS.map((p) => p.frostLight) : [];
 }
+
+/** Home's skyline markup (home-skyline.svg), fetched once and inlined by
+ *  Home.tsx so its paths can draw themselves. The same file an <img> would
+ *  load, so its ~500 paths stay out of the JS bundle; fetched at boot when the
+ *  visitor lands on home (preloadRoute), so it isn't waiting on React. */
+let skylinePromise: Promise<string> | null = null;
+let skylineText: string | null = null;
+export function loadSkyline(): Promise<string> {
+  return (skylinePromise ??= fetch(skylineUrl)
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+    .then((text) => (skylineText = text))
+    .catch((err: unknown) => {
+      skylinePromise = null; // retry on the next visit
+      throw err;
+    }));
+}
+
+/** The skyline markup if it has arrived (return visits inject it at once). */
+export const skylineMarkup = () => skylineText;
 
 /** Station pages' chunks (pages/Outlet.tsx renders them). Home is in the
  *  main chunk: it's what the site opens on. */
@@ -95,7 +120,8 @@ function pageLoader(path: string) {
 /** Fetch a route's code and decode its images. Never rejects. */
 export function preloadRoute(path: string): Promise<void> {
   const code = pageLoader(path)?.().then(() => undefined, () => undefined);
-  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code]).then(() => undefined);
+  const skyline = path === "/" ? loadSkyline().catch(() => undefined) : undefined;
+  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline]).then(() => undefined);
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */

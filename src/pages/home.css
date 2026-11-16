@@ -1,34 +1,310 @@
-/* Home (spec §7.1), design/mockups-v2/Home Page (7).png at 1767×1024. The
-   map and the name block are shared chrome; this page holds "who?". */
+/* Home (Figma "Home Page Final", 1767×1024). Every piece is placed at its
+   mockup coordinates: sizes and y in --px, x in --vx for the pieces out
+   toward the edges (as the old map did: on a wide screen they spread out),
+   while the name and the centre card stay centred. When the window is taller
+   than the frame (--px from the width), the composition centres vertically
+   (--hy); the posters stay pinned to the top and bottom edges they bleed off.
+
+   The pieces share one placement rule (centre or corner × units), so the
+   compact layout below can swap the units and origin instead of re-placing
+   each one. */
 .home {
+  --hy: max(0px, (100svh - 1024 * var(--px)) / 2);
+  /* x unit, size unit, y unit, and the origin (compact moves these). */
+  --ux: var(--vx);
+  --us: var(--px);
+  --ox: 0px;
+  --oy: var(--hy);
+  /* The centre card's unit: --px, floored so a small window keeps it legible. */
+  --hk: max(var(--px), 0.5px);
   position: relative;
-  min-height: 100vh;
+  height: 100svh;
+  overflow: clip;
 }
 
-/* "who?" spray (§7.2). The 910×302 guide box sits at mockup (713, 220) (Figma "Home Page": up beside the name block,
-   above the map; was 582), so
-   its ink lands where the mockup's does (714–1647 × 269–540); the canvas
-   extends --who-pad past it on every side for overspray and drips. Centred at
-   x 1168 on the stretched axis. It lives in the glass layer (fixed, full
-   viewport), which home's layout matches. */
-.home__who {
+/* ---- Paper (paper/PaperSheet.tsx): a sheet's box holding one plain image,
+   its texture baked in at build time (scripts/paperBake.ts). The shadows are
+   static CSS (--paper-shadow* in tokens.css), painted once. An outer
+   box-shadow is never drawn under the box, so none shows through the
+   see-through prints. ---- */
+.paper {
+  --ps-u: var(--us);
   position: absolute;
-  left: calc(1168 * var(--vx) - (var(--who-w) / 2 + var(--who-pad)) * var(--px));
-  top: calc((220 - var(--who-pad)) * var(--px));
-  width: calc((var(--who-w) + 2 * var(--who-pad)) * var(--px));
-  height: calc((var(--who-h) + 2 * var(--who-pad)) * var(--px));
   pointer-events: none;
 }
 
-/* Placed by chrome/homeLayout.ts instead (Home.tsx sets data-placed and the
-   box in px; the height keeps the canvas's aspect): on the compact layout
-   (global.css) under the name block on a portrait screen (user request: it
-   has the height, so the spray doesn't cover the text) or beside it on a
-   phone on its side; on the full layout, only when the name block (its bio
-   floored at 16px) would reach under the spray, pushed right of it. */
-.home__who[data-placed] {
-  left: var(--who-left);
-  top: var(--who-top);
-  width: var(--who-width);
-  height: calc(var(--who-width) * (var(--who-h) + 2 * var(--who-pad)) / (var(--who-w) + 2 * var(--who-pad)));
+.paper__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* The photos: cropped by the box, see-through, warmed by --photo-tint. */
+.paper[data-kind="photo"] {
+  overflow: hidden;
+  box-shadow: var(--paper-shadow);
+}
+
+.paper[data-kind="photo"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--photo-tint);
+}
+
+.paper[data-kind="photo"] .paper__img {
+  opacity: var(--photo-opacity);
+}
+
+.paper[data-kind="poster"] {
+  --ps-u: var(--px);
+  box-shadow: var(--paper-shadow-poster);
+}
+
+.paper[data-kind="poster"] .paper__img {
+  opacity: var(--home-poster-opacity);
+}
+
+/* Tape: a torn edge, so its shadow follows the image's alpha. */
+.paper[data-kind="tape"] .paper__img {
+  object-fit: fill;
+  opacity: var(--tape-opacity);
+  filter: var(--paper-shadow-tape);
+}
+
+.paper[data-kind="blank"] {
+  box-shadow: var(--paper-shadow);
+}
+
+.paper[data-kind="blank"] .paper__img {
+  object-fit: fill;
+}
+
+/* ---- Posters: the project placeholder at 40%, bleeding off the corners ---- */
+.home__poster {
+  width: calc(445 * var(--px));
+  height: calc(466 * var(--px));
+}
+
+.home__poster--top {
+  left: calc(113 * var(--vx));
+  top: calc(-153 * var(--px));
+}
+
+/* Its top is 150 frame px above the bottom edge (874 in the 1024 frame). */
+.home__poster--bottom {
+  left: calc(1173 * var(--vx));
+  top: calc(100svh - 150 * var(--px));
+}
+
+/* ---- "Matthew Lam" over the card: Rounded Bold 36, -8%, cap top 280 ---- */
+.home__name {
+  position: absolute;
+  left: calc(50% - 222 * var(--hk));
+  top: calc(var(--hy) + 280 * var(--px));
+  margin: 0;
+  font-family: var(--font-name);
+  font-size: calc(36 * var(--hk));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  white-space: nowrap;
+  color: var(--color-text);
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- The centre card (MapBox variant="home"; mapbox.css): 444×366 at
+   (662, 321), its right edge at the slot's ---- */
+.home__card {
+  --home-card-k: var(--hk);
+  position: absolute;
+  z-index: 2;
+  left: calc(50% - 222 * var(--hk));
+  top: calc(var(--hy) + 321 * var(--px));
+  width: calc(444 * var(--hk));
+  height: calc(366 * var(--hk));
+}
+
+/* ---- Sheets placed by their centres: the taped photos (HomePhotos.tsx),
+   the skyline's sheet, its tape and the skyline drawn on it ---- */
+.home-paper,
+.home__skyline {
+  position: absolute;
+  left: calc(var(--ox) + var(--cx) * var(--ux) - var(--w) / 2 * var(--us));
+  top: calc(var(--oy) + (var(--cy) - var(--h) / 2) * var(--us));
+  width: calc(var(--w) * var(--us));
+  height: calc(var(--h) * var(--us));
+  rotate: var(--r);
+}
+
+/* ---- "who?" (§7.2): the guide box (221×99) at (1285.8, 618.1), the Figma
+   box less the stroke overhang; the canvas reaches --who-pad past it on every
+   side for overspray and drips. ---- */
+.home__who {
+  --who-w: 220.937;
+  --who-h: 98.8558;
+  --who-pad: 20;
+  position: absolute;
+  z-index: 3;
+  left: calc(1285.83 * var(--vx));
+  top: calc(var(--hy) + 618.11 * var(--px));
+  width: calc(var(--who-w) * var(--px));
+  height: calc(var(--who-h) * var(--px));
+  pointer-events: none;
+}
+
+.home__who-canvas {
+  position: absolute;
+  left: calc(-100% * var(--who-pad) / var(--who-w));
+  top: calc(-100% * var(--who-pad) / var(--who-h));
+  width: calc(100% * (var(--who-w) + 2 * var(--who-pad)) / var(--who-w));
+  height: calc(100% * (var(--who-h) + 2 * var(--who-pad)) / var(--who-h));
+}
+
+/* ---- The cat (the footer's chat-cat.svg at 164 wide; Figma keeps its 5px
+   stroke, so the stroke is doubled in its own units). A click inside it
+   redraws it (Home.tsx); the box around it stays click-through. ---- */
+.home__cat {
+  position: absolute;
+  left: calc(115 * var(--vx));
+  top: calc(var(--hy) + 431.67 * var(--px));
+  width: calc(164.04 * var(--px));
+  pointer-events: none;
+}
+
+.home__cat svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.home__cat path {
+  stroke-width: 10.2;
+  pointer-events: all;
+}
+
+/* ---- GitHub, LinkedIn, mail and sound (chrome.css places the glyphs):
+   Figma's 124-wide row of three at (301, 515), centred on y 536.5. Kept
+   186 frame px right of the cat, so a wide screen doesn't pull them apart. ---- */
+.home .home__social {
+  --icon-scale: 0.83;
+  position: absolute;
+  left: calc(115 * var(--vx) + 186 * var(--px));
+  top: calc(var(--hy) + 536.5 * var(--px) - 18 * var(--s));
+  margin: 0;
+}
+
+/* ---- The skyline: 664×143 at (249.5, 816.5), inline (Home.tsx) so its
+   lines can draw themselves (skylineDraw.ts), on its taped sheet (Figma
+   "Rectangle 154", 763×221 turned -1.757°), so it turns with the sheet. The
+   group lays out in .home on the full layout; compact makes it one block. ---- */
+.home__sky {
+  display: contents;
+}
+
+.home__skyline {
+  --cx: 581.5;
+  --cy: 888;
+  --w: 664;
+  --h: 143;
+  --r: -1.757deg;
+  pointer-events: none;
+}
+
+.home__skyline svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ---- Compact layout (global.css): one centred column that scrolls: the
+   photos, the name, the card, the glyphs, "who?", then the cat beside the
+   skyline. No posters. ---- */
+@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+  .home {
+    --col: min(var(--compact-w), 444px);
+    --hk: calc(var(--col) / 444);
+    /* The photo cluster spans frame x 1295–1618, y 56–417 (323 × 361). */
+    --pu: calc(min(var(--col), 300px) / 323);
+    --ux: var(--pu);
+    --us: var(--pu);
+    --ox: calc(-1295 * var(--pu));
+    --oy: calc(-56 * var(--pu));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(28 * var(--m));
+    height: auto;
+    min-height: 100svh;
+    padding: calc(28 * var(--m)) var(--gutter) calc(48 * var(--m));
+  }
+
+  .home__poster {
+    display: none;
+  }
+
+  .home__name { order: 1; }
+  .home__card { order: 2; }
+  .home .home__social { order: 3; }
+  .home__who { order: 4; }
+  .home__cat { order: 5; }
+  .home__sky { order: 6; }
+
+  .home-photos {
+    position: relative;
+    width: calc(323 * var(--pu));
+    height: calc(361 * var(--pu));
+  }
+
+  .home__name,
+  .home__card,
+  .home .home__social,
+  .home__who,
+  .home__cat {
+    position: relative;
+    left: auto;
+    top: auto;
+  }
+
+  .home__name {
+    align-self: center;
+    width: var(--col);
+    font-size: var(--type-name);
+    margin-bottom: calc(-12 * var(--m));
+  }
+
+  .home .home__social {
+    width: var(--col);
+    --icon-scale: 1;
+  }
+
+  .home__who {
+    width: min(var(--col), 240px);
+    height: auto;
+    aspect-ratio: var(--who-w) / var(--who-h);
+  }
+
+  .home__cat {
+    width: calc(var(--col) * 0.28);
+    margin-bottom: calc(-40 * var(--m));
+    align-self: flex-start;
+    margin-left: calc((100% - var(--col)) / 2);
+  }
+
+  /* The sheet with its tape spans frame x 155–925, y 724–1004. */
+  .home__sky {
+    --su: calc(var(--col) / 770);
+    --ux: var(--su);
+    --us: var(--su);
+    --ox: calc(-155 * var(--su));
+    --oy: calc(-724 * var(--su));
+    display: block;
+    position: relative;
+    width: var(--col);
+    height: calc(280 * var(--su));
+  }
 }
