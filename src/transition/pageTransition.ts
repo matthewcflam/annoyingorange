@@ -9,23 +9,16 @@
  * a light page (home, the project pages) it is dark, with light text; leaving
  * a dark one (About, Experience) it is light, with black text. Home ↔
  * projects uses the same dark as every other dark cover (user request).
- *
- * Switching between projects is not a station change, so it only crossfades
- * the project's content; the name, list and Map box stay put.
  */
-import { gsap } from "../lib/gsap";
 import { play } from "../audio/engine";
-import { PROJECT, TRANSITION } from "../config/timings";
+import { TRANSITION } from "../config/timings";
 import { routeFor, STATIONS } from "../config/routes";
 import { getRoute, type TransitionRunner } from "../lib/router";
 import { preloadRoute } from "../lib/assets";
 import { markPageHidden, markPageShown } from "../lib/pageReveal";
 import { prefersReducedMotion } from "../lib/motion";
-import { projectScale } from "../lib/tokens";
 import { cover } from "./ditherCover";
 import { title } from "./scrambleTitle";
-
-const isProject = (path: string) => routeFor(path).station === "projects";
 
 /** The words typed on the cover, as groups placed by transition.css. */
 function titleFor(path: string): string[] {
@@ -48,8 +41,6 @@ function imagesReady(to: string): Promise<void> {
 
 export const pageTransition: TransitionRunner = async (to, commit) => {
   const ready = imagesReady(to);
-  if (isProject(getRoute()) && isProject(to)) return projectSwitch(ready, commit);
-
   const reduced = prefersReducedMotion();
   const tone = toneLeaving(getRoute());
   const color = coverColor(tone);
@@ -63,7 +54,7 @@ export const pageTransition: TransitionRunner = async (to, commit) => {
   await cover.show(reduced, color);
   await ready;
   markPageHidden();
-  commit(); // the map morph and name-block fade start here, under the cover
+  commit(); // the new page mounts here, under the cover
 
   // Input unlocks once the cover is nearly clear; the rest of the clear and
   // the title's type-out finish on their own.
@@ -79,22 +70,3 @@ export const pageTransition: TransitionRunner = async (to, commit) => {
   });
 };
 
-/** TODO(open-question #3): placeholder project switch (§10.1). */
-async function projectSwitch(ready: Promise<void>, commit: () => void) {
-  const offset = prefersReducedMotion() ? 0 : PROJECT.SWITCH_OFFSET_PX * projectScale();
-  const swap = () => document.querySelectorAll(".project__swap");
-  play("project.select");
-  await gsap.to(swap(), {
-    autoAlpha: 0,
-    y: -offset,
-    duration: PROJECT.SWITCH_OUT,
-    ease: PROJECT.SWITCH_EASE_OUT,
-  });
-  await ready;
-  commit();
-  await gsap.fromTo(
-    swap(),
-    { autoAlpha: 0, y: offset },
-    { autoAlpha: 1, y: 0, duration: PROJECT.SWITCH_IN, ease: PROJECT.SWITCH_EASE_IN, clearProps: "transform" },
-  );
-}

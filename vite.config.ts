@@ -13,6 +13,9 @@ const PRESETS: Record<string, Record<string, string>> = {
   // any image loads; `frostlight` (the mid blur) is a small file.
   frost: { w: '32', blur: '1.6', format: 'webp', quality: '70', inline: '' },
   frostlight: { w: '160', blur: '3', format: 'webp', quality: '70' },
+  // A <video> poster: one URL (the attribute takes no srcset), wide enough
+  // for the expanded lightbox.
+  poster: { w: '1280', format: 'webp', quality: '75' },
 }
 
 /** Preloads the fonts the gate waits for (src/lib/fonts.ts), so they download

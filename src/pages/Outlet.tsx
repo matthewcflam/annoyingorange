@@ -34,21 +34,16 @@ const PAGES: Record<string, ComponentType> = {
   "/": Home,
   "/about": About,
   "/experience": Experience,
-  "/projects/portfolio": Projects,
-  "/projects/oyster-news": Projects,
-  "/projects/remind": Projects,
-  "/projects/mango": Projects,
+  "/projects": Projects,
 };
 
-/** Renders the committed route's page, keyed so pages remount fresh. The
- *  project pages share one key: switching projects keeps the shell (name,
- *  list) mounted and only swaps its content. */
+/** Renders the committed route's page, keyed so pages remount fresh. */
 export default function Outlet() {
   const route = useRoute();
   const Page = PAGES[route];
   return (
     <Suspense fallback={null}>
-      <Page key={Page === Projects ? "projects" : route} />
+      <Page key={route} />
     </Suspense>
   );
 }

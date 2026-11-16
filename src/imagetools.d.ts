@@ -12,3 +12,8 @@ declare module "*?frostlight" {
   const src: string;
   export default src;
 }
+declare module "*?poster" {
+  /** A WebP URL. */
+  const src: string;
+  export default src;
+}

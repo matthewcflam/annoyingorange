@@ -10,12 +10,17 @@ import { useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 import { documentTitle, resolvePath, routeFor } from "../config/routes";
 import { lockScroll, resetScroll, unlockScroll } from "./scroll";
+import { projectSlugFromPath, type ProjectSlug } from "../content/projects";
 
 /**
  * Runs the visual transition to `to`. Must call `commit()` exactly once, when
  * the old page is hidden, and resolve when input can be unlocked.
  */
 export type TransitionRunner = (to: string, commit: () => void) => Promise<void>;
+
+/** The project an old /projects/<slug> link named; the Projects page takes
+ *  it on mount and opens scrolled to that project. */
+let projectFocus: ProjectSlug | null = projectSlugFromPath(location.pathname);
 
 let current = resolvePath(location.pathname);
 let transitioning = false;
@@ -24,7 +29,7 @@ let runner: TransitionRunner = async (_to, commit) => commit();
 const listeners = new Set<() => void>();
 let idleWaiters: (() => void)[] = [];
 
-// Canonicalize the entry URL (/projects → /projects/portfolio, unknown → /).
+// Canonicalize the entry URL (/projects/mango → /projects, unknown → /).
 if (current !== location.pathname) history.replaceState(null, "", current);
 document.title = documentTitle(routeFor(current));
 
@@ -38,6 +43,13 @@ function subscribe(listener: () => void): () => void {
 }
 
 export const getRoute = () => current;
+
+/** The project to open scrolled to, once (see projectFocus). */
+export function takeProjectFocus(): ProjectSlug | null {
+  const slug = projectFocus;
+  projectFocus = null;
+  return slug;
+}
 export const isInputLocked = () => transitioning;
 
 /** Resolves once no transition (or queued one) is running; immediately if idle.
@@ -97,6 +109,7 @@ function go(path: string, { push }: { push: boolean }) {
     return;
   }
   if (to === current) return;
+  projectFocus = projectSlugFromPath(path);
   if (push) history.pushState(null, "", to);
   void run(to);
 }

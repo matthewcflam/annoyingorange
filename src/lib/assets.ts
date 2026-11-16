@@ -3,7 +3,7 @@
  * prefetchRoute(); the page transition awaits preloadRoute() before it swaps
  * the page in, so heroes are decoded by the time they're shown.
  */
-import { projectByPath } from "../content/projects";
+import { HEROES } from "../content/projects";
 import { ABOUT_PHOTOS } from "../content/aboutPhotos";
 import { EXPERIENCE_PHOTOS } from "../content/experience";
 
@@ -27,8 +27,8 @@ interface RouteImage {
 function routeImages(path: string): RouteImage[] {
   if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
-  const heroes = projectByPath(path)?.heroes ?? [];
-  return heroes.map((h) => ({ picture: h.picture, sizes: HERO_SIZES }));
+  if (path === "/projects") return HEROES.map((h) => ({ picture: h.picture, sizes: HERO_SIZES }));
+  return [];
 }
 
 const loads = new Map<Picture, Promise<void>>();
@@ -89,7 +89,7 @@ export const PAGE_LOADERS = {
 function pageLoader(path: string) {
   if (path === "/about") return PAGE_LOADERS.about;
   if (path === "/experience") return PAGE_LOADERS.experience;
-  return projectByPath(path) ? PAGE_LOADERS.projects : null;
+  return path === "/projects" ? PAGE_LOADERS.projects : null;
 }
 
 /** Fetch a route's code and decode its images. Never rejects. */

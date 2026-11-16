@@ -1,21 +1,21 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "../../lib/gsap";
-import { onNavClick } from "../../lib/router";
-import { prefetchRoute } from "../../lib/assets";
 import { prefersReducedMotion } from "../../lib/motion";
 import { isCompact } from "../../lib/frame";
 import { flowShape, shapePath, type Shape } from "../../lib/waterFlow";
 import { play } from "../../audio/engine";
 import { MAP_BOX as M, PROJECT_POSTER as P } from "../../config/timings";
-import { PROJECTS, type Project, type ProjectSlug } from "../../content/projects";
+import { PROJECTS, type ProjectSlug } from "../../content/projects";
 
 const ZERO: Shape = { w: 0, h: 0, bl: 0, bb: 0, r: 0 };
 
 /**
- * The project list (fixed in columns 1–2) and its poster (Figma "Portfolio
- * Hover", "ReMind Hover", …): while a row is hovered (mouse) or focused
- * (keyboard), that row is black, the others grey, and a box in the project's
- * colour with its tagline hangs right of the list.
+ * The project list (fixed in columns 1–2), an index of the page: the row of
+ * the project in focus (`active`, Projects.tsx) is black, and a click calls
+ * `onSelect`, which glides the page to that project. Its poster (Figma
+ * "Portfolio Hover", "ReMind Hover", …): while a row is hovered (mouse) or
+ * focused (keyboard), that row is black, the others grey, and a box in the
+ * project's colour with its tagline hangs right of the list.
  *
  * The poster flows like the Map card (lib/waterFlow.ts, MAP_BOX): out from
  * its top-left corner, right then down; the text fades in as the water
@@ -24,7 +24,7 @@ const ZERO: Shape = { w: 0, h: 0, bl: 0, bb: 0, r: 0 };
  * corner after PROJECT_POSTER.HOVER_CLOSE_DELAY. Silent; no poster on touch
  * or the compact layout (project.css hides it).
  */
-export default function ProjectList({ current }: { current: Project }) {
+export default function ProjectList({ active, onSelect }: { active: ProjectSlug; onSelect: (slug: ProjectSlug) => void }) {
   const [peek, setPeek] = useState<ProjectSlug | null>(null);
   const posterRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<SVGPathElement>(null);
@@ -41,11 +41,11 @@ export default function ProjectList({ current }: { current: Project }) {
   const fill = (path: SVGPathElement, slug: ProjectSlug) => {
     path.style.fill = `var(${PROJECTS.find((p) => p.slug === slug)!.poster.color})`;
   };
-  /** A project's poster: the box's CSS size, taller if its text needs it. */
+  /** A project's poster: the box's CSS size, bigger if its text needs it. */
   const sizeFor = (slug: ProjectSlug) => {
     const box = posterRef.current!;
     const text = textRefs.current.get(slug)!;
-    return { w: box.offsetWidth, h: Math.max(box.offsetHeight, text.offsetHeight) };
+    return { w: Math.max(box.offsetWidth, text.offsetWidth), h: Math.max(box.offsetHeight, text.offsetHeight) };
   };
   const texts = () => [...textRefs.current.values()];
 
@@ -171,18 +171,21 @@ export default function ProjectList({ current }: { current: Project }) {
     <nav className="project-list" aria-label="Projects" data-peek={peek || undefined}>
       <ul onPointerLeave={(e) => e.pointerType === "mouse" && hide()}>
         {PROJECTS.map((p) => {
-          const isActive = p.slug === current.slug;
           return (
             <li key={p.slug} data-peek={p.slug === peek || undefined}>
               <a
-                href={p.path}
+                // A real link (old per-project URL) for a new tab; a plain click scrolls.
+                href={`/projects/${p.slug}`}
                 className="project-list__link"
-                aria-current={isActive ? "page" : undefined}
-                onClick={(e) => (isActive ? e.preventDefault() : onNavClick(e, p.path))}
+                data-active={p.slug === active || undefined}
+                onClick={(e) => {
+                  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                  e.preventDefault();
+                  onSelect(p.slug);
+                }}
                 onPointerEnter={(e) => {
-                  prefetchRoute(p.path);
                   if (e.pointerType === "touch") return;
-                  if (!isActive) play("link.hover");
+                  play("link.hover");
                   if (e.pointerType === "mouse") show(p.slug);
                 }}
                 // Keyboard only: a tap or click also focuses the link.

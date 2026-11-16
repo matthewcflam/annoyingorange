@@ -1,6 +1,7 @@
 /*
- * Project pages (Projects.tsx), measured from the Figma frame "Portfolio":
- * 1640 wide, on the 9-column grid. The shell (font, the fixed name, the
+ * The Projects page (Projects.tsx), from the Figma frames "Portfolio" and
+ * "Project Redesign": 1640 wide, on the 9-column grid; everything sits on
+ * column edges (the frame's stray 17/23/743 x values are snapped). The shell (font, the fixed name, the
  * element resets, --line, --fx) is page.css; the footer is footer.css.
  */
 .project {
@@ -12,9 +13,11 @@
   --tools-stick: calc((20 + 10 + 4 * 20 + 40) * var(--pp) + 0.72 * var(--type-project-title) + 4 * 0.72 * var(--type-project-body));
   /* The footer's cat stays clear of the list too. */
   --head-clear: var(--tools-stick);
-  /* TOOLS heading + its lines, with 13px between groups (Figma). */
-  --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * 13 * var(--pp));
-  /* Cap top of TOOLS and DESCRIPTION. 731 in the frame; less on a shorter
+  /* The first project's TOOLS heading + its lines, a body size between groups. */
+  --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * var(--type-project-body));
+  /* A project's name: 36 at 16px body (Figma "Project Redesign"). */
+  --type-project-heading: calc(2.25 * var(--type-project-body));
+  /* Cap top of the first project (its TOOLS and name). 731 in the frame; less on a shorter
      window, so the whole TOOLS list shows before any scrolling. */
   --content-top: clamp(var(--tools-stick) + 66 * var(--pp), 100svh - var(--tools-h) - 24 * var(--pp), 731 * var(--pp));
   /* The heroes' unit: 1 frame px, shrinking with a narrow window and with
@@ -96,20 +99,20 @@
 
 /* Black: the current project, unless another row is hovered or focused
    (ProjectList.tsx data-peek); then only that row. */
-.project-list:not([data-peek]) .project-list__link[aria-current],
+.project-list:not([data-peek]) .project-list__link[data-active],
 .project-list li[data-peek] .project-list__link {
   color: var(--color-text);
 }
 
 /* ---- The poster (ProjectList.tsx; Figma "… Hover"): right of the list, one
-   gutter out, from the first row's cap top to the last row's cap bottom,
-   155 wide at 16px type (× 1.5 for the list's 24). The colour is an SVG path
+   gutter out (column 3 on a wide window), from the first row's cap top to
+   the last row's cap bottom, one column wide (wider if its text needs it). The colour is an SVG path
    flowing from the top-left corner (the Map card's water). ---- */
 .project-poster {
   position: absolute;
   left: calc(100% + var(--grid-gutter));
   top: calc(10 * var(--pp));
-  width: calc(232.5 * var(--pp));
+  width: var(--grid-col);
   min-height: calc(100% - 20 * var(--pp));
   pointer-events: none;
   color: var(--color-poster-text);
@@ -197,100 +200,150 @@
   object-fit: cover;
 }
 
-/* ---- The scrolling body, on the grid ---- */
+/* A page-coloured band behind the header, over columns 1–2, ending half the
+   gap above the stick line: a TOOLS pushed out by the next one slides under
+   it instead of over the list. Above the body, under the header. */
+.project__band {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: calc(var(--grid-margin) + var(--grid-span2) + var(--grid-gutter) / 2);
+  height: calc(var(--tools-stick) - 20 * var(--pp));
+  background: var(--color-bg);
+  pointer-events: none;
+}
+
+/* ---- The projects, one block each ---- */
 .project__body {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-  column-gap: var(--grid-gutter);
   padding: var(--content-top) var(--grid-margin) 0;
 }
 
-/* TOOLS, columns 1–2 (text at x 17). It locks under the project list while
-   the rows scroll, then leaves with the body (the footer sits after the body,
-   so the cat never meets it). */
-.project__tools {
+/* One project on the 9-column grid: TOOLS (1–2), text (3–4), media (5–7).
+   The gap to the next project is the block's own padding, so its sticky
+   TOOLS holds until the next block arrives: the next TOOLS reaches the
+   stick line just as it pushes this one out. */
+.project-block {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-items: start;
+  padding-bottom: calc(6 * var(--type-project-body));
+}
+
+.project-block:last-child {
+  padding-bottom: 0;
+}
+
+/* TOOLS: black, or grey for the ones used a little; the heading in the
+   project's colour (its poster's). Locks under the project list. */
+.project-block__tools {
   grid-column: 1 / span 2;
   grid-row: 1;
-  align-self: start;
   position: sticky;
   top: var(--tools-stick);
   z-index: 1;
-  padding-left: calc(2 * var(--pp));
+  text-box: trim-both cap alphabetic;
+}
+
+.page .project-block__tools h3 {
+  color: var(--project-color);
+  font-family: var(--font-rounded);
+  font-weight: 700;
+}
+
+.project-block__tools li[data-dim] {
   color: var(--color-grey);
-  text-box: trim-both cap alphabetic;
 }
 
-.project__tools h2,
-.project-section h2 {
-  color: var(--color-orange);
+.project-block__tools ul + ul {
+  margin-top: var(--type-project-body);
 }
 
-.project__tools ul + ul {
-  margin-top: calc(13 * var(--pp));
-}
-
-/* Columns 3–9: rows of text (3–4) beside media (5–8). */
-.project__main {
-  grid-column: 3 / -1;
+/* The text, columns 3–4, as tall as the media: the intro at the top (cap
+   top level with the media's top), the description at the foot (its last
+   baseline on the media's bottom edge). Taller copy just grows the row. */
+.project-block__text {
+  grid-column: 3 / span 2;
   grid-row: 1;
-  display: grid;
-  grid-template-columns: subgrid;
-  align-content: start;
-}
-
-/* Rows are 194 apart (FEATURES' foot to HOW I BUILT IT); a tight row sits 16
-   under the one above (see .project-row__media). */
-.project-row {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: subgrid;
-  align-items: start;
-  margin-top: calc(194 * var(--pp));
-}
-
-.project-row:first-child {
-  margin-top: 0;
-}
-
-/* A row's media column: a tight row's media (Projects.tsx folds it into
-   the row above) stacks 16 under (the Figma board and the timeline). */
-.project-row__media {
-  grid-column: 3 / span 4;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: calc(16 * var(--pp));
+  justify-content: space-between;
+  gap: calc(2 * var(--line));
 }
 
-/* A row's sections, 135 apart (DESCRIPTION's foot to FEATURES). */
-.project-row__text {
-  grid-column: 1 / span 2;
-  display: flex;
-  flex-direction: column;
-  gap: calc(135 * var(--pp));
-}
-
-.project-section {
+.project-block__intro,
+.project-block__desc {
   text-box: trim-both cap alphabetic;
 }
 
-/* A blank line between paragraphs; 43 before a second sub-heading. */
-.project-section p + p {
+.page .project-block h2 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: var(--type-project-heading);
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+/* The name, then (2 body sizes down) the tagline; a blank line; the awards. */
+.page .project-block__tagline {
+  margin-top: calc(2 * var(--type-project-body));
+}
+
+.page .project-block__awards {
   margin-top: var(--line);
 }
 
-.project-section ol + h3 {
-  margin-top: calc(43 * var(--pp));
+.project-block__awards span {
+  display: block;
 }
 
-.project-section ol {
-  padding-left: 1.5em;
+.page .project-block__desc p + p {
+  margin-top: var(--line);
 }
 
-/* ---- Media (Media.tsx): columns 5–8, at its frame aspect ratio ---- */
+/* The links: 28px glyphs at 16px body, 13 apart, a body size under the text. */
+.page .project-block__links {
+  display: flex;
+  gap: calc(0.8 * var(--type-project-body));
+  margin-top: var(--type-project-body);
+}
+
+.project-block__links a {
+  display: block;
+  width: calc(1.75 * var(--type-project-body));
+  height: calc(1.75 * var(--type-project-body));
+  color: var(--color-text);
+  transition: color 0.15s;
+}
+
+.project-block__links svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.project-block__links a:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .project-block__links a:hover {
+    color: var(--project-color);
+  }
+}
+
+.project-block .media {
+  grid-column: 5 / span 3;
+  grid-row: 1;
+}
+
+/* ---- Media (Media.tsx): columns 5–7, at its frame aspect ratio ---- */
 .media {
-  grid-column: 3 / span 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,6 +362,7 @@
 
 .media:focus-visible,
 .lightbox__close:focus-visible,
+.lightbox__arrow:focus-visible,
 .connections__row:focus-visible {
   outline: 2px solid var(--color-orange);
   outline-offset: 3px;
@@ -325,8 +379,23 @@
   scale: 1.06;
 }
 
+/* A video item fills its box (tile and lightbox), cropped to it. */
+.media {
+  position: relative;
+}
+
+.media__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* The expanded media, over the page and its chrome, under the transition
-   cover. Media.tsx sizes the frame: from the tile's box to the window. */
+   cover. Media.tsx sizes the frame: from the tile's box to a centred player
+   (MEDIA.PLAYER_WIDTH of the window). */
 .lightbox {
   position: fixed;
   inset: 0;
@@ -343,10 +412,11 @@
   font-weight: var(--weight-text);
 }
 
+/* The page stays visible under a dim; a click on it closes the player. */
 .lightbox__backdrop {
   position: absolute;
   inset: 0;
-  background: var(--color-bg);
+  background: var(--color-lightbox-dim);
 }
 
 .lightbox__frame {
@@ -380,24 +450,91 @@
   text-box: trim-both cap alphabetic;
 }
 
+/* One item in the lightbox; Media.tsx slides them over each other. */
+.lightbox__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The carousel arrows and "1 / 3", lower middle, in the Close box's style. */
+.lightbox__nav {
+  position: absolute;
+  left: 50%;
+  bottom: var(--map-top);
+  translate: -50% 0;
+  display: flex;
+  align-items: stretch;
+  height: var(--map-h);
+  background: var(--color-map-box);
+  color: var(--color-map-box-text);
+  font-size: var(--type-project-card);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.lightbox__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--map-h);
+}
+
+.lightbox__arrow svg {
+  width: 0.9em;
+  height: 0.9em;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lightbox__arrow--next svg {
+  scale: -1 1;
+}
+
+@media (hover: hover) {
+  .lightbox__arrow--prev:hover svg {
+    translate: -0.15em 0;
+  }
+
+  .lightbox__arrow--next:hover svg {
+    translate: 0.15em 0;
+  }
+}
+
+.lightbox__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6em;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.lightbox__count span {
+  text-box: trim-both cap alphabetic;
+}
+
 html.is-scroll-locked {
   overflow: hidden;
 }
 
 /* ---- Compact layout (global.css): one column. The name and list scroll
-   with the page (page.css), TOOLS no longer sticks, each row's
-   media follows its text (the header: page.css; the footer: footer.css). ---- */
+   with the page (page.css), each project stacks and its TOOLS no longer
+   sticks (the header: page.css; the footer: footer.css). ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   .project {
     --content-top: calc(56vw + 40px);
     --hu: calc(100vw / 860);
+    --type-project-heading: 32px;
   }
 
   .project-list {
     margin-top: 20px;
   }
 
-  .project-poster {
+  .project-poster,
+  .project__band {
     display: none;
   }
 
@@ -417,34 +554,42 @@ html.is-scroll-locked {
   }
 
   .project__body {
-    display: block;
     padding-top: 24px;
   }
 
-  .project__tools {
-    position: static;
-    margin-bottom: 56px;
+  /* Stacked: the intro, the media, the description, then TOOLS (not sticky). */
+  .project-block {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 72px;
+  }
+  .project-block__text {
+    display: contents;
   }
 
-  .project__main,
-  .project-row {
-    display: block;
+  .project-block__intro {
+    order: 1;
   }
 
-  .project-row__media {
-    display: block;
-  }
-
-  .project-row {
-    margin-top: 72px;
-  }
-
-  .project-row__text {
-    gap: 56px;
-  }
-
-  .media {
+  .project-block .media {
+    order: 2;
     margin-top: 28px;
   }
 
+  .project-block__desc {
+    order: 3;
+    margin-top: 28px;
+  }
+
+  .project-block__tools {
+    order: 4;
+    position: static;
+    margin-top: 28px;
+  }
+
+  /* Expanded: the whole video, never a crop (the player keeps the tile's
+     aspect, so this only matters if the clip's own differs). */
+  .lightbox__frame .media__video {
+    object-fit: contain;
+  }
 }

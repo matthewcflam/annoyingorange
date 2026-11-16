@@ -246,13 +246,10 @@ export const PROJECT_POSTER = {
 
 /** Project pages (pages/projects/). */
 export const PROJECT = {
-  /** Placeholder project switch crossfade (§15 #3): the project's content
-   *  fades out drifting up, then fades in rising from below. */
-  SWITCH_OUT: 0.35,
-  SWITCH_IN: 0.45,
-  SWITCH_OFFSET_PX: 8,
-  SWITCH_EASE_OUT: "power2.in",
-  SWITCH_EASE_IN: "power2.out",
+  /** A click in the project list glides the page until that project sits
+   *  mid-screen. */
+  SCROLL_TO: 1.1,
+  SCROLL_TO_EASE: "expo.inOut",
   /** The tilted heroes settle in when the page shows: from this much extra
    *  tilt (degrees) and drop (px), one after the other. */
   HERO_IN: 1.1,
@@ -270,8 +267,16 @@ export const PROJECT = {
   ROW_HOVER_SCALE: 1.2,
 } as const;
 
-/** Project media (pages/projects/Media.tsx): a tile expands to cover the page. */
+/** Project media (pages/projects/Media.tsx): a tile expands to a centred
+ *  player over the dimmed page. */
 export const MEDIA = {
+  /** The player's width, as a fraction of the window's (at the tile's aspect
+   *  ratio; never smaller than the tile, and shrunk if it would reach Close or
+   *  the carousel arrows). */
+  PLAYER_WIDTH: 0.6,
+  /** Space kept between the player and Close / the arrows, in project px
+   *  (× projectScale()). */
+  PLAYER_GAP_PX: 24,
   OPEN: 0.7,
   OPEN_EASE: "expo.out",
   CLOSE: 0.5,
@@ -282,6 +287,12 @@ export const MEDIA = {
   HOVER_SCALE: 1.06,
   HOVER: 0.3,
   HOVER_EASE: "power3.out",
+  /** Expanded: switching items with the arrows (←/→). The old item slides
+   *  out and fades as the new one slides in from the side it came from. */
+  SLIDE: 0.45,
+  SLIDE_EASE: "expo.out",
+  /** How far an item slides, in project px (× projectScale()). */
+  SLIDE_OFFSET_PX: 80,
 } as const;
 
 /** Sound engine (§9). */

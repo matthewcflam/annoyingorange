@@ -92,8 +92,8 @@
 }
 
 /* Body text in Nunito Medium (tokens.css --font-text): the About and
-   Experience copy and the project body (TOOLS, sections, media labels).
-   The orange headings stay Helvetica Rounded Bold; so do the header, the
+   Experience copy and the project body (tools, taglines, descriptions,
+   media labels). The headings (and the project names) stay Helvetica Rounded Bold; so do the header, the
    project list and the footer, which sit outside these blocks. */
 .page .about__copy,
 .page .experience__list,
@@ -102,9 +102,7 @@
   font-weight: var(--weight-text);
 }
 
-.page .page-heading,
-.page .project__tools h2,
-.page .project-section h2 {
+.page .page-heading {
   font-family: var(--font-rounded);
   font-weight: 700;
 }

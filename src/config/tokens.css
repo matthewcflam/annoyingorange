@@ -107,6 +107,7 @@
   --project-lh:         1.1875;    /* 19px lines at 16 (measured from the frame) */
   --color-grey:  #939393;          /* inactive projects, tools, list rules */
   --color-media: #C6C6C6;          /* media placeholders */
+  --color-lightbox-dim: rgb(0 0 0 / 0.55); /* the page behind the expanded media player */
 
 }
 

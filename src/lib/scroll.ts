@@ -10,6 +10,8 @@ import { prefersReducedMotion } from "./motion";
 import { SCROLL } from "../config/timings";
 
 let lenis: Lenis | null = null;
+/** Starts Lenis's frames (it only ticks while it glides; see initScroll). */
+let wake = () => {};
 
 export function initScroll(): void {
   if (lenis || prefersReducedMotion()) return;
@@ -33,7 +35,7 @@ export function initScroll(): void {
       ticking = false;
     }
   };
-  const wake = () => {
+  wake = () => {
     still = 0;
     if (ticking) return;
     ticking = true;
@@ -49,6 +51,32 @@ export function initScroll(): void {
 export function resetScroll(): void {
   if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
   else window.scrollTo(0, 0);
+}
+
+/**
+ * Glide to `y` (clamped to the page) over `duration` seconds. Immediate with
+ * no Lenis (reduced motion) or when `immediate`. `onComplete` runs once the
+ * page is there; a wheel mid-glide takes over and it never runs.
+ */
+export function scrollToY(
+  y: number,
+  { duration, ease, immediate = false, onComplete }: { duration: number; ease: string; immediate?: boolean; onComplete?: () => void },
+): void {
+  if (!lenis) {
+    window.scrollTo(0, y);
+    onComplete?.();
+    return;
+  }
+  lenis.resize(); // a page that just mounted may be taller than Lenis knows
+  if (!immediate) wake();
+  const easing = gsap.parseEase(ease);
+  lenis.scrollTo(Math.max(0, Math.min(y, lenis.limit)), {
+    immediate,
+    force: true,
+    duration,
+    easing,
+    onComplete: () => onComplete?.(),
+  });
 }
 
 /** Stops any glide and swallows wheel input until unlockScroll(). */

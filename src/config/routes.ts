@@ -18,7 +18,7 @@ export interface Station {
 export const STATIONS: readonly Station[] = [
   { id: "about", label: "About", path: "/about", track: "upper" },
   { id: "experience", label: "Experience", path: "/experience", track: "lower" },
-  { id: "projects", label: "Projects", path: "/projects/portfolio", track: "lower" },
+  { id: "projects", label: "Projects", path: "/projects", track: "lower" },
 ];
 
 export interface RouteDef {
@@ -36,14 +36,16 @@ export const ROUTES: readonly RouteDef[] = [
   { path: "/", title: "Matthew Lam", station: null, theme: "light" },
   { path: "/about", title: "About", station: "about", theme: "light" },
   { path: "/experience", title: "Experience", station: "experience", theme: "light" },
-  { path: "/projects/portfolio", title: "This Portfolio", station: "projects", theme: "light" },
-  { path: "/projects/oyster-news", title: "Oyster News", station: "projects", theme: "light" },
-  { path: "/projects/remind", title: "ReMind", station: "projects", theme: "light" },
-  { path: "/projects/mango", title: "Mango", station: "projects", theme: "light" },
+  { path: "/projects", title: "Projects", station: "projects", theme: "light" },
 ];
 
+/** The old per-project pages: all on /projects now (the router remembers
+ *  which one, and the page opens scrolled to it). */
 const REDIRECTS: Record<string, string> = {
-  "/projects": "/projects/portfolio",
+  "/projects/remind": "/projects",
+  "/projects/mango": "/projects",
+  "/projects/oyster-news": "/projects",
+  "/projects/portfolio": "/projects",
 };
 
 const byPath = new Map(ROUTES.map((r) => [r.path, r]));
