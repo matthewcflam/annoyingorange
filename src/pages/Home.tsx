@@ -12,6 +12,14 @@ import { attachSkyline } from "./skylineDraw";
 import { loadSkyline, skylineMarkup } from "../lib/assets";
 import PaperSheet from "./paper/PaperSheet";
 import { SKY_SHEET, SKY_TAPE } from "./paper/sheets";
+import { onNavClick } from "../lib/router";
+import { prefetchRoute } from "../lib/assets";
+import { play } from "../audio/engine";
+
+/** The glass card's WebGL (its own chunk, keeping main under budget):
+ *  fetched as soon as this module runs, alongside the fonts the first render
+ *  waits for, so it's normally ready when home mounts. */
+const glassModule = import("./glass/glassRenderer");
 import "./home.css";
 
 /** Dev only: /?spray-debug shows the sprayPace tuning overlay (never shipped). */
@@ -26,12 +34,20 @@ const TECH_PAPERS = [
   ["React", "Node.js", ".NET"],
 ];
 
+/** The glass card's lines, in groups a blank line apart (Figma 517:34). */
+const GLASS_LINES = [
+  ["Computer Engineering @ UBC"],
+  ["UBC Sailbot", "UBC Third Quadrant Design", "prev. @ EnerSys"],
+  ["Open to summer/fall 2027 opportunities :)"],
+];
+
 /**
  * Home (Figma "Home Page Final", 1767×1024): "Matthew Lam" over the centre
  * card (the Map card, pinned open: keychain/MapBox.tsx variant="home"), the
  * social glyphs and sound toggle beside an orange cat, the Vancouver skyline,
  * taped photos (HomePhotos.tsx, paper/PaperSheet.tsx), two faded tech papers
- * bleeding off the top, and "who?" sprayed in orange. The skyline and "who?"
+ * bleeding off the top, and "who?" sprayed in orange under a glass card that
+ * lists the experiences and links to Experience. The skyline and "who?"
  * replay on click.
  *
  * The intro on load (chrome/intro.ts) reveals the pieces and opens the card;
@@ -40,16 +56,42 @@ const TECH_PAPERS = [
 export default function Home() {
   const [home, setHome] = useState<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glassRef = useRef<HTMLAnchorElement>(null);
+  const glassCanvasRef = useRef<HTMLCanvasElement>(null);
   const skylineRef = useRef<HTMLDivElement>(null);
   const [cardOpen, setCardOpen] = useState(isHomeCardOpen);
 
   useEffect(() => onHomeCardOpen(() => setCardOpen(true)), []);
 
+  // Dev only: /?glass-lab, the glass card's calibration bench (glass/glassLab.ts).
+  useEffect(() => {
+    if (!import.meta.env.DEV || !new URLSearchParams(location.search).has("glass-lab")) return;
+    let unmount: (() => void) | undefined;
+    let alive = true;
+    import("./glass/glassLab").then((m) => {
+      if (alive) unmount = m.mountGlassLab();
+    });
+    return () => {
+      alive = false;
+      unmount?.();
+    };
+  }, []);
+
   useEffect(() => {
     const engine = new SprayEngine(canvasRef.current!);
+    // The glass card refracts "who?" (glass/glassRenderer.ts); without WebGL
+    // (or until the chunk lands) it keeps its CSS blur (home.css, no data-glass).
+    const card = glassRef.current!;
+    let alive = true;
+    let teardown = () => {};
+    glassModule.then((m) => {
+      if (alive) teardown = m.attachHomeGlass(card, glassCanvasRef.current!, engine);
+    }, () => undefined);
     const detach = attachWho(engine);
     return () => {
+      alive = false;
       detach();
+      teardown();
       engine.destroy();
     };
   }, []);
@@ -120,6 +162,30 @@ export default function Home() {
           </Suspense>
         )}
       </div>
+
+      {/* The glass card over "who?" (Figma "Rectangle 157"): goes to Experience. */}
+      <a
+        ref={glassRef}
+        className="home__glass"
+        href="/experience"
+        data-cursor="Read More"
+        onClick={(e) => onNavClick(e, "/experience")}
+        onPointerEnter={(e) => {
+          if (e.pointerType === "touch") return;
+          play("link.hover");
+          prefetchRoute("/experience");
+        }}
+        onFocus={() => prefetchRoute("/experience")}
+      >
+        <canvas ref={glassCanvasRef} className="home__glass-canvas" aria-hidden="true" />
+        {GLASS_LINES.map((group, i) => (
+          <p key={i}>
+            {group.map((l, j) => (
+              <span key={j}>{l}</span>
+            ))}
+          </p>
+        ))}
+      </a>
 
       {/* The intro draws it the first time (chrome/intro.ts); a click redraws it. */}
       <DrawnCat className="home__cat" />

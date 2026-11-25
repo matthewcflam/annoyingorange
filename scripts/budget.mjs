@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 const BUDGET_KB = {
   /** The main JS chunk (everything home needs to run). */
-  mainJs: 135,
+  mainJs: 136, // 135 until the home glass card (its WebGL is a separate chunk; the spray hook and GLASS values stay in main)
   /** Everything home loads before its intro: JS, CSS, preloaded fonts, home's images and skyline. */
   homeTotal: 300,
   /** Any one home image. */

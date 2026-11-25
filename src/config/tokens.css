@@ -106,6 +106,13 @@
   --home-tech-opacity: 0.7;
   --home-tech-ink:     #C4C4C0;
   --home-tech-shadow:  0 calc(4 * var(--px)) calc(4 * var(--px)) rgb(0 0 0 / 0.25);
+  /* Home's glass card over "who?" (Figma "Rectangle 157"; user request: a
+     glass effect, unlike the matte paper). --glass-blur is frame px. */
+  --glass-fill:   rgb(244 244 240 / 0.2);
+  --glass-border: #939393;
+  --glass-blur:   5;
+  --glass-rim:    inset 0 0 calc(10 * var(--hk, 1px)) rgb(255 255 255 / 0.7);
+  --glass-ink:    rgb(0 0 0 / 0.8);
   --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
 
   /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */

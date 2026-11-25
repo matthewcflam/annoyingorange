@@ -126,7 +126,7 @@ export interface SprayOptions {
 }
 
 export class SprayEngine {
-  private readonly canvas: HTMLCanvasElement;
+  readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly color = readToken("--color-orange");
   private readonly resizeObserver: ResizeObserver;
@@ -148,12 +148,25 @@ export class SprayEngine {
   private sized = false;
   /** From show(): drawn instead of a replay if the canvas size matches. */
   private cached: HTMLCanvasElement | null = null;
+  /** Told whenever the canvas changes (home's glass card refracts it). */
+  private readonly drawListeners = new Set<() => void>();
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(canvas);
+  }
+
+  /** Call `fn` whenever the canvas's pixels change (new paint, a wipe, a
+   *  replay after a resize). Returns the unsubscribe. */
+  onDraw(fn: () => void): () => void {
+    this.drawListeners.add(fn);
+    return () => this.drawListeners.delete(fn);
+  }
+
+  private notify() {
+    for (const fn of this.drawListeners) fn();
   }
 
   /** Start a fresh spray. Returns its timeline (null when instant). */
@@ -243,10 +256,12 @@ export class SprayEngine {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.applyTransform();
+    this.notify();
   }
 
   destroy(): void {
     this.clear();
+    this.drawListeners.clear();
     this.resizeObserver.disconnect();
     this.dprQuery?.removeEventListener("change", this.onDprChange);
   }
@@ -312,7 +327,10 @@ export class SprayEngine {
       ease: SPRAY.DRIP_EASE,
       onStart: () => void (this.drips.includes(drip) || this.drips.push(drip)),
       onUpdate: () => {
-        if (drip.progress > drawn && !this.fastForward) this.drawDrip(drip, drawn, drip.progress);
+        if (drip.progress > drawn && !this.fastForward) {
+          this.drawDrip(drip, drawn, drip.progress);
+          this.notify();
+        }
         drawn = drip.progress;
       },
     });
@@ -329,6 +347,7 @@ export class SprayEngine {
       this.stamps.push(x, y, perStamp);
       if (!this.fastForward) this.drawStamp(x, y, perStamp);
     }
+    if (!this.fastForward) this.notify();
   }
 
   /** One Gaussian cluster: a dense core, sparse overspray, the odd spit. */
@@ -411,6 +430,7 @@ export class SprayEngine {
       this.ctx.globalAlpha = 1;
       this.ctx.drawImage(cached, 0, 0);
       this.applyTransform();
+      this.notify();
       return;
     }
     this.applyTransform(); // resizing the canvas already cleared it and reset state
@@ -418,5 +438,6 @@ export class SprayEngine {
     const s = this.stamps;
     for (let i = 0; i < s.length; i += 3) this.drawStamp(s[i], s[i + 1], s[i + 2]);
     for (const d of this.drips) this.drawDrip(d, 0, d.progress);
+    this.notify();
   }
 }

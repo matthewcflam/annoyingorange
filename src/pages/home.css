@@ -107,8 +107,8 @@
   rotate: var(--r);
 }
 
-/* ---- "who?" (§7.2): the guide box (221×99) at (1285.8, 618.1), the Figma
-   box less the stroke overhang; the canvas reaches --who-pad past it on every
+/* ---- "who?" (§7.2): the guide box (221×99) at (1256.9, 685), centred on
+   the Figma box (1261, 690, 212.8×89), so the glass card covers its foot; the canvas reaches --who-pad past it on every
    side for overspray and drips. ---- */
 .home__who {
   --who-w: 220.937;
@@ -116,8 +116,8 @@
   --who-pad: 20;
   position: absolute;
   z-index: 3;
-  left: calc(1285.83 * var(--vx));
-  top: calc(var(--hy) + 618.11 * var(--px));
+  left: calc(1256.9 * var(--vx));
+  top: calc(var(--hy) + 685 * var(--px));
   width: calc(var(--who-w) * var(--px));
   height: calc(var(--who-h) * var(--px));
   /* A click sprays it again (Home.tsx); the canvas pad is part of the target. */
@@ -129,6 +129,88 @@
   top: calc(-100% * var(--who-pad) / var(--who-h));
   width: calc(100% * (var(--who-w) + 2 * var(--who-pad)) / var(--who-w));
   height: calc(100% * (var(--who-h) + 2 * var(--who-pad)) / var(--who-h));
+}
+
+/* ---- The glass card (Figma "Rectangle 157"): 456×196 at (1170.76, 711.6),
+   over the foot of "who?", which shows through blurred. Radius 50, a 1px grey
+   edge, a faint white rim; the lines (Rounded Bold 16, 80% black) at
+   (+47, +36), a blank line between groups. Sized in its own --hk
+   (0.75px: 12px text, capped so the card always fits in the window);
+   compact overrides it to fill the column. A link to Experience (Home.tsx).
+   The glass itself is WebGL (glass/glassRenderer.ts: Figma's Glass, the
+   frosted "who?" refracted at the rim, a light rim) on .home__glass-canvas,
+   set up with data-glass="gl"; without WebGL the CSS blur below stands in. */
+.home__glass {
+  /* 12px text (user request), the card scaled to match, shrunk further when
+     it would cross the window's right or bottom edge (24 frame px clear). */
+  --hk: min(
+    0.75px,
+    (596.24 * var(--vx) - 24 * var(--px)) / 456,
+    (100svh - var(--hy) - 735.6 * var(--px)) / 196
+  );
+  position: absolute;
+  z-index: 4;
+  left: calc(1170.76 * var(--vx));
+  top: calc(var(--hy) + 711.6 * var(--px));
+  box-sizing: border-box;
+  width: calc(456 * var(--hk));
+  height: calc(196 * var(--hk));
+  padding: calc(36 * var(--hk)) 0 0 calc(47 * var(--hk));
+  border-radius: calc(50 * var(--hk));
+  background: var(--glass-fill);
+  box-shadow: var(--glass-rim);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * var(--hk)));
+  backdrop-filter: blur(calc(var(--glass-blur) * var(--hk)));
+  font-family: var(--font-rounded);
+  font-size: calc(16 * var(--hk));
+  font-weight: 700;
+  line-height: 1.19;
+  color: var(--glass-ink);
+  text-decoration: none;
+}
+
+/* Figma's 1px stroke, inside the box, over the glass. */
+.home__glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.home__glass-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The shader draws the fill, the blur and the rim. */
+.home__glass[data-glass="gl"] {
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.home__glass:not([data-glass]) .home__glass-canvas {
+  display: none;
+}
+
+.home__glass p {
+  position: relative;
+  margin: 0 0 1.19em;
+}
+
+.home__glass p:last-child {
+  margin-bottom: 0;
+}
+
+.home__glass span {
+  display: block;
 }
 
 /* ---- The cat (the footer's chat-cat.svg at 164 wide; Figma keeps its 5px
@@ -187,7 +269,8 @@
 
 /* ---- Compact layout (global.css): one centred column that scrolls: the
    photos, the name, the card, the glyphs, "who?", then the cat beside the
-   skyline. No tech papers. ---- */
+   skyline. No tech papers; the glass card overlaps the foot of "who?" as on
+   the full layout. ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   .home {
     --col: min(var(--compact-w), 444px);
@@ -215,8 +298,9 @@
   .home__card { order: 2; }
   .home .home__social { order: 3; }
   .home__who { order: 4; }
-  .home__cat { order: 5; }
-  .home__sky { order: 6; }
+  .home__glass { order: 5; }
+  .home__cat { order: 6; }
+  .home__sky { order: 7; }
 
   .home-photos {
     position: relative;
@@ -228,6 +312,7 @@
   .home__card,
   .home .home__social,
   .home__who,
+  .home__glass,
   .home__cat {
     position: relative;
     left: auto;
@@ -252,6 +337,13 @@
     width: min(var(--col), 240px);
     height: auto;
     aspect-ratio: var(--who-w) / var(--who-h);
+  }
+
+  /* As wide as the column; pulled up over the lower 73% of "who?" (its
+     guide box is 99 tall, the card starts 26.6 below its top), less the gap. */
+  .home__glass {
+    --hk: calc(var(--col) / 456);
+    margin-top: calc(-28 * var(--m) - 0.733 * min(var(--col), 240px) * 98.8558 / 220.937);
   }
 
   .home__cat {

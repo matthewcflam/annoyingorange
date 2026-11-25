@@ -343,3 +343,37 @@ export const PAPER = {
   HALFTONE_PX: 3,
   HALFTONE_MIX: 0.32,
 } as const;
+
+/**
+ * Home's glass card over "who?" (pages/glass/glassRenderer.ts). The first
+ * seven are Figma's Glass effect on "Rectangle 157" as set in the file (Plugin
+ * API: radius 4, refraction 0.8, depth 20, light -45° at 0.8, dispersion 0.5,
+ * splay 0); lengths are frame px. Figma's shader isn't public: the gains below
+ * map them onto the figma_glass recreation (MIT) and were calibrated against a
+ * 4x Figma render (design/figma-glass/, /?glass-lab, scripts/glassDiff.mjs).
+ */
+export const GLASS = {
+  FROST: 4,
+  REFRACTION: 0.8,
+  DEPTH: 20,
+  LIGHT_ANGLE: -45,
+  LIGHT_INTENSITY: 0.8,
+  DISPERSION: 0.5,
+  SPLAY: 0,
+  /** Edge shift = lens × DEPTH × REFRACTION × SHIFT_GAIN (frame px). */
+  SHIFT_GAIN: 0.65,
+  /** R / B sample at shift × (1 ∓ DISPERSION × DISPERSION_GAIN). */
+  DISPERSION_GAIN: 0.15,
+  /** Gaussian sigma = FROST × FROST_SCALE (frame px). */
+  FROST_SCALE: 0.42,
+  /** The light, measured off Figma's render: over the bevel (t²) the edge
+   *  facing LIGHT_ANGLE darkens by SHADE_GAIN × LIGHT_INTENSITY × (n·L)^SHADE_POWER
+   *  (−8/255 at the top-left corner), the edge facing away brightens by
+   *  GLOW_GAIN × LIGHT_INTENSITY × (−n·L)^GLOW_POWER (+2/255); side-on, nothing. */
+  SHADE_GAIN: 0.044,
+  SHADE_POWER: 1.36,
+  GLOW_GAIN: 0.011,
+  GLOW_POWER: 0.5,
+  /** Device pixel ratio cap for the card canvas. */
+  MAX_DPR: 2,
+} as const;
