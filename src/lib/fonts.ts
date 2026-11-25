@@ -40,7 +40,7 @@ export function registerRoundedFont(): void {
 }
 
 /** Body text on the station pages (tokens.css --font-text). */
-const NUNITO = fontString(500, 16, "Nunito");
+const NUNITO = fontString(300, 16, "Nunito");
 
 /** Load the station pages' body font (Nunito). preloadRoute() calls it, so a
  *  page transition never swaps fonts on screen. Never rejects. */

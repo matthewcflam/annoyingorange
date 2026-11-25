@@ -1,6 +1,6 @@
 // Fonts first, before anything renders (spec §5.2).
 import "@fontsource-variable/inter";
-import "@fontsource/nunito/500.css"; // body text, Medium (tokens.css --font-text)
+import "@fontsource/nunito/300.css"; // body text, Light (tokens.css --font-text)
 
 import "./config/tokens.css";
 import "./global.css";

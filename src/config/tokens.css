@@ -13,13 +13,13 @@
   --font-name:    var(--font-rounded);
   --font-sound:   var(--font-rounded);
   --font-muted:   var(--font-rounded);
-  /* Body text (user request): Nunito Medium, from @fontsource/nunito (only the
-     500 weight is imported, main.tsx). The home bio, About and Experience
+  /* Body text (user request): Nunito Light, from @fontsource/nunito (only the
+     300 weight is imported, main.tsx). The home bio, About and Experience
      copy, and the project text; the names, Map box, Connections card,
      project list, orange headings, footer and transition stay Helvetica
      Rounded Bold. */
   --font-text:    "Nunito", "Inter Variable", system-ui, sans-serif;
-  --weight-text:  500;
+  --weight-text:  300;
 
   /* ---- Type scale (user request): text that should match uses these, so
      it is the same size and scales the same way on every page. Each role is
