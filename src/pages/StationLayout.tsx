@@ -18,6 +18,7 @@ export default function StationLayout({
   style,
   bar,
   nav,
+  footer = true,
   children,
 }: {
   className?: string;
@@ -26,6 +27,8 @@ export default function StationLayout({
   /** A page-coloured band under the header that content scrolls under. */
   bar?: boolean;
   nav?: ReactNode;
+  /** The site footer (About has none). */
+  footer?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -47,7 +50,7 @@ export default function StationLayout({
         {nav}
       </header>
       {children}
-      <SiteFooter />
+      {footer && <SiteFooter />}
     </div>
   );
 }

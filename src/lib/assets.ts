@@ -4,7 +4,7 @@
  * the page in, so heroes are decoded by the time they're shown.
  */
 import { PROJECTS, type CollageItem } from "../content/projects";
-import { ABOUT_PHOTOS } from "../content/aboutPhotos";
+import { ABOUT_PICTURES } from "../content/aboutPhotos";
 import { LOGO_URLS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
 import { isCompact } from "./frame";
@@ -47,7 +47,7 @@ interface RouteImage {
 function routeImages(path: string): RouteImage[] {
   // Home: the prints, and the posters unless compact hides them.
   if (path === "/") return HOME_PICTURES.filter((p) => !(isCompact() && p.sizes === POSTER_SIZES));
-  if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
+  if (path === "/about") return ABOUT_PICTURES;
   // Projects: the first project's collage, on screen as the page shows.
   if (path === "/projects")
     return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it) }] : []));
@@ -82,7 +82,7 @@ function load({ picture: pic, sizes }: RouteImage): Promise<void> {
 
 const urlLoads = new Map<string, Promise<void>>();
 
-/** Fetch and decode a plain image URL (the About photos' light frost). */
+/** Fetch and decode a plain image URL (home's tape, the Experience logos). */
 export function decodeUrl(src: string): Promise<void> {
   let p = urlLoads.get(src);
   if (!p) {
@@ -100,7 +100,7 @@ export function decodeUrl(src: string): Promise<void> {
 function routeUrls(path: string): string[] {
   if (path === "/") return HOME_URLS;
   if (path === "/experience") return LOGO_URLS;
-  return path === "/about" ? ABOUT_PHOTOS.map((p) => p.frostLight) : [];
+  return [];
 }
 
 /** Home's skyline markup (home-skyline.svg), fetched once and inlined by

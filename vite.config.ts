@@ -9,11 +9,6 @@ import { paperTransform } from './scripts/paperBake.ts'
  *  for `object-fit: cover` cropping. */
 const PRESETS: Record<string, Record<string, string>> = {
   hero: { w: '700;1400', format: 'avif;webp', as: 'picture' },
-  // About photos' frosted glass, blurred here instead of with CSS filters.
-  // `frost` (heavy) is tiny and inlined as a data URI, so it shows before
-  // any image loads; `frostlight` (the mid blur) is a small file.
-  frost: { w: '32', blur: '1.6', format: 'webp', quality: '70', inline: '' },
-  frostlight: { w: '160', blur: '3', format: 'webp', quality: '70' },
   // The project collages' photos (content/projects.ts): ~250–420 CSS px in
   // the page (asked for at 1.5x, since they're rotated; collageSizes()), up
   // to 60% of the window in the lightbox. Quality is above sharp's AVIF

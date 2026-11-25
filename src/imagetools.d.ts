@@ -7,15 +7,6 @@ declare module "*?collage" {
   const picture: import("./lib/assets").Picture;
   export default picture;
 }
-declare module "*?frost" {
-  /** A data URI. */
-  const src: string;
-  export default src;
-}
-declare module "*?frostlight" {
-  const src: string;
-  export default src;
-}
 declare module "*?logo" {
   /** A WebP URL. */
   const src: string;

@@ -1,14 +1,11 @@
 /*
  * About and Experience, in the project pages' style (page.css: the shell,
- * Helvetica Rounded Bold at --type-project-body, the 9-column grid). Both
- * lay out on the grid (tokens.css --grid-*): About's copy in columns 3–4
- * and its photo in 5–7; Experience's index in 1–2, each job's header in
- * 3–4 and its points in 5–7.
+ * Helvetica Rounded Bold at --type-project-body, the 9-column grid). About
+ * is one composition placed from the window's centre; Experience lays out on
+ * the grid (tokens.css --grid-*): the index in 1–2, the jobs staggered.
  */
 .station-page {
-  /* The hand-drawn marks (line1–3.svg, anything.svg) are 1:1 at 16px; they
-     scale with the body size. A body line is 19 of them (--line), so the
-     marks' measured offsets need no extra leading. */
+  /* Figma px at a 16px body (1 at the usual size). */
   --cp: calc(var(--type-project-body) / 16);
   /* From one column's left edge to the next. */
   --col-step: calc(var(--grid-col) + var(--grid-gutter));
@@ -22,158 +19,114 @@
   padding: 0 var(--grid-margin);
 }
 
-/* Hand-drawn dashes (line1–3.svg) before list items and points. */
-.station-dash {
-  position: absolute;
-  left: calc(2 * var(--cp));
-  top: round(calc(10.2 * var(--cp)), 1px);
-  width: calc(8 * var(--cp));
-  height: calc(2 * var(--cp));
-}
-
-.station-dash--mid {
-  top: round(calc(9.2 * var(--cp)), 1px);
-}
-
-.station-dash--thin {
-  top: round(calc(11.2 * var(--cp)), 1px);
-  height: calc(1 * var(--cp));
-}
-
-/* ---- About: the copy (columns 3–4) beside the photo (5–7), centred in the
-   first screen under the header; the footer follows. ---- */
-.about__main {
-  align-items: center;
-  min-height: 100svh;
-  padding-block: var(--station-head-h);
-}
-
-.about__copy {
+/* ---- About (Figma "ABOUT FINAL", a 1600×998 frame drawn at the site's
+   real size): one screen, no footer. The collage of prints on the left
+   (content/aboutPhotos.ts, home's paper styling) is Figma px × --au from the
+   frame's centre (800, 499): --cp (the body / 16, so 1 at the usual size),
+   shrunk so the collage (x 124–788, y 156–844: 676 left of the centre, 345
+   above and below; the Connections card reaches 844) fits between the margins and under the header. The
+   greeting and copy start on column 6's left edge (Figma x 896) and are
+   centred vertically in the window (user request). ---- */
+.about__stage {
+  --au: min(var(--cp), (50vw - var(--grid-margin)) / 676, (50svh - var(--station-head-h)) / 345);
+  --ax: 800;
+  --ay: 499;
   position: relative;
-  grid-column: 3 / span 2;
+  height: 100svh;
 }
 
-.about__copy p + p,
-.about__list,
-.about__copy .about__connect {
+.about__collage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* A print: placed by its centre, at its unrotated size, then rotated. */
+.about__collage .paper {
+  --ps-u: var(--au);
+  left: calc(50% + (var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
+  top: calc(50% + (var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  width: calc(var(--w) * var(--au));
+  height: calc(var(--h) * var(--au));
+  rotate: var(--r);
+}
+
+/* The Connections card (chrome/Connections.tsx, Figma "Group 122"): a
+   collage piece placed like the prints, in front of them, at
+   --about-card-opacity (Figma 70%). Every footer measure is × --ft, so --ft
+   is the collage unit here, then Figma's sizes: 308×168, text 21.33, rows
+   27.55 apart ending 4 above the foot, logos 18.66 at 9.8 in, labels and
+   title 8 / 7 in. It works as the footer's does (connections.css). */
+.about__collage .about__connections {
+  --ft: var(--au);
+  left: calc(50% + (var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
+  top: calc(50% + (var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  width: calc(var(--w) * var(--au));
+  height: calc(var(--h) * var(--au));
+  padding-top: calc(53.8 * var(--au));
+  font-size: calc(21.33 * var(--au));
+  rotate: var(--r);
+  opacity: var(--about-card-opacity);
+  pointer-events: auto;
+}
+
+.about__connections .connections__row {
+  height: calc(27.55 * var(--au));
+  padding: 0 calc(8 * var(--au)) 0 calc(9.8 * var(--au));
+}
+
+.about__connections .connections__icon {
+  width: calc(18.66 * var(--au));
+  height: calc(18.66 * var(--au));
+}
+
+/* Column 6's left edge, 408 wide (in text units, so the measure follows the
+   type), never past the right margin; the block's middle at the window's. */
+.about__text {
+  position: absolute;
+  left: calc(var(--grid-margin) + 5 * var(--col-step));
+  top: 50%;
+  translate: 0 -50%;
+  width: min(408 * var(--cp), 4 * var(--grid-col) + 3 * var(--grid-gutter));
+}
+
+.page .about__hello {
+  font-size: var(--type-project-title);
+  letter-spacing: -0.04em;
+  line-height: 1.175;
+}
+
+/* Nunito Light (page.css) at Experience's body size and leading (user
+   request): the page's --type-project-body on --project-lh, a blank --line
+   between paragraphs. */
+.page .about__copy {
+  margin-top: calc(16 * var(--au));
+}
+
+.page .about__copy p + p {
   margin-top: var(--line);
 }
 
-.about__list li {
-  position: relative;
-  padding-left: calc(15 * var(--cp));
-}
-
-/* "anything" (anything.svg, 59×16), inline, raised (user change). Relative,
-   so it doesn't grow the line box. */
-.about__anything {
-  display: inline-block;
-  position: relative;
-  top: calc(-10 * var(--cp));
-  width: calc(59 * var(--cp));
-  height: calc(16 * var(--cp));
-  margin: 0 calc(1 * var(--cp)) 0 calc(3.5 * var(--cp));
-  vertical-align: calc(-8.4 * var(--cp));
+.about__accent,
+.about__link {
+  color: var(--color-orange);
 }
 
 .about__link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: max(1px, calc(1 * var(--cp)));
-  text-underline-offset: calc(2.5 * var(--cp));
-  cursor: pointer;
-  transition: color 0.15s ease-out;
+  text-decoration: none;
+  text-decoration-thickness: max(1px, calc(1 * var(--au)));
+  text-underline-offset: calc(2.5 * var(--au));
 }
 
-/* Orange on hover, like the Connections rows. */
 .about__link:focus-visible {
-  color: var(--color-orange);
+  text-decoration: underline;
   outline: none;
 }
 
 @media (hover: hover) {
   .about__link:hover {
-    color: var(--color-orange);
+    text-decoration: underline;
   }
-}
-
-.about__smile {
-  color: var(--color-orange);
-}
-
-.about__copy .about__toast {
-  position: absolute;
-  left: 0;
-  top: calc(100% + var(--line));
-  color: var(--color-grey);
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* The photo: three columns wide, or less on a short window so it fits the
-   first screen under the header, at its own aspect (--w, --h from
-   content/aboutPhotos.ts). */
-.about-photo {
-  position: relative;
-  grid-column: 5 / span 3;
-  width: min(100%, (100svh - 2 * var(--station-head-h)) * var(--w) / var(--h));
-  aspect-ratio: var(--w) / var(--h);
-  border-radius: var(--image-radius);
-  overflow: hidden;
-  /* Clips the overscaled heavy frost. */
-  isolation: isolate;
-}
-
-.about-photo picture,
-.about-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.about-photo img {
-  object-fit: cover;
-}
-
-.about-photo__glass,
-.about-photo__frost {
-  position: absolute;
-  inset: 0;
-}
-
-/* Pre-blurred copies (vite.config.ts ?frost / ?frostlight), upscaled: the
-   browser's smoothing finishes the blur, so there are no CSS filters. The
-   heavy one is opaque and inlined, so the frame is never an empty box. */
-.about-photo__frost--heavy,
-.about-photo__frost--light {
-  background-size: cover;
-  background-position: center;
-  will-change: opacity;
-}
-
-/* Upscaling a 32px image shows its pixel edges at the frame's border; the
-   slight overscale pushes them outside. */
-.about-photo__frost--heavy {
-  inset: -6%;
-}
-
-.about-photo__wash {
-  background: var(--color-frost-wash);
-  will-change: opacity;
-}
-
-/* White noise at low alpha (no blend mode: one less pass per frame while it
-   fades). */
-.about-photo__grain {
-  opacity: var(--frost-grain);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  will-change: opacity;
 }
 
 /* ---- Experience (Figma "Experience Final"): the index fixed on the left
@@ -417,21 +370,51 @@
     padding: 0;
   }
 
-  /* About: the photo, then the copy. */
-  .about__main {
+  /* About: the collage across the column (x 124–788, y 156–844), then
+     the text, scrolling. */
+  .about__stage {
+    --au: calc(var(--compact-w) / 664);
+    --ax: 124;
+    --ay: 156;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 32px;
-    min-height: 0;
-    padding-block: 32px 0;
+    width: var(--compact-w);
+    height: auto;
+    margin: 0 auto;
+    padding: 32px 0 72px;
   }
 
-  /* Centred, at most 400 wide and 55svh tall, at the photo's aspect. */
-  .about-photo {
-    order: -1;
-    align-self: center;
-    width: min(100%, 400px, 55svh * var(--w) / var(--h));
+  .about__collage {
+    position: relative;
+    inset: auto;
+    height: calc(688 * var(--au));
+  }
+
+  .about__collage .paper,
+  .about__collage .about__connections {
+    left: calc((var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
+    top: calc((var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  }
+
+  .about__text {
+    position: static;
+    translate: none;
+    width: auto;
+    margin-top: 40px;
+  }
+
+  /* The header name's compact size (page.css), so they still match. */
+  .page .about__hello {
+    font-size: min(var(--type-project-title), (100vw - 2 * var(--grid-margin) - var(--map-w) - 16px) / 5.9);
+  }
+
+  .page .about__copy {
+    margin-top: 16px;
+  }
+
+  .about__link {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
   }
 
   /* Experience: the index under the name, scrolling with the page; each job

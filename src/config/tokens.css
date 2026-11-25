@@ -96,6 +96,7 @@
      thin tape. --ps-u is the sheet's unit (home.css). */
   --paper-sheet:   #FBFAF3;
   --photo-opacity: 0.8;
+  --about-card-opacity: 0.7; /* About's Connections card on the collage (Figma 70%) */
   --photo-tint:    rgba(255, 119, 0, 0.1);
   --tape-opacity:  0.9;
   --tape-tint:     rgba(255, 140, 30, 0.14);
@@ -103,10 +104,6 @@
   --paper-shadow:        0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.18);
   --paper-shadow-poster: 0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.11);
   --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
-
-  /* ---- About photos: frosted glass (pages/AboutPhoto.tsx) ---- */
-  --color-frost-wash: rgba(226, 232, 240, 0.38);  /* milky, slightly cool */
-  --frost-grain:      0.14;
 
   /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */
   /* Helvetica Rounded Bold: supplied by the user as

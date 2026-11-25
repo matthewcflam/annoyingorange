@@ -1,90 +1,73 @@
-import { useLayoutEffect, useRef } from "react";
-import { gsap } from "../lib/gsap";
-import { revealOnScroll } from "../lib/scrollReveal";
+import type { CSSProperties } from "react";
 import StationLayout from "./StationLayout";
-import AboutPhoto from "./AboutPhoto";
-import { ABOUT_PHOTOS } from "../content/aboutPhotos";
-import { GITHUB, LINKEDIN, SPOTIFY, LETTERBOXD } from "../content/contact";
-import { defrost } from "./aboutFrost";
-import { prefersReducedMotion } from "../lib/motion";
+import PaperSheet from "./paper/PaperSheet";
+import Connections from "../chrome/Connections";
+import { ABOUT_CARD, ABOUT_SHEETS } from "../content/aboutPhotos";
+import { onNavClick } from "../lib/router";
+import { prefetchRoute } from "../lib/assets";
 import { play } from "../audio/engine";
-import { useCopyEmail } from "../chrome/useCopyEmail";
-import line1 from "../../assets-src/svg/line1.svg";
-import line2 from "../../assets-src/svg/line2.svg";
-import line3 from "../../assets-src/svg/line3.svg";
-import anything from "../../assets-src/svg/anything.svg";
 import "./station.css";
 
-const hover = (e: React.PointerEvent) => e.pointerType !== "touch" && play("link.hover");
+/** A collage piece's box (Figma px) as the vars station.css places it by. */
+const placeAt = (b: { cx: number; cy: number; w: number; h: number; rotate: number }) =>
+  ({ "--cx": b.cx, "--cy": b.cy, "--w": b.w, "--h": b.h, "--r": `${b.rotate}deg` }) as CSSProperties;
 
-function Ext({ href, children }: { href: string; children: string }) {
+/** An orange word that goes to another station (Experience, Projects). */
+function StationLink({ to, children }: { to: string; children: string }) {
   return (
-    <a className="about__link" href={href} target="_blank" rel="noopener noreferrer" onPointerEnter={hover}>
+    <a
+      className="about__link"
+      href={to}
+      data-cursor={`View ${children[0].toUpperCase()}${children.slice(1)}`}
+      onClick={(e) => onNavClick(e, to)}
+      onPointerEnter={(e) => {
+        if (e.pointerType === "touch") return;
+        play("link.hover");
+        prefetchRoute(to);
+      }}
+      onFocus={() => prefetchRoute(to)}
+    >
       {children}
     </a>
   );
 }
 
-/** About: copy with hand-drawn marks (static, they show with the text) on
- *  grid columns 3–4 and a photo in 5–7 (content/aboutPhotos.ts) that
- *  defrosts in (pages/aboutFrost.ts), then the site footer. */
+/**
+ * About (Figma "ABOUT FINAL"): one screen, no footer. A collage of prints
+ * of me-final.png on the left (content/aboutPhotos.ts), placed in Figma px
+ * from the frame's centre, and the greeting and copy starting at grid
+ * column 6, centred vertically in the window (station.css).
+ */
 export default function About() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const frost = !prefersReducedMotion();
-  const { copyEmail, toastRef, copied } = useCopyEmail();
-
-  useLayoutEffect(() => {
-    if (!frost) return;
-    return defrost(ABOUT_PHOTOS.map((p, i) => ({ el: photoRefs.current[i]!, frostLight: p.frostLight })));
-  }, [frost]);
-
-  // The footer pieces fade up as they scroll in.
-  useLayoutEffect(() => revealOnScroll(gsap.utils.selector(rootRef)("[data-reveal]") as HTMLElement[]), []);
-
   return (
-    <StationLayout className="station-page about" rootRef={rootRef} bar>
-      <div className="station-grid about__main">
-        <div className="about__copy">
-          <p>Hi, I’m Matthew</p>
-          <p>I’m a curious, user-focused developer that likes to use clever software and design to solve problems.</p>
-          <p>In my free time, you could catch me:</p>
-          <ul className="about__list">
-            <li>
-              <img className="station-dash" src={line1} alt="" />
-              listening to <Ext href={SPOTIFY}>music</Ext>
-            </li>
-            <li>
-              <img className="station-dash station-dash--mid" src={line2} alt="" />
-              catching a <Ext href={LETTERBOXD}>flick</Ext>
-            </li>
-            <li>
-              <img className="station-dash station-dash--thin" src={line3} alt="" />
-              working on <em>something</em>
-            </li>
-          </ul>
-          <p className="about__connect">
-            Connect with me about <img className="about__anything" src={anything} alt="anything" /> on{" "}
-            <Ext href={GITHUB}>github</Ext>, <Ext href={LINKEDIN}>linkedin</Ext>, or{" "}
-            <button type="button" className="about__link" onPointerEnter={hover} onClick={copyEmail}>
-              email
-            </button>{" "}
-            <span className="about__smile">:)</span>
-          </p>
-          <p ref={toastRef} className="about__toast" role="status">
-            {copied ? "email copied to clipboard!" : ""}
-          </p>
+    <StationLayout className="station-page about" footer={false}>
+      <div className="about__stage">
+        {/* Each print hides itself from assistive tech; the card stays in. */}
+        <div className="about__collage">
+          {ABOUT_SHEETS.map((s, i) => (
+            <PaperSheet key={s.id} sheet={s} eager={i === ABOUT_SHEETS.length - 1} style={placeAt(s)} />
+          ))}
+          <Connections className="about__connections" titleId="about-connections-title" style={placeAt(ABOUT_CARD)} />
         </div>
-        {ABOUT_PHOTOS.map((photo, i) => (
-          <AboutPhoto
-            key={photo.id}
-            ref={(el) => {
-              photoRefs.current[i] = el;
-            }}
-            photo={photo}
-            frost={frost}
-          />
-        ))}
+        <div className="about__text">
+          <h2 className="about__hello">
+            Nice to meet you!
+            <br />
+            I’m Matthew
+          </h2>
+          <div className="about__copy">
+            <p>
+              I’m a curious, user focused developer that loves to understand problems and use technology to solve them. I’m
+              currently pursuing a degree in Computer Engineering at the{" "}
+              <span className="about__accent">University of British Columbia</span>.
+            </p>
+            <p>I’m based in Vancouver, and open to summer / fall 2027 opportunities!</p>
+            <p>
+              Check out my <StationLink to="/experience">experience</StationLink> and{" "}
+              <StationLink to="/projects">projects</StationLink> :)
+            </p>
+          </div>
+        </div>
       </div>
     </StationLayout>
   );
