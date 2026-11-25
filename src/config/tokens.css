@@ -44,6 +44,10 @@
 
   /* ---- Brand ---- */
   --color-orange: #FF7700;          /* "who?", scribbles, Portfolio hero */
+  /* Highlighted text (user request): the site orange, not the browser blue.
+     White text so orange text stays readable when it's selected. */
+  --color-selection:      var(--color-orange);
+  --color-selection-text: #FFFFFF;
 
   /* ---- Transit map ---- */
   --color-route:          #0664DF;  /* spec said ≈#0A64E0; sampled */
@@ -55,7 +59,7 @@
      page, light leaving a dark one (transition/pageTransition.ts). */
   --color-cover-dark:        var(--color-station-bg);
   --color-cover-light:       var(--color-home-bg);
-  --color-transition-accent: var(--color-route); /* 2xa uses its blue */
+  --color-transition-accent: var(--color-orange); /* the site orange (user request; 2xa uses its blue) */
   --font-transition: var(--font-rounded);
 
   /* ---- Station chrome: the Map box (keychain/MapBox.tsx, Figma "Portfolio" /

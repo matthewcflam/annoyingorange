@@ -324,16 +324,16 @@ export const AUDIO = {
 /** Smooth wheel scrolling (Lenis, lib/scroll.ts). Touch stays native. */
 export const SCROLL = {
   /** Fraction of the remaining distance covered per frame: lower = floatier. */
-  LERP: 0.1,
+  LERP: 0.2,
   WHEEL_MULTIPLIER: 1,
 } as const;
 
 /** The cursor (chrome/Cursor.tsx): a dot that opens into a ring over
  *  anything clickable. Sizes in screen px (it doesn't scale with the frame). */
 export const CURSOR = {
-  DOT_PX: 10,
-  RING_PX: 22,
-  RING_STROKE_PX: 1.5,
+  DOT_PX: 14,
+  RING_PX: 30,
+  RING_STROKE_PX: 2,
   /** Dot ↔ ring. */
   GROW: 0.2,
   GROW_EASE: "power3.out",

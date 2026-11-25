@@ -113,6 +113,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Text selection (user request): the site orange (tokens.css). Pure paint,
+   no JS; only background-color and color, so it never triggers layout. */
+::selection {
+  background-color: var(--color-selection);
+  color: var(--color-selection-text);
+}
+
 /* Lenis (lib/scroll.ts). Its stock .lenis-stopped { overflow: clip } is left
    out on purpose: stop() runs during every transition, and clipping would drop
    the scrollbar (a layout shift) and block the router scroll-to-top. */
