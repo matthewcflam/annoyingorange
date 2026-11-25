@@ -15,7 +15,7 @@ function toggle(muted: boolean) {
 }
 
 /**
- * Sound on/off, home only (spec §9.8), the fourth glyph in home's social row
+ * Sound on/off, home only (spec §9.8), the last glyph in home's social row
  * (user decision, "Home Page Final"): a speaker, crossed out while muted.
  * Every load starts muted and the choice isn't saved (user decision).
  * Shortcut: M.
@@ -45,7 +45,8 @@ export default function MuteToggle() {
       title={`Sound ${muted ? "off" : "on"} (M). The iPhone silent switch mutes sound.`}
       onClick={() => toggle(muted)}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {/* Cropped to the ink of both states (speaker, cross, waves with their strokes). */}
+      <svg viewBox="1.5 4.3 20.8 15.4" aria-hidden="true" focusable="false">
         <path fill="currentColor" d="M2.5 8.75h3.9l5.1-4.3a.6.6 0 0 1 1 .46v14.18a.6.6 0 0 1-1 .46l-5.1-4.3H2.5a1 1 0 0 1-1-1v-4.5a1 1 0 0 1 1-1z" />
         <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           {muted ? (

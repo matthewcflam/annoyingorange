@@ -215,8 +215,10 @@
     margin-bottom: calc(-12 * var(--m));
   }
 
+  /* Left on the column, as wide as its glyphs (the toast sits past the last). */
   .home .home__social {
-    width: var(--col);
+    align-self: flex-start;
+    margin-left: calc((100% - var(--col)) / 2);
     --icon-scale: 1;
   }
 

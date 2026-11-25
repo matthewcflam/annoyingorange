@@ -6,16 +6,37 @@
 .social-links {
   /* --iu: the Map button's unit (--type-small / 20), so they scale alike. */
   --s: calc(var(--icon-scale, 1) * var(--iu));
+  /* Every glyph's box is cropped to its ink (Icon tight; the sound glyph's
+     own viewBox), so the row lines them up by what shows: one centre line,
+     the same space between inks. Sizes follow icon keyline shapes
+     (Material's 24 grid: circle 20 across, landscape rectangle 20 × 16), so
+     they look the same size rather than measure it: the round and square
+     marks and mail take the full height (mail by user choice), and the
+     sound speaker matches the GitHub circle's width instead. */
+  --glyph-h: calc(30 * var(--s));
+  --glyph-gap: calc(18 * var(--s));
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
   height: calc(36 * var(--s));
   margin-top: calc(-2 * var(--px));
 }
 
 .social-links__icon {
-  position: absolute;
-  top: 0;
+  position: relative;
   display: block;
+  flex: none;
+  height: var(--glyph-h);
   color: var(--color-text);
+}
+
+/* Hover turns the glyph orange (user request); mouse only, like the Map
+   card's rows, so a tap doesn't leave one stuck orange. */
+@media (hover: hover) {
+  .social-links__icon:hover {
+    color: var(--color-orange);
+  }
 }
 
 .social-links__icon:focus-visible {
@@ -48,39 +69,40 @@
   height: 100%;
 }
 
-/* github */
+/* Widths from each ink box's aspect (icons.ts `ink`). */
+/* github: 512 × 495.9 */
 .social-links__icon:nth-child(1) {
-  left: calc(-1 * var(--s));
-  width: calc(35 * var(--s));
-  height: calc(35 * var(--s));
+  aspect-ratio: 512 / 495.9;
 }
 
-/* linkedin */
+/* linkedin: square */
 .social-links__icon:nth-child(2) {
-  left: calc(51 * var(--s));
-  width: calc(37 * var(--s));
-  height: calc(37 * var(--s));
+  aspect-ratio: 1;
 }
 
-/* mail */
+/* mail: 512 × 384, full height, the same as GitHub (user request, after
+   trying it at the circle's width, ~0.77, bottom-aligned). */
 .social-links__icon--mail {
-  left: calc(103 * var(--s));
-  top: calc(-1 * var(--s));
-  width: calc(46 * var(--s));
-  height: calc(40 * var(--s));
+  aspect-ratio: 512 / 384;
 }
 
-/* sound (MuteToggle.tsx, user decision: the row's fourth glyph) */
+/* devpost: a 512 × 442 hexagon; its points make it read wide, so a hair
+   shorter than the round ones. */
+.social-links__icon--devpost {
+  height: calc(var(--glyph-h) * 0.94);
+  aspect-ratio: 512 / 442;
+}
+
+/* sound (MuteToggle.tsx, user decision: the row's last glyph): 20.8 × 15.4,
+   a landscape keyline, as wide as the GitHub circle (≈ 0.764). */
 .social-links__icon--sound {
-  left: calc(160 * var(--s));
-  top: calc(-1 * var(--s));
-  width: calc(38 * var(--s));
-  height: calc(38 * var(--s));
+  height: calc(var(--glyph-h) * 0.764);
+  aspect-ratio: 20.8 / 15.4;
 }
 
 .social-links .social-links__toast {
   position: absolute;
-  left: calc(212 * var(--s));
+  left: calc(100% + var(--glyph-gap));
   top: 50%;
   margin: calc(-9 * var(--px)) 0 0;
   font-size: max(0.8125rem, 18 * var(--px));
