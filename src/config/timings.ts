@@ -33,30 +33,28 @@ export const GATE = {
   /** The cat draws itself (like the footer's). */
   CAT_IN: 0.9,
   CAT_DRAW: 1.6,
-  /** The skyline draws itself (pages/skylineDraw.ts, user request): from the
-   *  peak down the ridges, then the city top to bottom. Distances are the
-   *  SVG's own px (664×143 at the reference size). */
-  SKYLINE_IN: 1.0,
-  /** Ridge lines start this much later per px their near end is from the peak. */
-  SKYLINE_MOUNTAIN_S_PER_PX: 0.003,
-  /** The city starts this long after the peak… */
-  SKYLINE_CITY_START: 0.3,
-  /** …then each path later per px its top is below the city's top… */
-  SKYLINE_CITY_S_PER_PX: 0.012,
-  /** …and per px it is out to the side of the peak. */
-  SKYLINE_CITY_S_PER_PX_X: 0.0015,
-  /** Each line's own draw: its length × this, clamped. */
-  SKYLINE_SEG_S_PER_PX: 0.006,
-  SKYLINE_SEG_MIN: 0.15,
-  SKYLINE_SEG_MAX: 0.7,
-  SKYLINE_SEG_EASE: "power1.inOut",
-  /** "who?" sprays (measured from load). User request: with the cat and the
-   *  skyline. The first paint lands SPRAY_PACE.leadMs (0.25s) after this, so
-   *  0.65 puts it at CAT_IN (0.9), beside the skyline at 1.0. */
-  WHO_DELAY: 0.65,
   /** TODO(open-question #1): deep link — the requested page fades in
    *  instead of the home sequence. */
   DEEP_LINK_FADE: 0.4,
+} as const;
+
+/** Home's skyline redraws on click (pages/skylineDraw.ts, user request): from
+ *  the peak down the ridges, then the city top to bottom. Distances are the
+ *  SVG's own px (664×143 at the reference size). Seconds. */
+export const SKYLINE = {
+  /** Ridge lines start this much later per px their near end is from the peak. */
+  MOUNTAIN_S_PER_PX: 0.003,
+  /** The city starts this long after the peak… */
+  CITY_START: 0.3,
+  /** …then each path later per px its top is below the city's top… */
+  CITY_S_PER_PX: 0.012,
+  /** …and per px it is out to the side of the peak. */
+  CITY_S_PER_PX_X: 0.0015,
+  /** Each line's own draw: its length × this, clamped. */
+  SEG_S_PER_PX: 0.006,
+  SEG_MIN: 0.15,
+  SEG_MAX: 0.7,
+  SEG_EASE: "power1.inOut",
 } as const;
 
 /** "who?" spray engine (§7.2). Distances are mockup px (the 1767×1024 frame),

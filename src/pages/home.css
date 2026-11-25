@@ -92,7 +92,7 @@
   top: calc(var(--hy) + 618.11 * var(--px));
   width: calc(var(--who-w) * var(--px));
   height: calc(var(--who-h) * var(--px));
-  pointer-events: none;
+  /* A click sprays it again (Home.tsx); the canvas pad is part of the target. */
 }
 
 .home__who-canvas {
@@ -136,8 +136,7 @@
   margin: 0;
 }
 
-/* ---- The skyline: 664×143 at (249.5, 816.5), inline (Home.tsx) so its
-   lines can draw themselves (skylineDraw.ts), on its taped sheet (Figma
+/* ---- The skyline: 664×143 at (249.5, 816.5), inline (Home.tsx) so a click can draw its lines again (skylineDraw.ts; the whole box is the target), on its taped sheet (Figma
    "Rectangle 154", turned -1.757°; trimmed on the left to 679×221, see sheets.ts), so it turns with the sheet. The
    group lays out in .home on the full layout; compact makes it one block. ---- */
 .home__sky {
@@ -150,7 +149,6 @@
   --w: 664;
   --h: 143;
   --r: -1.757deg;
-  pointer-events: none;
 }
 
 .home__skyline svg {

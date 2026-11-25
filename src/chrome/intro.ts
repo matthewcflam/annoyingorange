@@ -6,15 +6,13 @@
  * On home (Figma "Home Page Final"): the paper (posters, photos, tape, the
  * skyline's sheet) is simply there, sharp, from the first frame
  * (pages/paper/); the name fades up, the centre card rushes
- * open, the cat draws itself, the skyline draws itself from the peak down
- * into the city, the glyphs fade up, and "who?" sprays. Every later visit
- * shows all of it finished.
+ * open, the cat draws itself and the glyphs fade up. The skyline and "who?"
+ * are there finished from the first frame (user request: only the cat
+ * animates on load; a click replays either, see Home.tsx). Every later visit shows all of it finished.
  */
 import { gsap } from "../lib/gsap";
 import { GATE } from "../config/timings";
-import { introSpray, skipIntroSpray } from "../spray/who";
 import { openHomeCard } from "../pages/homeIntro";
-import { skipSkyline, startSkyline } from "../pages/skylineDraw";
 import { markPageShown } from "../lib/pageReveal";
 
 interface Options {
@@ -34,9 +32,7 @@ export function introTimeline({ root, home, reduced }: Options): gsap.core.Timel
 
   if (!home) {
     // TODO(open-question #1): placeholder deep-link reveal.
-    skipIntroSpray();
     openHomeCard();
-    skipSkyline();
     const page = q(".layer--page");
     gsap.set(page, { autoAlpha: 0 });
     tl.to(page, { autoAlpha: 1, duration: GATE.DEEP_LINK_FADE }, GATE.PAGE_SHOWN);
@@ -57,9 +53,5 @@ export function introTimeline({ root, home, reduced }: Options): gsap.core.Timel
     gsap.set(catPaths, { drawSVG: "0%" });
     tl.to(catPaths, { drawSVG: "100%", duration: GATE.CAT_DRAW, ease: "power2.inOut" }, GATE.CAT_IN);
   }
-  // The skyline draws itself from the peak down (pages/skylineDraw.ts).
-  tl.call(startSkyline, undefined, GATE.SKYLINE_IN);
-
-  tl.call(introSpray, undefined, GATE.WHO_DELAY);
   return tl;
 }
