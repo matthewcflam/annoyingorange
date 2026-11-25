@@ -1,0 +1,63 @@
+/* ---- Paper (paper/PaperSheet.tsx): a sheet's box holding one plain image,
+   its texture baked in at build time (scripts/paperBake.ts). The shadows are
+   static CSS (--paper-shadow* in tokens.css), painted once. An outer
+   box-shadow is never drawn under the box, so none shows through the
+   see-through prints. Shared by home (home.css places the sheets) and
+   the Experience photos (station.css); --ps-u, the unit the shadows scale by,
+   is home's --us unless the page sets it on the sheet. ---- */
+.paper {
+  --ps-u: var(--us);
+  position: absolute;
+  pointer-events: none;
+}
+
+.paper__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* The photos: cropped by the box, see-through, warmed by --photo-tint. */
+.paper[data-kind="photo"] {
+  overflow: hidden;
+  box-shadow: var(--paper-shadow);
+}
+
+.paper[data-kind="photo"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--photo-tint);
+}
+
+.paper[data-kind="photo"] .paper__img {
+  opacity: var(--photo-opacity);
+}
+
+.paper[data-kind="poster"] {
+  --ps-u: var(--px);
+  box-shadow: var(--paper-shadow-poster);
+}
+
+.paper[data-kind="poster"] .paper__img {
+  opacity: var(--home-poster-opacity);
+}
+
+/* Tape: a torn edge, so its shadow follows the image's alpha. */
+.paper[data-kind="tape"] .paper__img {
+  object-fit: fill;
+  opacity: var(--tape-opacity);
+  filter: var(--paper-shadow-tape);
+}
+
+.paper[data-kind="blank"] {
+  box-shadow: var(--paper-shadow);
+}
+
+.paper[data-kind="blank"] .paper__img {
+  object-fit: fill;
+}

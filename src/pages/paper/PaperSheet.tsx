@@ -1,4 +1,5 @@
 import type { Sheet } from "./sheets";
+import "./paper.css";
 
 /**
  * One sheet of home's paper: a box (placed by home.css) holding a plain image.
@@ -14,6 +15,7 @@ export default function PaperSheet({
   className = "",
   placed = false,
   eager = false,
+  style: ownStyle,
   children,
 }: {
   sheet: Sheet;
@@ -22,11 +24,13 @@ export default function PaperSheet({
   placed?: boolean;
   /** The first thing anyone sees (the front print): fetch it first. */
   eager?: boolean;
+  /** Placement by the page itself (used when not `placed`). */
+  style?: React.CSSProperties;
   children?: React.ReactNode;
 }) {
   const style = placed
     ? ({ "--cx": sheet.cx, "--cy": sheet.cy, "--w": sheet.w, "--h": sheet.h, "--r": `${sheet.rotate}deg` } as React.CSSProperties)
-    : undefined;
+    : ownStyle;
   const c = sheet.crop;
   const crop = c ? { left: `${c.x * 100}%`, top: `${c.y * 100}%`, width: `${c.w * 100}%`, height: `${c.h * 100}%` } : undefined;
   // Posters are hidden on compact; lazy keeps a display:none poster from loading.
