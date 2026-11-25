@@ -58,12 +58,16 @@ export const PHOTO_TAPES: Sheet[] = [
 ];
 
 /** The skyline's sheet (Figma "Rectangle 154": a blank paper sheet, the
- *  skyline drawn on it) and its tape, centred on its top edge. */
+ *  skyline drawn on it) and its tape, centred on its top edge. The left side
+ *  is trimmed (user request; Figma's is 763 wide at cx 539.71, cy 859.38) so
+ *  the sheet runs as far past the drawing's left end (x 249.5) as Figma's runs
+ *  past its right: 7.7. The right edge stays put, so the centre moves 41.79
+ *  along the sheet's own (turned) x axis, and the tape moves with it. */
 export const SKY_SHEET: Sheet = {
-  id: "sky", kind: "blank", cx: 539.71, cy: 859.38, w: 763, h: 221, rotate: -1.757, src: sheetPaper,
+  id: "sky", kind: "blank", cx: 581.48, cy: 858.10, w: 679.42, h: 221, rotate: -1.757, src: sheetPaper,
 };
 export const SKY_TAPE: Sheet = {
-  id: "tape-sky", kind: "tape", cx: 536.82, cy: 748.92, w: 126, h: 50, rotate: -1.757, src: tapeSkyline,
+  id: "tape-sky", kind: "tape", cx: 578.59, cy: 747.64, w: 126, h: 50, rotate: -1.757, src: tapeSkyline,
 };
 
 /** The two faded project posters (placed by home.css, unrotated). */

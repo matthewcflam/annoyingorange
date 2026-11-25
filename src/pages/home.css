@@ -138,7 +138,7 @@
 
 /* ---- The skyline: 664×143 at (249.5, 816.5), inline (Home.tsx) so its
    lines can draw themselves (skylineDraw.ts), on its taped sheet (Figma
-   "Rectangle 154", 763×221 turned -1.757°), so it turns with the sheet. The
+   "Rectangle 154", turned -1.757°; trimmed on the left to 679×221, see sheets.ts), so it turns with the sheet. The
    group lays out in .home on the full layout; compact makes it one block. ---- */
 .home__sky {
   display: contents;
@@ -235,12 +235,12 @@
     margin-left: calc((100% - var(--col)) / 2);
   }
 
-  /* The sheet with its tape spans frame x 155–925, y 724–1004. */
+  /* The sheet with its tape spans frame x 238–925, y 724–1004. */
   .home__sky {
-    --su: calc(var(--col) / 770);
+    --su: calc(var(--col) / 687);
     --ux: var(--su);
     --us: var(--su);
-    --ox: calc(-155 * var(--su));
+    --ox: calc(-238 * var(--su));
     --oy: calc(-724 * var(--su));
     display: block;
     position: relative;

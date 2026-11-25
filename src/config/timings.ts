@@ -50,8 +50,10 @@ export const GATE = {
   SKYLINE_SEG_MIN: 0.15,
   SKYLINE_SEG_MAX: 0.7,
   SKYLINE_SEG_EASE: "power1.inOut",
-  /** "who?" sprays (measured from load). */
-  WHO_DELAY: 2.0,
+  /** "who?" sprays (measured from load). User request: with the cat and the
+   *  skyline. The first paint lands SPRAY_PACE.leadMs (0.25s) after this, so
+   *  0.65 puts it at CAT_IN (0.9), beside the skyline at 1.0. */
+  WHO_DELAY: 0.65,
   /** TODO(open-question #1): deep link — the requested page fades in
    *  instead of the home sequence. */
   DEEP_LINK_FADE: 0.4,
