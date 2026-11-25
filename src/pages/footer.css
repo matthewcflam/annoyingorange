@@ -88,83 +88,10 @@
   text-box: trim-both cap alphabetic;
 }
 
-/* ---- Connections: at (671, 1466), 232 wide (Figma), text 24. Taller than
-   Figma's 147 (user request): the rows are 31 apart, the Map card's station
-   pitch (mapbox.css, 31 per 24px of text), so the card is 166 tall. The title
-   sits 7 in from the top-right; the rows start 38.5 down, labels' right edges
-   7 in, each logo (21 box) 8 in on the left, centred on its label. ---- */
-.connections {
-  position: absolute;
+/* The Connections card (chrome/connections.css): at (671, 1466). */
+.site-footer .connections {
   left: calc(50% + (671 - 787) * var(--ft));
   top: calc(var(--footer-gap) + (1466 - 1422) * var(--ft));
-  width: calc(232 * var(--ft));
-  height: calc(166 * var(--ft));
-  padding-top: calc(38.5 * var(--ft));
-  background: var(--color-map-box);
-  color: var(--color-map-box-text);
-  font-size: calc(24 * var(--ft));
-  line-height: 1;
-}
-
-.page .connections__title {
-  position: absolute;
-  top: calc(7 * var(--ft));
-  right: calc(7 * var(--ft));
-  text-box: trim-both cap alphabetic;
-}
-
-/* "email copied!": right of the card, level with the Email row. */
-.page .connections__toast {
-  position: absolute;
-  top: calc(49 * var(--ft));
-  left: calc(100% + 12 * var(--ft));
-  font-size: calc(16 * var(--ft));
-  color: var(--color-text);
-  white-space: nowrap;
-  text-box: trim-both cap alphabetic;
-  opacity: 0;
-  visibility: hidden;
-}
-
-.connections__row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: calc(31 * var(--ft));
-  padding: 0 calc(7 * var(--ft)) 0 calc(8 * var(--ft));
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  text-decoration: none;
-  transition: color 0.15s ease-out;
-}
-
-.connections__icon {
-  flex: none;
-  width: calc(21 * var(--ft));
-  height: calc(21 * var(--ft));
-}
-
-.connections__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* Hover (user request: no sound, no grow): the logo (currentColor) and the
-   label turn orange. */
-.connections__row:focus-visible {
-  color: var(--color-orange);
-}
-
-@media (hover: hover) {
-  .connections__row:hover {
-    color: var(--color-orange);
-  }
-}
-
-.connections__label {
-  text-box: trim-both cap alphabetic;
 }
 
 /* ---- Compact layout (global.css): the footer stacks: the cat, "Let's
@@ -190,7 +117,7 @@
     margin-top: 32px;
   }
 
-  .connections {
+  .site-footer .connections {
     position: relative;
     left: auto;
     top: auto;
