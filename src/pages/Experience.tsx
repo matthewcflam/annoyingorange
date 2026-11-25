@@ -1,166 +1,114 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import PaperSheet from "./paper/PaperSheet";
 import StationLayout from "./StationLayout";
-import ResponsivePicture from "./ResponsivePicture";
+import ExperienceList from "./ExperienceList";
 import { JOBS, EXTRAS, type Job } from "../content/experience";
+import { JOB_PHOTOS } from "../content/experiencePhotos";
 import { revealOnScroll } from "../lib/scrollReveal";
-import { gsap } from "../lib/gsap";
-import { isCompact, pxScale } from "../lib/frame";
-import { prefersReducedMotion } from "../lib/motion";
-import { whenPageShown } from "../lib/pageReveal";
-import { isUnderPointer } from "../lib/pointer";
-import { EXPERIENCE } from "../config/timings";
-import line1 from "../../assets-src/svg/line1.svg";
-import line2 from "../../assets-src/svg/line2.svg";
-import line3 from "../../assets-src/svg/line3.svg";
+import { useScrollIndex } from "../lib/useScrollIndex";
+import { PROJECT } from "../config/timings";
 import "./station.css";
 
-/** About's hand-drawn dashes, recycled down each job's points. */
-const DASHES = [
-  { src: line1, mod: "" },
-  { src: line2, mod: " station-dash--mid" },
-  { src: line3, mod: " station-dash--thin" },
-];
+const IDS = JOBS.map((j) => j.id);
 
-/** Show or hide a job's photos (the later one lands on top, second). */
-function setPhotos(els: HTMLElement[], on: boolean) {
-  if (prefersReducedMotion()) {
-    gsap.set(els, { autoAlpha: on ? 1 : 0 });
-    return;
-  }
-  gsap.to(
-    els,
-    on
-      ? {
-          autoAlpha: 1,
-          scale: 1,
-          y: 0,
-          duration: EXPERIENCE.PHOTO_IN,
-          ease: EXPERIENCE.PHOTO_EASE,
-          stagger: EXPERIENCE.PHOTO_STAGGER,
-          overwrite: "auto",
-        }
-      : {
-          autoAlpha: 0,
-          scale: EXPERIENCE.PHOTO_SCALE_FROM,
-          y: EXPERIENCE.PHOTO_Y * pxScale(),
-          duration: EXPERIENCE.PHOTO_OUT,
-          ease: "power2.in",
-          overwrite: "auto",
-        },
+/** A job's taped photos (content/experiencePhotos.ts): a box anchored to column `col` (`--k` columns
+ *  right of the job's own), the prints and tape placed by their centres. */
+function JobPhotos({ job }: { job: Job }) {
+  const p = JOB_PHOTOS[job.id];
+  const shifted = Array.isArray(p.fit) ? p.fit : [];
+  return (
+    <div
+      className="experience-photos"
+      aria-hidden="true"
+      style={{ "--pfit": p.fit === "cluster" ? 1 : 0, "--dy": p.dy, "--w": p.w, "--h": p.h } as CSSProperties}
+    >
+      {p.sheets.map((s) => (
+        <PaperSheet
+          key={s.id}
+          sheet={s}
+          style={{
+            "--cx": s.cx, "--cy": s.cy, "--w": s.w, "--h": s.h, "--r": `${s.rotate}deg`,
+            "--shift": shifted.includes(s.id) ? 1 : 0,
+          } as CSSProperties}
+        />
+      ))}
+    </div>
   );
 }
 
-const noHover = () => window.matchMedia("(hover: none)").matches;
-
-/**
- * One job: a full-width grid row from its header's top to the foot of its
- * copy. The company and date sit in columns 1–2, the role and points in 3–4; the photos show only while the
- * cursor is over the band or a shown photo (a tap toggles them on touch
- * screens).
- */
-function JobRow({ job }: { job: Job }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const shown = useRef(false);
-  const hasPhotos = job.photos.length > 0;
-
-  useLayoutEffect(() => {
-    if (!hasPhotos) return;
-    const els = photoRefs.current.filter((el): el is HTMLDivElement => el !== null);
-    if (!prefersReducedMotion()) {
-      gsap.set(els, { scale: EXPERIENCE.PHOTO_SCALE_FROM, y: EXPERIENCE.PHOTO_Y * pxScale() });
-    }
-    return () => {
-      gsap.killTweensOf(els);
-    };
-  }, [hasPhotos]);
-
-  const toggle = useCallback(
-    (on: boolean) => {
-      // Compact layout: the photos are an always-shown strip (station.css).
-      if (!hasPhotos || isCompact() || shown.current === on) return;
-      shown.current = on;
-      setPhotos(
-        photoRefs.current.filter((el): el is HTMLDivElement => el !== null),
-        on,
-      );
-    },
-    [hasPhotos],
-  );
-
-  // The page can appear under a cursor that isn't moving, which fires no
-  // pointerenter: open the job it's already resting on.
-  useEffect(() => {
-    if (!hasPhotos) return;
-    let live = true;
-    void whenPageShown().then(() => {
-      if (live && isUnderPointer(sectionRef.current!)) toggle(true);
-    });
-    return () => {
-      live = false;
-    };
-  }, [hasPhotos, toggle]);
-
+/** One job, placed on the 9-column grid where Figma staggers it (three
+ *  columns from `col`, `drop` below its row's top): the company, the role
+ *  and date in grey, then the points, and its taped photos (placed from
+ *  their own column, station.css). */
+function JobSection({ job, ref }: { job: Job; ref: (el: HTMLElement | null) => void }) {
+  const p = JOB_PHOTOS[job.id];
   return (
     <section
-      ref={sectionRef}
-      className="experience__job"
-      onPointerEnter={hasPhotos ? (e) => e.pointerType !== "touch" && toggle(true) : undefined}
-      onPointerLeave={hasPhotos ? (e) => e.pointerType !== "touch" && toggle(false) : undefined}
-      onClick={hasPhotos ? () => noHover() && toggle(!shown.current) : undefined}
+      ref={ref}
+      id={job.id}
+      className="experience-job"
+      aria-labelledby={`job-${job.id}`}
+      data-wrap={p.fit === "cluster" ? "" : undefined}
+      style={{
+        "--col": job.col, "--row": job.row, "--drop": job.drop, "--ph": p.dy + p.h,
+        "--pk": p.col - job.col, "--pdx": p.dx, "--pw": p.w,
+      } as CSSProperties}
     >
-      <div className="experience__company" data-reveal>
-        <p className="experience__title">{job.company}</p>
-        <p className="experience__date">{job.date}</p>
-      </div>
-      <div className="experience__text">
-        <h2 className="experience__role" data-reveal>
-          {job.role}
+      <div className="experience-job__head">
+        <h2 id={`job-${job.id}`} className="experience-job__company">
+          {job.company}
         </h2>
-        {job.body.map((para, i) => (
-          <p key={para} className="experience__para" data-reveal>
-            <img className={"station-dash" + DASHES[i % 3].mod} src={DASHES[i % 3].src} alt="" />
-            {para}
-          </p>
+        <p className="experience-job__role">
+          {job.role}
+          <br />
+          {job.date}
+        </p>
+      </div>
+      <div className="experience-job__points">
+        {job.body.map((para) => (
+          <p key={para}>{para}</p>
         ))}
       </div>
-      {job.photos.map((p, i) => (
-        <div
-          key={p.picture.img.src}
-          ref={(el) => {
-            photoRefs.current[i] = el;
-          }}
-          className="experience__photo"
-          style={{ "--x": p.x, "--dy": p.dy, "--w": p.w, "--h": p.h } as CSSProperties}
-        >
-          <ResponsivePicture picture={p.picture} alt={p.alt} eager sizes={p.sizes} />
-        </div>
-      ))}
+      <JobPhotos job={job} />
     </section>
   );
 }
 
-/** Experience: jobs on the grid, then the extras, then the site footer.
- *  Everything fades up as it's scrolled into view (lib/scrollReveal.ts). */
+/**
+ * Experience (Figma "Experience Final"): three jobs staggered across the
+ * grid, then the site footer. The index (ExperienceList.tsx) sits fixed
+ * under "Matthew Lam" in the page header, like the Projects list; its extra rows
+ * (Aquatics, Geering Up) have no section. Everything fades up as it's
+ * scrolled into view (lib/scrollReveal.ts).
+ */
 export default function Experience() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const blocks = useRef(new Map<string, HTMLElement>());
+  const { active, select } = useScrollIndex(IDS, blocks, rootRef, {
+    sound: "project.select",
+    duration: PROJECT.SCROLL_TO,
+    ease: PROJECT.SCROLL_TO_EASE,
+  });
 
   useLayoutEffect(() => revealOnScroll([...rootRef.current!.querySelectorAll<HTMLElement>("[data-reveal]")]), []);
 
   return (
-    <StationLayout className="station-page experience" rootRef={rootRef} bar>
-      <div className="station-grid experience__list">
+    <StationLayout
+      className="station-page experience"
+      rootRef={rootRef}
+      nav={<ExperienceList rows={JOBS} extras={EXTRAS} active={active} onSelect={select} />}
+    >
+      <div className="experience__jobs">
         {JOBS.map((job) => (
-          <JobRow key={job.company} job={job} />
+          <JobSection
+            key={job.id}
+            job={job}
+            ref={(el) => {
+              if (el) blocks.current.set(job.id, el);
+              else blocks.current.delete(job.id);
+            }}
+          />
         ))}
-        <div className="experience__extras-group">
-          <h2 className="page-heading experience__extras" data-reveal>
-            EXTRAS
-          </h2>
-          {EXTRAS.map((job) => (
-            <JobRow key={job.company} job={job} />
-          ))}
-        </div>
       </div>
     </StationLayout>
   );

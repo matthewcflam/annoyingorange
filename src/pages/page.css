@@ -86,17 +86,17 @@
   pointer-events: none;
 }
 
-/* Section headings (TOOLS, DESCRIPTION, EXTRAS) are orange. */
+/* Section headings (TOOLS) are orange. */
 .page-heading {
   color: var(--color-orange);
 }
 
-/* Body text in Nunito Medium (tokens.css --font-text): the About and
+/* Body text in Nunito Light (tokens.css --font-text): the About and
    Experience copy and the project body (tools, taglines, descriptions,
    media labels). The headings (and the project names) stay Helvetica Rounded Bold; so do the header, the
    project list and the footer, which sit outside these blocks. */
 .page .about__copy,
-.page .experience__list,
+.page .experience__jobs,
 .page .project__body {
   font-family: var(--font-text);
   font-weight: var(--weight-text);

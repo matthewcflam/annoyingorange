@@ -182,7 +182,7 @@ export const FROST = {
   LIGHT_S: 1.0,
 } as const;
 
-/** Experience (pages/Experience.tsx). Seconds unless noted. */
+/** Scroll reveals on the station pages (lib/scrollReveal.ts). Seconds unless noted. */
 export const EXPERIENCE = {
   /** Scroll reveal (lib/scrollReveal.ts): each element fades up once as it
    *  enters the window. Rise in mockup px. */
@@ -197,15 +197,6 @@ export const EXPERIENCE = {
    *  not a margin above the bottom edge: elements at the page's foot, like
    *  the footer, could never scroll past such a line.) */
   REVEAL_THRESHOLD: 0.25,
-  /** Hover photos: in while the cursor is over a job, out when it leaves. */
-  PHOTO_IN: 0.45,
-  PHOTO_OUT: 0.25,
-  /** The photo on top lands this much after the one below. */
-  PHOTO_STAGGER: 0.07,
-  /** Photos grow from this scale and rise PHOTO_Y mockup px. */
-  PHOTO_SCALE_FROM: 0.94,
-  PHOTO_Y: 12,
-  PHOTO_EASE: "power3.out",
 } as const;
 
 /**
@@ -269,6 +260,15 @@ export const PROJECT = {
   CAT_DRAW_EASE: "power2.inOut",
   /** Connections rows: the logo grows on hover, like a station dot. */
   ROW_HOVER_SCALE: 1.2,
+} as const;
+
+/** Experience index (pages/ExperienceList.tsx): "Extras" waits in the
+ *  bottom-left corner and slides up under the jobs once the page is scrolled
+ *  to its end (within END_PX), and back down when it leaves the end. */
+export const EXPERIENCE_EXTRAS = {
+  END_PX: 4,
+  SLIDE: 0.9,
+  SLIDE_EASE: "power3.inOut",
 } as const;
 
 /** Project media (pages/projects/Media.tsx): a collage piece expands to a

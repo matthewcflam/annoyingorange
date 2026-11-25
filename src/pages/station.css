@@ -1,8 +1,9 @@
 /*
  * About and Experience, in the project pages' style (page.css: the shell,
  * Helvetica Rounded Bold at --type-project-body, the 9-column grid). Both
- * lay out on the grid (tokens.css --grid-*): columns 1–2 for side notes
- * (Experience's company and date), 3–4 for copy, 5–8 for photos.
+ * lay out on the grid (tokens.css --grid-*): About's copy in columns 3–4
+ * and its photo in 5–7; Experience's index in 1–2, each job's header in
+ * 3–4 and its points in 5–7.
  */
 .station-page {
   /* The hand-drawn marks (line1–3.svg, anything.svg) are 1:1 at 16px; they
@@ -175,101 +176,259 @@
   will-change: opacity;
 }
 
-/* ---- Experience: one grid row per job. Company and date in columns 1–2,
-   the role and its points in 3–4, the hover photos over 5–8. Each job is a
-   full-width band (the photos' hover area). ---- */
-.experience__list {
-  /* The photo unit: 1px of the Experience mockup, shrinking so the widest
-     collage (435 wide, from x 1263) fits columns 5–8. */
-  --pu: min(1px, (4 * var(--grid-col) + 3 * var(--grid-gutter)) / 435);
-  padding-top: calc(var(--station-head-h) + 120 * var(--pp));
+/* ---- Experience (Figma "Experience Final"): the index fixed on the left
+   in columns 1–2 (ExperienceList.tsx), and three jobs staggered across the
+   grid, each three columns wide: company, role and date in grey, then the
+   points. Figma's sizes are at a 16px body, so text-bound sizes are × --cp. ---- */
+.experience {
+  /* The company: 24 at a 16px body. */
+  --type-project-heading: calc(1.5 * var(--type-project-body));
 }
 
-.experience__job,
-.experience__extras-group {
+/* The index: logo, name, dates (Figma px × --cp); rows 37 apart with a hairline between,
+   like the Projects list. It lives in the fixed page header, under "Matthew Lam"
+   (user request; Figma has it at 489), the same gap as the Projects list. */
+.experience-list {
+  margin-top: calc(10 * var(--pp));
+  /* Logos and row spacing: 7/8 of Figma at a 16px body (user request). */
+  --cp: calc(0.875 * var(--type-project-body) / 16);
+  /* The text matches the Projects list: the body size (user request). */
+  font-size: var(--type-project-body);
+}
+
+.experience-list li {
   position: relative;
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: subgrid;
-  align-items: start;
 }
 
-/* The project sections' gap. */
-.experience__job + .experience__job {
-  margin-top: calc(135 * var(--pp));
+/* "Extras" (index-only rows): in the flow 40 below the jobs, where it slides
+   up to at the end of the page; until then ExperienceList.tsx translates it
+   down to the window's bottom-left corner, the margin below kept clear. */
+.experience-list__extras {
+  margin-top: calc(40 * var(--cp));
+  margin-bottom: var(--grid-margin);
+  will-change: transform;
 }
 
-/* Company (black) over its date (grey), cap tops level with the role's. */
-.experience__company {
-  grid-column: 1 / span 2;
+/* Black, 22 at the index's 16 (~1.4× the rows). */
+.page .experience-list__heading {
+  margin-bottom: calc(6 * var(--cp));
+  color: var(--color-text);
+  font-size: calc(22 * var(--cp));
+  line-height: 1;
   text-box: trim-both cap alphabetic;
 }
 
-.experience__date {
-  color: var(--color-grey);
+/* The extras have no section: plain and grey. */
+.experience-list__link[data-static] {
+  cursor: default;
 }
 
-.experience__text {
-  grid-column: 3 / span 2;
-}
 
-.experience__role {
-  text-box: trim-both cap alphabetic;
-}
-
-/* A blank line under the role and between points (the project paragraphs'). */
-.page .experience__para {
-  position: relative;
-  margin-top: var(--line);
-}
-
-/* The hand-drawn dash hangs left of each point's first line. */
-.experience__para .station-dash {
-  left: calc(-17 * var(--cp));
-}
-
-/* The extras: a project-style heading, then a row each, closer together. */
-.experience__extras-group {
-  margin-top: calc(194 * var(--pp));
-}
-
-.experience__extras {
-  grid-column: 3 / span 2;
-  text-box: trim-both cap alphabetic;
-}
-
-.experience__extras-group .experience__job {
-  margin-top: calc(2 * var(--line));
-}
-
-/* Hover photos: mockup boxes (content/experience.ts: x from the mockup's
-   left, dy from the role's cap top) in --pu, from column 5's left edge.
-   Hidden until the job is hovered (autoAlpha). A shown photo is part of its
-   job's hover area: it sits inside the <section>, so pointerleave waits
-   until the cursor leaves both. Hidden, visibility keeps it out of
-   hit-testing. */
-.experience__photo {
+/* 0.3px hairlines (user request). */
+.experience-list li + li::before {
+  content: "";
   position: absolute;
-  left: calc(4 * var(--col-step) + (var(--x) - 1263) * var(--pu));
-  top: calc(var(--dy) * var(--pu));
-  width: calc(var(--w) * var(--pu));
-  height: calc(var(--h) * var(--pu));
-  border-radius: 5px;
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  will-change: transform, opacity;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-grey);
+  transform: scaleY(0.3);
+  transform-origin: top;
 }
 
-.experience__photo picture,
-.experience__photo img {
+.experience-list__link {
+  display: flex;
+  align-items: center;
+  padding: calc(13 * var(--cp)) 0;
+  color: var(--color-grey);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.experience-list__link:focus-visible {
+  outline: 2px solid var(--color-route);
+  outline-offset: 4px;
+}
+
+.experience-list__link[data-active] {
+  color: var(--color-text);
+}
+
+@media (hover: hover) {
+  a.experience-list__link:hover {
+    color: var(--color-text);
+  }
+}
+
+.experience-list__name,
+.experience-list__date {
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+/* A long name breaks where content/experience.ts says ("
+"). */
+.experience-list__name {
+  line-height: 1.25;
+  white-space: pre-line;
+}
+
+/* The year, styled like the Projects list's (user request): the row's
+   Rounded type and colour (grey, black in focus or on hover), right-aligned
+   to column 2's edge and centred on a two-line name. */
+.experience-list__date {
+  margin-left: auto;
+  padding-left: calc(12 * var(--cp));
+}
+
+/* The logo slot: names start 34 in; each logo's Figma box at --ls (1.3×
+   Figma's, user reference), centred on the row (content/experience.ts). */
+.experience-list__logo {
+  --ls: 1.3;
+  position: relative;
+  flex: none;
+  align-self: stretch;
+  width: calc(34 * var(--cp));
+}
+
+.experience-list__mark {
+  position: absolute;
+  left: calc(var(--x) * var(--ls) * var(--cp));
+  top: 50%;
+  width: calc(var(--w) * var(--ls) * var(--cp));
+  height: calc(var(--h) * var(--ls) * var(--cp));
+  translate: 0 -50%;
+  overflow: hidden;
+}
+
+.experience-list__mark img {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
-.experience__photo img {
-  object-fit: cover;
+/* A sprite: Figma's placement of the image inside the box. */
+.experience-list__mark img[data-crop] {
+  position: absolute;
+  left: calc(var(--cx) * 1%);
+  top: calc(var(--cy) * 1%);
+  width: calc(var(--cw) * 1%);
+  height: calc(var(--ch) * 1%);
+  max-width: none;
+  object-fit: fill;
+}
+
+/* The jobs on the 9-column grid, the first cap top at 143 (Figma). EnerSys
+   has row 1; Sailbot and TQD share row 2 in separate columns, each dropped
+   to its Figma cap top (content/experience.ts), so however the text wraps
+   nothing overlaps. The footer's cat lands ~161 under TQD's last line. */
+.experience__jobs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-items: start;
+  padding: calc(143 * var(--cp)) var(--grid-margin) calc(54 * var(--cp));
+}
+
+.experience-job {
+  position: relative;
+  grid-column: var(--col) / span 3;
+  grid-row: var(--row);
+  margin-top: calc(var(--drop) * var(--cp));
+  /* The row reaches the foot of the job's photos (--ph below its cap top),
+     so the next row's drop is measured from whichever ends lower. */
+  min-height: calc(var(--ph) * var(--cp));
+  /* Lets the photos (and the text beside them) measure columns in cqw. */
+  container-type: inline-size;
+}
+
+/* Column 9 stays empty (user request; content/experiencePhotos.ts `fit`).
+   Measured from the job's left: one column (--cw), the photo cluster's Figma
+   left edge (--photo-at, --pk columns right of the job's first, --pdx past
+   it), column 8's right edge (--room), and how far the cluster (--pw wide,
+   its rotated bounds) would cross it (--over). Defined on the children so
+   cqw resolves against the job. */
+.experience-job > * {
+  --cw: calc((100cqw - 2 * var(--grid-gutter)) / 3);
+  --photo-at: calc(var(--pk) * (var(--cw) + var(--grid-gutter)) + var(--pdx) * var(--cp));
+  --room: calc((9 - var(--col)) * var(--cw) + (8 - var(--col)) * var(--grid-gutter));
+  --over: max(0px, var(--photo-at) + var(--pw) * var(--cp) - var(--room));
+}
+
+/* A job whose whole cluster slides left (TQD): its text ends the EnerSys
+   text-to-photo gap (a gutter + 16.67) before the photo. */
+.experience-job[data-wrap] > :is(.experience-job__head, .experience-job__points) {
+  max-width: min(100%, var(--photo-at) - var(--over) - var(--grid-gutter) - 16.67 * var(--cp));
+}
+
+/* ---- A job's taped photos (Figma "Experience Final"; content/experience.ts),
+   styled like home's prints (paper/paper.css: 80% opacity, the orange tint,
+   the tape and the shadows). The box is anchored to its own column, --pk
+   columns right of the job's first (--photo-at above), --pdx past that edge
+   (less --over when the whole cluster fits, `--pfit`; or only the `--shift`
+   sheets move) and --dy below
+   the company's cap top (the section's top, trimmed to the cap). It takes no
+   space, so the text flows as before. Sizes are Figma px × --pu. ---- */
+.experience-photos {
+  --pu: var(--cp);
+  position: absolute;
+  left: calc(var(--photo-at) - var(--pfit) * var(--over));
+  top: calc(var(--dy) * var(--pu));
+  width: calc(var(--w) * var(--pu));
+  height: calc(var(--h) * var(--pu));
+  pointer-events: none;
+}
+
+.experience-photos .paper {
+  --ps-u: var(--pu);
+  left: calc((var(--cx) - var(--w) / 2) * var(--pu) - var(--shift) * var(--over));
+  top: calc((var(--cy) - var(--h) / 2) * var(--pu));
+  width: calc(var(--w) * var(--pu));
+  height: calc(var(--h) * var(--pu));
+  rotate: var(--r);
+}
+
+.page .experience-job__company {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: var(--type-project-heading);
+  line-height: 1.05;
+  letter-spacing: -0.08em;
+  text-box: trim-both cap alphabetic;
+}
+
+/* The role, then the date: Rounded 14 in grey, cap tops 30 and 48 under
+   the company's (Figma 173 / 191 from 143). */
+.page .experience-job__role {
+  margin-top: calc(12 * var(--cp));
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: calc(14 * var(--cp));
+  line-height: calc(18 * var(--cp));
+  letter-spacing: -0.04em;
+  color: var(--color-grey);
+  text-box: trim-both cap alphabetic;
+}
+
+/* The points: cap top 32 under the date's (Figma 223). */
+.experience-job__points {
+  margin-top: calc(22 * var(--cp));
+  text-box: trim-both cap alphabetic;
+}
+
+/* Balanced lines, as Figma sets them (text-balance): shorter lines that
+   keep clear of the photos beside them. */
+.experience-job__points p {
+  text-wrap: balance;
+}
+
+.page .experience-job__points p + p {
+  margin-top: var(--line);
 }
 
 /* ---- Compact layout (global.css): one column under the (scrolling)
@@ -299,74 +458,49 @@
     width: min(100%, 400px, 55svh * var(--w) / var(--h));
   }
 
-  /* Experience: each job is the role, the company and date, its photos (a
-     strip, always shown: touch has no hover; user decision), then the
-     points. */
-  .experience__list {
-    padding-top: 40px;
+  /* Experience: the index under the name, scrolling with the page; each job
+     stacks: company, role and date, then the points. */
+  .experience {
+    --type-project-heading: 24px;
   }
 
-  .experience__job {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 8px;
+  .experience-list {
+    margin-top: 20px;
+    --cp: 1px;
+    /* The Projects list's size (the compact body, 24). */
+    font-size: var(--type-project-body);
   }
 
-  .experience__extras-group {
+  .experience__jobs {
     display: block;
+    width: var(--compact-w);
+    margin: 0 auto;
+    padding: 56px 0 72px;
+  }
+
+  .experience-job {
+    margin-top: 0;
+    min-height: 0;
+  }
+
+  .experience-job > * {
+    --over: 0px;
+  }
+
+  .experience-job[data-wrap] > :is(.experience-job__head, .experience-job__points) {
+    max-width: none;
+  }
+
+  .experience-job + .experience-job {
     margin-top: 72px;
   }
 
-  .experience__job > *,
-  .experience__text > * {
-    flex: 0 0 100%;
-  }
-
-  /* The role and points join the job's flex row, so the photos can sit
-     between them. */
-  .experience__text {
-    display: contents;
-  }
-
-  .experience__job + .experience__job,
-  .experience__extras-group .experience__job {
-    margin-top: 48px;
-  }
-
-  .experience__role {
-    order: 1;
-  }
-
-  .experience__company {
-    order: 2;
-  }
-
-  /* The gutter can't hold a hanging dash: indent the points (About's list). */
-  .page .experience__para {
-    order: 4;
-    margin-top: 8px;
-    padding-left: calc(15 * var(--cp));
-  }
-
-  .experience__para .station-dash {
-    left: calc(2 * var(--cp));
-  }
-
-  /* !important: the hover tweens (Experience.tsx) leave inline styles. */
-  .experience__photo {
+  /* The photos follow the points, centred, scaled to fit the column. */
+  .experience-photos {
+    --pu: min(1px, var(--compact-w) / var(--w));
     position: relative;
     left: auto;
     top: auto;
-    order: 3;
-    flex: 0 1 auto;
-    width: auto;
-    max-width: calc(50% - 4px);
-    height: calc(120 * var(--m));
-    aspect-ratio: var(--w) / var(--h);
-    margin-top: 8px;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
+    margin: var(--line) auto 0;
   }
 }

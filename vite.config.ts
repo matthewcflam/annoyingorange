@@ -21,6 +21,9 @@ const PRESETS: Record<string, Record<string, string>> = {
   collage: { w: '600;1000;1600;2400', format: 'avif;webp', quality: '72', as: 'picture' },
   // A <video> poster: one URL (the attribute takes no srcset), wide enough
   // for the expanded lightbox.
+  // Experience's index logos: ~14–26 CSS px boxes (the TQD sprite shows a
+  // third of its width), so one 160px WebP covers 3x screens.
+  logo: { w: '160', format: 'webp', quality: '85' },
   poster: { w: '1280', format: 'webp', quality: '75' },
   // Home's paper (pages/paper/sheets.ts). The texture is baked in at build
   // time (scripts/paperBake.ts), so the page ships plain images.

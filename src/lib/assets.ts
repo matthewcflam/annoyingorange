@@ -5,7 +5,7 @@
  */
 import { PROJECTS, type CollageItem } from "../content/projects";
 import { ABOUT_PHOTOS } from "../content/aboutPhotos";
-import { EXPERIENCE_PHOTOS } from "../content/experience";
+import { LOGO_URLS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
 import { isCompact } from "./frame";
 import { loadTextFont } from "./fonts";
@@ -43,13 +43,11 @@ interface RouteImage {
   sizes: string;
 }
 
-/** Images per route that must be decoded before it shows (above the fold,
- *  or Experience's hover photos, which must not pop in). */
+/** Images per route that must be decoded before it shows (above the fold). */
 function routeImages(path: string): RouteImage[] {
   // Home: the prints, and the posters unless compact hides them.
   if (path === "/") return HOME_PICTURES.filter((p) => !(isCompact() && p.sizes === POSTER_SIZES));
   if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
-  if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   // Projects: the first project's collage, on screen as the page shows.
   if (path === "/projects")
     return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it) }] : []));
@@ -101,6 +99,7 @@ export function decodeUrl(src: string): Promise<void> {
 /** Plain image URLs per route (decoded alongside its pictures). */
 function routeUrls(path: string): string[] {
   if (path === "/") return HOME_URLS;
+  if (path === "/experience") return LOGO_URLS;
   return path === "/about" ? ABOUT_PHOTOS.map((p) => p.frostLight) : [];
 }
 

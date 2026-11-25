@@ -12,7 +12,8 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `home-skyline.svg` | home | the orange Vancouver skyline line drawing; its lines draw themselves from the peak down during the intro | 664×143, 507 stroked paths (1px, `#FF7700`; stroke set on the root) in two groups: `[data-part=mountain]` (73 ridge lines, Figma Group 116) and `[data-part=city]` (434, Group 117). Exported from Figma "Home Page Final" (Group 118), background rects removed, coordinates rounded to 2 decimals. Fetched and inlined at runtime (not `?raw`, to keep it out of the JS bundle) |
 | `line1.svg`, `line2.svg`, `line3.svg` | About | hand-drawn list dashes, one per list item, static | 8×2 / 8×2 / 8×1, `#FF7700`, drawn 1:1 |
 | `anything.svg` | About | the word "anything" inline in the Connect line, raised above the text, static | 59×16, `#FF7700`, drawn 1:1 |
-| `extras.svg` | Experience | the hand-drawn word "extras" above the extra jobs, static | 126×34, `#FF7700`, drawn 1:1, right edge at x 419 |
+| `extras.svg` | (unused) | the old hand-drawn "extras" (replaced by `extras-final.svg`) | 126×34, `#FF7700` |
+| `extras-final.svg` | (unused) | the hand-drawn "Extras" (dropped from the updated Figma "Experience Final") (Figma "Experience Final", its 10 strokes combined, positions kept) | 219.4×56.45, `#FF7700`, 10px strokes |
 | `portfolio-scribble.svg`, `new-portfolio.svg`, `new-oyster.svg`, `new-mango.svg` | (unused) | the old Map pill squiggle and project-list scribbles | **Unused** since the Projects redesign |
 | `project-smiley.svg` | Projects (ReMind) | the orange hand-drawn smiley beside ReMind's photos, static | 64×72, 3 stroked paths, `#FF7700`, 10px stroke, combined from Figma "Project Final" Vectors 839–841 |
 | `project-heart.svg` | Projects (This Portfolio) | the orange heart scribble over the portfolio pieces, static | 145×122, 1 stroked path, `#FF7700`, 2px stroke, Figma "Project Final" Vector 300 |
@@ -30,18 +31,24 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `oyster-news-paper.png` | Projects (Oyster News collage) | the newspaper page behind the screencast placeholder | 876×1151 (image 115). `?collage` |
 | `portfolio-1.png` | Projects (This Portfolio collage) | the Figma board | 1395×899 (image 146). `?collage` |
 | `home-photo.png` | home | the three taped prints (one photo, cropped alike): thumbs up by the water | 2048×1536, from Figma "Home Page Final" (image 122). `?print` (AVIF/WebP 400/800/1200) |
-| `tape-long.png`, `tape-short.png` | home | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
+| `tape-long.png`, `tape-short.png` | home (`tape-short` also holds the Experience photos) | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
 | `tape-skyline.png` | home | the strip holding the skyline's sheet (Figma "tape1", 452:4941) | 320 wide, cut from the same tape sheet at Figma's crop. Baked like the other tape |
 | `paper-sheet.png` | home | a stub (8×8 white) for the skyline's blank sheet: the `?sheet` preset fills it with `--paper-sheet` and bakes the fibre in (scripts/paperBake.ts) | not art; don't replace |
 | `texture.png` | home | faint paper grain over the taped prints | |
 | `oyster-news.png`, `mango.png`, `portfolio-orange.png` | (unused) | the old article heroes, the draggable orange | **Unused** since the Projects redesign |
 | `me-final.png` | About | the photo: thumbs up on the seawall | 2134×2222. Box (941, 278) 447×465 in `About (6).png` |
-| `enersys1.png` | Experience (EnerSys) | hover photo: selfie by the EnerSys logo | 2305×1728. Box (1288, header cap −45) 235×176 in `Experience (2).png` |
-| `enersys2.png` | Experience (EnerSys) | hover photo: meeting-room demo, on top | 2736×2060. Box (1432, +55) 229×173 |
-| `sailbot1.png` | Experience (UBC Sailbot) | hover photo: the Sailbot logo | 1612×1612. Box (1547, −49) 128×128 |
-| `sailbot2.png` | Experience (UBC Sailbot) | hover photo: the team, on top | 3044×2283. Box (1298, +42) 268×201 |
-| `tqd.png` | Experience (Third Quadrant Design) | hover photo: the TQD logo | 2050×988. Box (1263, +11) 224×108 (`Experience (3).png`) |
-| `tqd2.png` | Experience (Third Quadrant Design) | hover photo: the Poetry Night competition board, over the logo | 4680×3300. Box (1395, +103) 303×214 (`Experience (3).png`) |
+| `enersys1.png` | Experience | taped photo beside EnerSys (Figma "Experience Final" 235×176; was a hover photo): selfie by the EnerSys logo | 2305×1728. Box (1288, header cap −45) 235×176 in `Experience (2).png` |
+| `enersys2.png` | Experience | taped photo beside EnerSys, over the selfie (229×173, turned 5.34°): meeting-room demo | 2736×2060. Box (1432, +55) 229×173 |
+| `sailbot1.png` | (unused) | hover photo: the Sailbot logo | 1612×1612. Box (1547, −49) 128×128 |
+| `sailbot2.png` | Experience | taped photo left of Sailbot (215×162, turned −3.14°): the team | 3044×2283. Box (1298, +42) 268×201 |
+| `tqd.png` | (unused) | hover photo: the TQD logo | 2050×988. Box (1263, +11) 224×108 (`Experience (3).png`) |
+| `tqd2.png` | (unused) | hover photo: the Poetry Night competition board, over the logo | 4680×3300. Box (1395, +103) 303×214 (`Experience (3).png`) |
+| `tqd-team.jpg` | Experience | taped photo beside TQD (349×183, turned 1.54°): the team at a table | 3841×2011, downloaded from Figma (IMG_7757), EXIF/GPS stripped |
+| `enersys-logo.png` | Experience | index logo, EnerSys | 447×447, shown in a 39×39 box at x −9 (Figma px at a 16px body) |
+| `sailbot-logo.png` | Experience | index logo, UBC Sailbot | 200×200, 21×21 |
+| `tqd-logo.png` | Experience | index logo, Third Quadrant Design: a sprite of the full logo; Figma crops it to the green mark | 2048×2048, 21×27 box, crop 314.93%×245.35% at −8.96%/−66.28% |
+| `aquatic-logo.png` | Experience | index logo, UBC Aquatic Centre (Extras) | 1280×1172, 21×19 |
+| `geering-up-logo.png` | Experience | index logo, UBC Geering Up (Extras) | 447×447, 19×19 at x 1 |
 | `me4.jpg` | About (unused since `About (6)`) | photo: alley by the dumpsters | 2048×1536. Box (1317, 191) 331×303 in `About (4).png` |
 | `me3.jpg` | About (unused) | photo: hoodie against a brick wall | 2048×1536. Box (1022, 283) 225×299 in `About (4).png` |
 | `me1.jpg` | About (unused) | photo: as a kid in a car | 2560×1920, EXIF-rotated to portrait (imagetools outputs it upright). Not in the mockup: box (1423, 564) 225×300 is my placement |
