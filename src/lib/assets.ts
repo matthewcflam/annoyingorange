@@ -6,8 +6,7 @@
 import { PROJECTS, type CollageItem } from "../content/projects";
 import { ABOUT_PICTURES } from "../content/aboutPhotos";
 import { LOGO_URLS } from "../content/experience";
-import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
-import { isCompact } from "./frame";
+import { HOME_PICTURES, HOME_URLS } from "../pages/paper/sheets";
 import { loadTextFont } from "./fonts";
 import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
@@ -51,8 +50,8 @@ interface RouteImage {
 
 /** Images per route that must be decoded before it shows (above the fold). */
 function routeImages(path: string): RouteImage[] {
-  // Home: the prints, and the posters unless compact hides them.
-  if (path === "/") return HOME_PICTURES.filter((p) => !(isCompact() && p.sizes === POSTER_SIZES));
+  // Home: the prints.
+  if (path === "/") return HOME_PICTURES;
   if (path === "/about") return ABOUT_PICTURES;
   // Projects: the first project's collage, on screen as the page shows.
   if (path === "/projects")

@@ -38,15 +38,6 @@
   opacity: var(--photo-opacity);
 }
 
-.paper[data-kind="poster"] {
-  --ps-u: var(--px);
-  box-shadow: var(--paper-shadow-poster);
-}
-
-.paper[data-kind="poster"] .paper__img {
-  opacity: var(--home-poster-opacity);
-}
-
 /* Tape: a torn edge, so its shadow follows the image's alpha. */
 .paper[data-kind="tape"] .paper__img {
   object-fit: fill;

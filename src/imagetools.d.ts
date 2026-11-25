@@ -22,10 +22,6 @@ declare module "*?print" {
   const picture: import("./lib/assets").Picture;
   export default picture;
 }
-declare module "*?homeposter" {
-  const picture: import("./lib/assets").Picture;
-  export default picture;
-}
 /** Tape: `?w=…&paperFibre=…&tape` (the preset name last). A WebP URL. */
 declare module "*&tape" {
   const src: string;

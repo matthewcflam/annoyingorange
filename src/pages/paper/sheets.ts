@@ -1,5 +1,4 @@
 import photo from "../../../assets-src/images/home-photo.png?print";
-import poster from "../../../assets-src/images/project-hero-placeholder.png?homeposter";
 import tapeLong from "../../../assets-src/images/tape-long.png?w=270&paperFibre=135&tape";
 import tapeShort from "../../../assets-src/images/tape-short.png?w=152&paperFibre=76&tape";
 import tapeSkyline from "../../../assets-src/images/tape-skyline.png?w=252&paperFibre=126&tape";
@@ -14,7 +13,7 @@ import type { Picture } from "../../lib/assets";
  * tape's tint) is baked into the files at build time (vite.config.ts presets,
  * scripts/paperBake.ts), so every sheet is a plain image.
  */
-export type SheetKind = "photo" | "poster" | "tape" | "blank";
+export type SheetKind = "photo" | "tape" | "blank";
 
 export interface Sheet {
   id: string;
@@ -24,7 +23,7 @@ export interface Sheet {
   w: number;
   h: number;
   rotate: number;
-  /** Responsive image (photos, posters) with its `sizes`. */
+  /** Responsive image (photos) with its `sizes`. */
   picture?: Picture;
   sizes?: string;
   /** Plain image URL (tape, the blank sheet). */
@@ -41,9 +40,6 @@ const PHOTO_CROP = { x: -0.3058, y: -0.0952, w: 1.5207, h: 1.0952 };
  *  all three share one `sizes`, so they share one download). Compact: ~310px.
  */
 export const PRINT_SIZES = `(max-width: 760px) 310px, (max-aspect-ratio: 1/1) 310px, (max-height: 500px) 310px, ${frameSizes(325)}`;
-
-/** The posters: 445 mockup px (hidden on compact). */
-export const POSTER_SIZES = frameSizes(445);
 
 /** The three prints, back to front, and their tape. */
 export const PHOTO_SHEETS: Sheet[] = [
@@ -70,15 +66,8 @@ export const SKY_TAPE: Sheet = {
   id: "tape-sky", kind: "tape", cx: 578.59, cy: 747.64, w: 126, h: 50, rotate: -1.757, src: tapeSkyline,
 };
 
-/** The two faded project posters (placed by home.css, unrotated). */
-export const POSTER_SHEETS: Sheet[] = [
-  { id: "poster-top", kind: "poster", cx: 0, cy: 0, w: 445, h: 466, rotate: 0, picture: poster, sizes: POSTER_SIZES },
-  { id: "poster-bottom", kind: "poster", cx: 0, cy: 0, w: 445, h: 466, rotate: 0, picture: poster, sizes: POSTER_SIZES },
-];
-
 /** Everything home shows above the fold, for lib/assets.ts to fetch at boot. */
 export const HOME_PICTURES = [
   { picture: photo, sizes: PRINT_SIZES },
-  { picture: poster, sizes: POSTER_SIZES },
 ];
 export const HOME_URLS = [tapeLong, tapeShort, tapeSkyline, sheetPaper];

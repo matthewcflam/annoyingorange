@@ -92,17 +92,20 @@
      --paper-sheet and --tape-tint are baked into the images at build time
      (scripts/paperBake.ts; restart the dev server after changing them); the
      fibre and halftone are PAPER in timings.ts. One small drop shadow,
-     straight down (Figma's 0/4/4), lighter under the faded posters and the
-     thin tape. --ps-u is the sheet's unit (home.css). */
+     straight down (Figma's 0/4/4), lighter under the thin tape. --ps-u is the sheet's unit (home.css). */
   --paper-sheet:   #FBFAF3;
   --photo-opacity: 0.8;
   --about-card-opacity: 0.7; /* About's Connections card on the collage (Figma 70%) */
   --photo-tint:    rgba(255, 119, 0, 0.1);
   --tape-opacity:  0.9;
   --tape-tint:     rgba(255, 140, 30, 0.14);
-  --home-poster-opacity: 0.4;
   --paper-shadow:        0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.18);
-  --paper-shadow-poster: 0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.11);
+  /* Home's two tech papers top-left (Figma "Group 123/124"): plain sheets at
+     70%, the list in a pale grey, also at 70%. */
+  --home-tech-paper:   #F4F4F0;
+  --home-tech-opacity: 0.7;
+  --home-tech-ink:     #C4C4C0;
+  --home-tech-shadow:  0 calc(4 * var(--px)) calc(4 * var(--px)) rgb(0 0 0 / 0.25);
   --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
 
   /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */

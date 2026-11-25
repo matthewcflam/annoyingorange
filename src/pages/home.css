@@ -3,7 +3,7 @@
    toward the edges (as the old map did: on a wide screen they spread out),
    while the name and the centre card stay centred. When the window is taller
    than the frame (--px from the width), the composition centres vertically
-   (--hy); the posters stay pinned to the top and bottom edges they bleed off.
+   (--hy); the tech papers stay pinned to the top edge they bleed off.
 
    The pieces share one placement rule (centre or corner × units), so the
    compact layout below can swap the units and origin instead of re-placing
@@ -22,21 +22,49 @@
   overflow: clip;
 }
 
-/* ---- Posters: the project placeholder at 40%, bleeding off the corners ---- */
-.home__poster {
-  width: calc(445 * var(--px));
+/* ---- The tech papers (Figma "Group 123", "Group 124"): two faded sheets
+   bleeding off the top edge, each listing languages / frameworks in Rounded
+   Bold 40. Pinned to the top (no --hy), x on --vx, the rest in --px. The
+   list sits at Figma's text box (line-height "normal": 47 per line). ---- */
+.home__tech {
+  position: absolute;
+  background: var(--home-tech-paper);
+  opacity: var(--home-tech-opacity);
+  box-shadow: var(--home-tech-shadow);
+}
+
+/* 456×466 at (112, -192), unrotated; its list at (145, 41). */
+.home__tech--0 {
+  left: calc(112 * var(--vx));
+  top: calc(-192 * var(--px));
+  width: calc(456 * var(--px));
   height: calc(466 * var(--px));
+  padding: calc(233 * var(--px)) 0 0 calc(33 * var(--px));
 }
 
-.home__poster--top {
-  left: calc(113 * var(--vx));
-  top: calc(-153 * var(--px));
+/* 303.53×291 centred on (381.05, 66.74), turned -2.95°; its list is placed in
+   the sheet's own (turned) axes, so it turns with it. Anchored to the first
+   sheet (117.29 px right of it), so a wide window keeps them overlapped. */
+.home__tech--1 {
+  left: calc(112 * var(--vx) + 117.29 * var(--px));
+  top: calc(-78.76 * var(--px));
+  width: calc(303.53 * var(--px));
+  height: calc(291 * var(--px));
+  padding: calc(110.06 * var(--px)) 0 0 calc(25.41 * var(--px));
+  rotate: -2.95deg;
 }
 
-/* Its top is 150 frame px above the bottom edge (874 in the 1024 frame). */
-.home__poster--bottom {
-  left: calc(1173 * var(--vx));
-  top: calc(100svh - 150 * var(--px));
+.home__tech-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-rounded);
+  font-size: calc(40 * var(--px));
+  font-weight: 700;
+  line-height: 1.175;
+  white-space: nowrap;
+  color: var(--home-tech-ink);
+  opacity: var(--home-tech-opacity);
 }
 
 /* ---- "Matthew Lam" over the card: Rounded Bold 36, -8%, cap top 280 ---- */
@@ -159,7 +187,7 @@
 
 /* ---- Compact layout (global.css): one centred column that scrolls: the
    photos, the name, the card, the glyphs, "who?", then the cat beside the
-   skyline. No posters. ---- */
+   skyline. No tech papers. ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   .home {
     --col: min(var(--compact-w), 444px);
@@ -179,7 +207,7 @@
     padding: calc(28 * var(--m)) var(--gutter) calc(48 * var(--m));
   }
 
-  .home__poster {
+  .home__tech {
     display: none;
   }
 

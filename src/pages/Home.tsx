@@ -11,7 +11,7 @@ import DrawnCat from "../chrome/DrawnCat";
 import { attachSkyline } from "./skylineDraw";
 import { loadSkyline, skylineMarkup } from "../lib/assets";
 import PaperSheet from "./paper/PaperSheet";
-import { POSTER_SHEETS, SKY_SHEET, SKY_TAPE } from "./paper/sheets";
+import { SKY_SHEET, SKY_TAPE } from "./paper/sheets";
 import "./home.css";
 
 /** Dev only: /?spray-debug shows the sprayPace tuning overlay (never shipped). */
@@ -20,12 +20,19 @@ const SprayDebug =
     ? lazy(() => import("../spray/SprayDebug"))
     : null;
 
+/** The tech papers' lists, back to front (Figma "Group 123", "Group 124"). */
+const TECH_PAPERS = [
+  ["Python", "TypeScript", "C#", "SQL"],
+  ["React", "Node.js", ".NET"],
+];
+
 /**
  * Home (Figma "Home Page Final", 1767×1024): "Matthew Lam" over the centre
  * card (the Map card, pinned open: keychain/MapBox.tsx variant="home"), the
  * social glyphs and sound toggle beside an orange cat, the Vancouver skyline,
- * taped photos (HomePhotos.tsx), two faded project posters bleeding off the
- * corners (all paper: paper/PaperSheet.tsx), and "who?" sprayed in orange. The skyline and "who?" replay on click.
+ * taped photos (HomePhotos.tsx, paper/PaperSheet.tsx), two faded tech papers
+ * bleeding off the top, and "who?" sprayed in orange. The skyline and "who?"
+ * replay on click.
  *
  * The intro on load (chrome/intro.ts) reveals the pieces and opens the card;
  * every later visit shows them finished. Placement is home.css.
@@ -74,8 +81,16 @@ export default function Home() {
 
   return (
     <div ref={setHome} className="home">
-      <PaperSheet sheet={POSTER_SHEETS[0]} className="home__poster home__poster--top" />
-      <PaperSheet sheet={POSTER_SHEETS[1]} className="home__poster home__poster--bottom" />
+      {/* The tech papers (Figma "Group 123/124"), bleeding off the top edge. */}
+      {TECH_PAPERS.map((lines, i) => (
+        <div key={i} className={`home__tech home__tech--${i}`}>
+          <ul className="home__tech-list">
+            {lines.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
 
       <h1 className="home__name">Matthew Lam</h1>
       <div className="home__card">

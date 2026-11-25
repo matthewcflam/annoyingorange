@@ -18,7 +18,7 @@ const BUDGET_KB = {
 };
 
 /** Home's images and the skyline, by source file name. */
-const HOME_ASSETS = ["home-photo", "project-hero-placeholder", "tape-long", "tape-short", "tape-skyline", "paper-sheet", "home-skyline"];
+const HOME_ASSETS = ["home-photo", "tape-long", "tape-short", "tape-skyline", "paper-sheet", "home-skyline"];
 
 const DIST = "dist";
 const ASSETS = join(DIST, "assets");

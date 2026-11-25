@@ -26,7 +26,6 @@ const PRESETS: Record<string, Record<string, string>> = {
   // ~460 on a big screen, so 400/800/1200 covers 1x–2.6x.
   print: { w: '400;800;1200', format: 'avif;webp', as: 'picture' },
   // The faded posters: the source is the 445 px box itself; halftone + fibre.
-  homeposter: { w: '445', format: 'avif;webp', as: 'picture', paperHalftone: '445', paperFibre: '445' },
   // Tape: alpha WebP, warmed by --tape-tint, with fibre. Pass `w` (2x its box)
   // and `paperFibre` (its box width, mockup px) on the import.
   tape: { format: 'webp', quality: '90', paperTint: '--tape-tint' },
