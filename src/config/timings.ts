@@ -262,15 +262,6 @@ export const PROJECT = {
   ROW_HOVER_SCALE: 1.2,
 } as const;
 
-/** Experience index (pages/ExperienceList.tsx): "Extras" waits in the
- *  bottom-left corner and slides up under the jobs once the page is scrolled
- *  to its end (within END_PX), and back down when it leaves the end. */
-export const EXPERIENCE_EXTRAS = {
-  END_PX: 4,
-  SLIDE: 0.9,
-  SLIDE_EASE: "power3.inOut",
-} as const;
-
 /** Project media (pages/projects/Media.tsx): a collage piece expands to a
  *  centred player over the dimmed page. */
 export const MEDIA = {

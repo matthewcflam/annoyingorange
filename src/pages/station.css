@@ -200,30 +200,6 @@
   position: relative;
 }
 
-/* "Extras" (index-only rows): in the flow 40 below the jobs, where it slides
-   up to at the end of the page; until then ExperienceList.tsx translates it
-   down to the window's bottom-left corner, the margin below kept clear. */
-.experience-list__extras {
-  margin-top: calc(40 * var(--cp));
-  margin-bottom: var(--grid-margin);
-  will-change: transform;
-}
-
-/* Black, 22 at the index's 16 (~1.4× the rows). */
-.page .experience-list__heading {
-  margin-bottom: calc(6 * var(--cp));
-  color: var(--color-text);
-  font-size: calc(22 * var(--cp));
-  line-height: 1;
-  text-box: trim-both cap alphabetic;
-}
-
-/* The extras have no section: plain and grey. */
-.experience-list__link[data-static] {
-  cursor: default;
-}
-
-
 /* 0.3px hairlines (user request). */
 .experience-list li + li::before {
   content: "";

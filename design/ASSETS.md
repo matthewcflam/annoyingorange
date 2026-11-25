@@ -47,8 +47,8 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `enersys-logo.png` | Experience | index logo, EnerSys | 447×447, shown in a 39×39 box at x −9 (Figma px at a 16px body) |
 | `sailbot-logo.png` | Experience | index logo, UBC Sailbot | 200×200, 21×21 |
 | `tqd-logo.png` | Experience | index logo, Third Quadrant Design: a sprite of the full logo; Figma crops it to the green mark | 2048×2048, 21×27 box, crop 314.93%×245.35% at −8.96%/−66.28% |
-| `aquatic-logo.png` | Experience | index logo, UBC Aquatic Centre (Extras) | 1280×1172, 21×19 |
-| `geering-up-logo.png` | Experience | index logo, UBC Geering Up (Extras) | 447×447, 19×19 at x 1 |
+| `aquatic-logo.png` | (unused) | index logo, UBC Aquatic Centre (Extras, removed) | 1280×1172, 21×19 |
+| `geering-up-logo.png` | (unused) | index logo, UBC Geering Up (Extras, removed) | 447×447, 19×19 at x 1 |
 | `me4.jpg` | About (unused since `About (6)`) | photo: alley by the dumpsters | 2048×1536. Box (1317, 191) 331×303 in `About (4).png` |
 | `me3.jpg` | About (unused) | photo: hoodie against a brick wall | 2048×1536. Box (1022, 283) 225×299 in `About (4).png` |
 | `me1.jpg` | About (unused) | photo: as a kid in a car | 2560×1920, EXIF-rotated to portrait (imagetools outputs it upright). Not in the mockup: box (1423, 564) 225×300 is my placement |

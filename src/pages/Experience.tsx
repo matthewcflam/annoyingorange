@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import PaperSheet from "./paper/PaperSheet";
 import StationLayout from "./StationLayout";
 import ExperienceList from "./ExperienceList";
-import { JOBS, EXTRAS, type Job } from "../content/experience";
+import { JOBS, type Job } from "../content/experience";
 import { JOB_PHOTOS } from "../content/experiencePhotos";
 import { revealOnScroll } from "../lib/scrollReveal";
 import { useScrollIndex } from "../lib/useScrollIndex";
@@ -96,7 +96,7 @@ export default function Experience() {
     <StationLayout
       className="station-page experience"
       rootRef={rootRef}
-      nav={<ExperienceList rows={JOBS} extras={EXTRAS} active={active} onSelect={select} />}
+      nav={<ExperienceList rows={JOBS} active={active} onSelect={select} />}
     >
       <div className="experience__jobs">
         {JOBS.map((job) => (
