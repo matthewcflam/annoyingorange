@@ -28,7 +28,8 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `project-hero-placeholder.png` | home | home's two faded corner posters (the project heroes are gone since "Project Final") | 445×466, exported from the Figma file (image 109). `?homeposter` |
 | `remind-1.jpg`, `remind-2.png`, `remind-3.jpg` | Projects (ReMind collage) | the team with the robot arm; a selfie on the train; the demo table | 3072×4096, 2316×3088, 1280×960, from Figma "Project Final" (image 142, image 143, "1792474850278 1"). `?collage` (AVIF/WebP 400/800/1600) |
 | `mango-1.png`, `mango-2.png`, `mango-3.png` | Projects (Mango collage) | the team with prizes; the pose tracking; the team selfie | 1280×853, 1054×607, 1215×911 (image 145, Mango 1, image 144). `?collage` |
-| `oyster-news-paper.png` | Projects (Oyster News collage) | the newspaper page behind the screencast placeholder | 876×1151 (image 115). `?collage` |
+| `oyster-news-paper.png` | unused (was the Oyster News collage, removed at the user's request) | a newspaper page | 876×1151 (image 115). `?collage` |
+| `oyster-news-map.png` | Projects (Oyster News collage) | screenshot of oysternews.xyz: the world map with headline bubbles | 3824×1896 (1912×948 at 2x), taken 2026-11-25. `?collage` |
 | `portfolio-1.png` | Projects (This Portfolio collage) | the Figma board | 1395×899 (image 146). `?collage` |
 | `home-photo.png` | home | the three taped prints (one photo, cropped alike): thumbs up by the water | 2048×1536, from Figma "Home Page Final" (image 122). `?print` (AVIF/WebP 400/800/1200) |
 | `tape-long.png`, `tape-short.png` | home (`tape-short` also holds the Experience photos) | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |

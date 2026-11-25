@@ -69,13 +69,18 @@ const COLLAGE_PAD = 3;
 
 /** The collage's height in cqw: down to the foot of its lowest print. */
 function collageHeight(items: CollageItem[]): number {
-  return Math.max(...items.map((it) => it.y + (it.w * it.media.h) / it.media.w)) + COLLAGE_PAD;
+  return Math.max(...items.map((it) => it.y + it.w / printAspect(it))) + COLLAGE_PAD;
+}
+
+/** A print's width / height on the page (cropped when `aspect` is set). */
+function printAspect(it: CollageItem): number {
+  return it.aspect ?? it.media.w / it.media.h;
 }
 
 /** A photo print (placeholders are a plain grey sheet, project.css). The
  *  sheet's own box is unused: the piece places it. */
-function printSheet(it: CollageItem, picture: Picture, i: number): Sheet {
-  return { id: `print-${i}`, kind: "photo", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, picture, sizes: collageSizes(it) };
+function printSheet(it: CollageItem, picture: Picture, i: number, scale?: number): Sheet {
+  return { id: `print-${i}`, kind: "photo", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, picture, sizes: collageSizes(it, scale) };
 }
 
 /** Its strip of tape. */
@@ -106,7 +111,10 @@ export default function MediaCollage({ project }: { project: Project }) {
   }, [open]);
 
   return (
-    <div className="collage" style={{ "--collage-h": collageHeight(collage.items) } as CSSProperties}>
+    <div
+      className="collage"
+      style={{ "--collage-h": collageHeight(collage.items), ...(collage.scale && { "--collage-scale": collage.scale }) } as CSSProperties}
+    >
       {collage.items.map((it, i) => (
         <div key={i} className="collage__piece" style={pieceStyle(it, i)} data-open={open === i || undefined}>
           {/* The tilt lives inside the piece (the piece is the layout box). */}
@@ -117,7 +125,7 @@ export default function MediaCollage({ project }: { project: Project }) {
               }}
               type="button"
               className="collage__item"
-              style={{ aspectRatio: `${it.media.w} / ${it.media.h}` }}
+              style={{ aspectRatio: printAspect(it) }}
               aria-haspopup="dialog"
               aria-label={`Expand: ${it.media.label}`}
               data-kind={it.media.kind}
@@ -128,7 +136,7 @@ export default function MediaCollage({ project }: { project: Project }) {
               }}
             >
               {it.media.kind === "image" ? (
-                <PaperSheet sheet={printSheet(it, it.media.picture, i)} />
+                <PaperSheet sheet={printSheet(it, it.media.picture, i, collage.scale)} />
               ) : (
                 <span className="paper collage__blank" data-kind="blank" aria-hidden="true" />
               )}
@@ -164,7 +172,7 @@ export default function MediaCollage({ project }: { project: Project }) {
       {open !== null && (
         <Lightbox
           items={items}
-          previews={collage.items.map((it) => collageSizes(it))}
+          previews={collage.items.map((it) => collageSizes(it, collage.scale))}
           start={open}
           origin={() => pieces.current[open]!}
           rotation={collage.items[open].rotate}

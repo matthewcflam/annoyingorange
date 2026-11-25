@@ -28,14 +28,20 @@ const COLLAGE_OVERSAMPLE = 1.5;
 /** The collage's width on the full layout in the 1640 frame: columns 6–8,
  *  3 columns + 2 gutters (project.css). */
 const COLLAGE_SCALE = 0.75; // --collage-scale in project.css
-const COLLAGE_FRAME_W = ((3 * (1640 - 2 * 15 - 8 * 15)) / 9 + 2 * 15) * COLLAGE_SCALE;
+const COLLAGE_COLUMNS_W = (3 * (1640 - 2 * 15 - 8 * 15)) / 9 + 2 * 15;
 
 /** The collage piece `it`'s `sizes`: its print is `it.w`% of the collage,
- *  which is columns 6–8 (COLLAGE_FRAME_W of the 1640 frame) on the full
+ *  which is `scale` of columns 6–8 (COLLAGE_COLUMNS_W of the 1640 frame) on the full
  *  layout and about the window's width on compact (project.css). */
-export function collageSizes(it: CollageItem): string {
-  const share = (it.w / 100) * COLLAGE_OVERSAMPLE;
-  return `(max-width: 760px) ${(share * 100).toFixed(1)}vw, ${(((share * COLLAGE_FRAME_W) / 1640) * 100).toFixed(1)}vw`;
+export function collageSizes(it: CollageItem, scale = COLLAGE_SCALE): string {
+  const share = (it.w / 100) * COLLAGE_OVERSAMPLE * coverZoom(it);
+  return `(max-width: 760px) ${(share * 100).toFixed(1)}vw, ${(((share * COLLAGE_COLUMNS_W * scale) / 1640) * 100).toFixed(1)}vw`;
+}
+
+/** How much wider than its print a cropped photo is drawn (object-fit: cover). */
+function coverZoom(it: CollageItem): number {
+  const media = it.media.w / it.media.h;
+  return it.aspect && media > it.aspect ? media / it.aspect : 1;
 }
 
 interface RouteImage {
@@ -50,7 +56,7 @@ function routeImages(path: string): RouteImage[] {
   if (path === "/about") return ABOUT_PICTURES;
   // Projects: the first project's collage, on screen as the page shows.
   if (path === "/projects")
-    return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it) }] : []));
+    return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it, PROJECTS[0].collage.scale) }] : []));
   return [];
 }
 

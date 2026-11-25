@@ -10,7 +10,7 @@ import remind3 from "../../assets-src/images/remind-3.jpg?collage";
 import mango1 from "../../assets-src/images/mango-1.png?collage";
 import mango2 from "../../assets-src/images/mango-2.png?collage";
 import mango3 from "../../assets-src/images/mango-3.png?collage";
-import oysterPaper from "../../assets-src/images/oyster-news-paper.png?collage";
+import oysterMap from "../../assets-src/images/oyster-news-map.png?collage";
 import portfolio1 from "../../assets-src/images/portfolio-1.png?collage";
 import smileySvg from "../../assets-src/svg/project-smiley.svg";
 import heartSvg from "../../assets-src/svg/project-heart.svg";
@@ -62,6 +62,9 @@ export interface CollageItem {
   /** The strip holding it, centred `x`% across its top edge, turned `rotate`
    *  more; `long` is the longer strip. */
   tape: { x: number; rotate: number; long?: boolean };
+  /** The print's width / height on the page, when it differs from the media's:
+   *  the photo is cropped to it, centred (the lightbox shows it uncropped). */
+  aspect?: number;
   /** Text written on a placeholder, at this spot (% of the piece). */
   caption?: { text: string[]; x: number; y: number };
 }
@@ -79,6 +82,9 @@ export interface CollageMark {
 /** A project's media, taped prints in columns 6–8 (3–5 when mirrored). */
 export interface Collage {
   items: CollageItem[];
+  /** The collage's share of columns 6–8 (3–5 mirrored), instead of the usual
+   *  --collage-scale (0.75); at most 0.92, so it still ends inside them. */
+  scale?: number;
   marks?: CollageMark[];
 }
 
@@ -220,11 +226,10 @@ export const PROJECTS: readonly Project[] = [
       [t("Claude Code"), t("Figma", true)],
     ],
     poster: { color: "--color-poster-oyster-news", text: [["Worldwide News,", "Mapped"]] },
-    // TODO(open-question #13): the screencast is a placeholder.
     collage: {
+      scale: 0.92,
       items: [
-        { media: photo("A newspaper page", oysterPaper), w: 46, x: 4, y: 2, rotate: -1.8, tape: { x: 50, rotate: -2, long: true } },
-        { media: placeholder("Oyster News screencast", 250, 174), w: 62, x: 36, y: 34, rotate: 2.4, tape: { x: 35, rotate: 7 }, caption: { text: ["future screencast", "of oyster news"], x: 31, y: 41 } },
+        { media: photo("Oyster News, the live map", oysterMap), aspect: 1.55, w: 97, x: 1.5, y: 4, rotate: 1.6, tape: { x: 50, rotate: -3, long: true } },
       ],
     },
     description: [
