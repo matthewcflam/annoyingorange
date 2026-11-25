@@ -322,11 +322,24 @@ export const SCROLL = {
  *  anything clickable. Sizes in screen px (it doesn't scale with the frame). */
 export const CURSOR = {
   DOT_PX: 14,
-  RING_PX: 30,
+  /** The dot grows into this ring over anything clickable (user request). */
+  RING_PX: 24,
   RING_STROKE_PX: 2,
   /** Dot ↔ ring. */
   GROW: 0.2,
   GROW_EASE: "power3.out",
+  /** The action label (data-cursor): its corner sits this far right/below
+   *  the pointer (flipped left/up near the window's edges). Screen px. */
+  LABEL_OFFSET_X: 18,
+  LABEL_OFFSET_Y: 18,
+  /** Kept this far from the window's edges before it flips. */
+  EDGE_PAD: 8,
+  /** Dot → label pop, and back. */
+  LABEL_IN: 0.22,
+  LABEL_OUT: 0.15,
+  LABEL_EASE: "power3.out",
+  /** The label grows from this scale at the pointer corner. */
+  LABEL_FROM_SCALE: 0.6,
 } as const;
 
 /** The scroll thumb (chrome/ScrollBar.tsx) that replaces the native scrollbar

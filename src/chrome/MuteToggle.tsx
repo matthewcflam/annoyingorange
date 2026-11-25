@@ -41,6 +41,7 @@ export default function MuteToggle() {
       className="social-links__icon social-links__icon--sound interactive"
       aria-label="Sound"
       aria-pressed={!muted}
+      data-cursor={muted ? "Sound On" : "Sound Off"}
       aria-keyshortcuts="M"
       title={`Sound ${muted ? "off" : "on"} (M). The iPhone silent switch mutes sound.`}
       onClick={() => toggle(muted)}

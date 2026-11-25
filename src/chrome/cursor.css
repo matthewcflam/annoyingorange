@@ -1,4 +1,4 @@
-/* The cursor (Cursor.tsx). White with difference blending, so it inverts
+/* The cursor (Cursor.tsx). The dot is white with difference blending, so it inverts
    whatever is under it: black on the light home, white on dark station
    pages. It lives in <body>, outside App's root (whose opacity fade makes it
    its own group, which would hide the body colour from the blend). */
@@ -22,4 +22,26 @@ html.has-cursor * {
   pointer-events: none;
   visibility: hidden;
   will-change: transform;
+}
+
+/* The action label (data-cursor): replaces the dot over things that say what
+   a click does. Normal blending, so the orange stays orange. Cursor.tsx
+   places it beside the pointer and flips it near the window's edges. */
+.cursor-label {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  padding: var(--cursor-label-pad);
+  background: var(--cursor-label-bg);
+  color: var(--cursor-label-color);
+  font-family: var(--cursor-label-font);
+  font-weight: 700;
+  font-size: var(--cursor-label-size);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  transform-origin: 0 0;
+  pointer-events: none;
+  will-change: transform, opacity;
 }

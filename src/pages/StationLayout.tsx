@@ -37,6 +37,7 @@ export default function StationLayout({
             href="/"
             className="page__home"
             aria-label="Matthew Lam, home"
+            data-cursor="Go Home"
             onPointerEnter={(e) => e.pointerType !== "touch" && play("link.hover")}
             onClick={(e) => onNavClick(e, "/")}
           >

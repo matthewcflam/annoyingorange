@@ -58,5 +58,5 @@ export default function DrawnCat({ className, drawOnView = false }: { className:
     };
   }, [drawOnView]);
 
-  return <div ref={ref} className={className} data-clickable aria-hidden="true" dangerouslySetInnerHTML={{ __html: catSvg }} />;
+  return <div ref={ref} className={className} data-clickable data-cursor="Redraw" aria-hidden="true" dangerouslySetInnerHTML={{ __html: catSvg }} />;
 }

@@ -49,6 +49,14 @@
   --color-selection:      var(--color-orange);
   --color-selection-text: #FFFFFF;
 
+  /* ---- Cursor label (chrome/Cursor.tsx): what a click will do, in an
+     orange box at 70% (user request; the text stays fully white) ---- */
+  --cursor-label-bg:    color-mix(in srgb, var(--color-orange) 70%, transparent);
+  --cursor-label-color: #FFFFFF;
+  --cursor-label-font:  var(--font-rounded);
+  --cursor-label-size:  16px;
+  --cursor-label-pad:   0.3em 0.5em 0.25em;
+
   /* ---- Transit map ---- */
   --color-route:          #0664DF;  /* spec said ≈#0A64E0; sampled */
   --color-station-fill:   #FFFFFF;

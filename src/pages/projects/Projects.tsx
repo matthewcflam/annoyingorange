@@ -70,6 +70,8 @@ export default function Projects() {
 }
 
 const LINK_LABEL: Record<ProjectLink["kind"], string> = { github: "GitHub", devpost: "Devpost", site: "Website" };
+/** What the cursor says over each link (chrome/Cursor.tsx). */
+const LINK_CURSOR: Record<ProjectLink["kind"], string> = { github: "View GitHub", devpost: "View Devpost", site: "Visit Site" };
 
 /** One project: TOOLS, its name, tagline, awards and links, then its
  *  description, and its media collage. Every other block is mirrored
@@ -114,6 +116,7 @@ function ProjectBlock({ project: p, flip, ref }: { project: Project; flip: boole
                 <a
                   href={link.href}
                   aria-label={`${p.name} on ${LINK_LABEL[link.kind]}`}
+                  data-cursor={LINK_CURSOR[link.kind]}
                   {...(link.href.startsWith("/")
                     ? { onClick: (e: React.MouseEvent) => onNavClick(e, link.href) }
                     : { target: "_blank", rel: "noreferrer" })}

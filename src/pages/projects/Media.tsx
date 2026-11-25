@@ -121,6 +121,7 @@ export default function MediaCollage({ project }: { project: Project }) {
               aria-haspopup="dialog"
               aria-label={`Expand: ${it.media.label}`}
               data-kind={it.media.kind}
+              data-cursor={it.media.kind === "image" ? "View Photo" : it.media.kind === "video" ? "Play Video" : "Expand"}
               onClick={() => {
                 play("project.select");
                 setOpen(i);
@@ -384,17 +385,17 @@ function Lightbox({
 
   return createPortal(
     <div className="lightbox" role="dialog" aria-modal="true" aria-label={items[current.index].label} style={{ "--project-color": color } as CSSProperties}>
-      <div ref={backdropRef} className="lightbox__backdrop" data-clickable onClick={close} />
-      <div ref={frameRef} className="lightbox__frame" onClick={close}>
+      <div ref={backdropRef} className="lightbox__backdrop" data-clickable data-cursor="Close" onClick={close} />
+      <div ref={frameRef} className="lightbox__frame" data-cursor="Close" onClick={close}>
         {leaving.map(renderSlide)}
         {renderSlide(current)}
       </div>
-      <button ref={closeRef} type="button" className="lightbox__close" onClick={close}>
+      <button ref={closeRef} type="button" className="lightbox__close" data-cursor="Close" onClick={close}>
         <span>Close</span>
       </button>
       {n > 1 && (
         <div ref={navRef} className="lightbox__nav">
-          <button type="button" className="lightbox__arrow lightbox__arrow--prev" aria-label="Previous" onPointerEnter={hoverSound} onClick={() => step(-1)}>
+          <button type="button" className="lightbox__arrow lightbox__arrow--prev" aria-label="Previous" data-cursor="Previous" onPointerEnter={hoverSound} onClick={() => step(-1)}>
             <Arrow />
           </button>
           <span className="lightbox__count" aria-live="polite">
@@ -402,7 +403,7 @@ function Lightbox({
               {current.index + 1} / {n}
             </span>
           </span>
-          <button type="button" className="lightbox__arrow lightbox__arrow--next" aria-label="Next" onPointerEnter={hoverSound} onClick={() => step(1)}>
+          <button type="button" className="lightbox__arrow lightbox__arrow--next" aria-label="Next" data-cursor="Next" onPointerEnter={hoverSound} onClick={() => step(1)}>
             <Arrow />
           </button>
         </div>

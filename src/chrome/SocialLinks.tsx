@@ -17,16 +17,16 @@ export default function SocialLinks({ className, children }: { className?: strin
 
   return (
     <div className={`social-links${className ? ` ${className}` : ""}`}>
-      <a className="social-links__icon interactive" href={GITHUB} target="_blank" rel="noopener noreferrer" aria-label="GitHub" onPointerEnter={hover}>
+      <a className="social-links__icon interactive" href={GITHUB} target="_blank" rel="noopener noreferrer" aria-label="GitHub" data-cursor="View GitHub" onPointerEnter={hover}>
         <Icon name="github" tight />
       </a>
-      <a className="social-links__icon interactive" href={LINKEDIN} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" onPointerEnter={hover}>
+      <a className="social-links__icon interactive" href={LINKEDIN} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" data-cursor="View LinkedIn" onPointerEnter={hover}>
         <Icon name="linkedin" tight />
       </a>
-      <button type="button" className="social-links__icon social-links__icon--mail interactive" aria-label={`Copy email address (${EMAIL})`} onPointerEnter={hover} onClick={copyEmail}>
+      <button type="button" className="social-links__icon social-links__icon--mail interactive" aria-label={`Copy email address (${EMAIL})`} data-cursor="Copy Email" onPointerEnter={hover} onClick={copyEmail}>
         <Icon name="mail" tight />
       </button>
-      <a className="social-links__icon social-links__icon--devpost interactive" href={DEVPOST} target="_blank" rel="noopener noreferrer" aria-label="Devpost" onPointerEnter={hover}>
+      <a className="social-links__icon social-links__icon--devpost interactive" href={DEVPOST} target="_blank" rel="noopener noreferrer" aria-label="Devpost" data-cursor="View Devpost" onPointerEnter={hover}>
         <Icon name="devpost" tight />
       </a>
       {children}
