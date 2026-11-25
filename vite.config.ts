@@ -14,6 +14,11 @@ const PRESETS: Record<string, Record<string, string>> = {
   // any image loads; `frostlight` (the mid blur) is a small file.
   frost: { w: '32', blur: '1.6', format: 'webp', quality: '70', inline: '' },
   frostlight: { w: '160', blur: '3', format: 'webp', quality: '70' },
+  // The project collages' photos (content/projects.ts): ~250–420 CSS px in
+  // the page (asked for at 1.5x, since they're rotated; collageSizes()), up
+  // to 60% of the window in the lightbox. Quality is above sharp's AVIF
+  // default (50), which looked soft at these sizes.
+  collage: { w: '600;1000;1600;2400', format: 'avif;webp', quality: '72', as: 'picture' },
   // A <video> poster: one URL (the attribute takes no srcset), wide enough
   // for the expanded lightbox.
   poster: { w: '1280', format: 'webp', quality: '75' },

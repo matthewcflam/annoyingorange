@@ -15,14 +15,12 @@
   --head-clear: var(--tools-stick);
   /* The first project's TOOLS heading + its lines, a body size between groups. */
   --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * var(--type-project-body));
-  /* A project's name: 36 at 16px body (Figma "Project Redesign"). */
-  --type-project-heading: calc(2.25 * var(--type-project-body));
+  /* A project's name: the Experience company size (station.css), 24 at a
+     16px body (user request; was 2.25 × body). */
+  --type-project-heading: calc(1.5 * var(--type-project-body));
   /* Cap top of the first project (its TOOLS and name). 731 in the frame; less on a shorter
      window, so the whole TOOLS list shows before any scrolling. */
   --content-top: clamp(var(--tools-stick) + 66 * var(--pp), 100svh - var(--tools-h) - 24 * var(--pp), 731 * var(--pp));
-  /* The heroes' unit: 1 frame px, shrinking with a narrow window and with
-     the space above the copy. */
-  --hu: min(var(--pp), var(--fx), var(--content-top) / 731);
 }
 
 .project-list__link:focus-visible {
@@ -154,52 +152,6 @@
   display: block;
 }
 
-/* ---- The two tilted heroes, in the space above the copy ----
-   Their boxes (445×466 and 502×525.7) are placed by their centres:
-   (548.9, 469.6) and (1005.6, 259.8) in the frame, i.e. 261.4 and 471.2
-   above the copy's top. Projects.tsx tilts them, settles them in and moves
-   them with the scroll. 40% opacity, as in the frame. */
-.project__heroes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 0;
-  pointer-events: none;
-}
-
-.project-hero {
-  position: absolute;
-  opacity: 0.4;
-  will-change: transform;
-}
-
-.project-hero--0 {
-  left: calc(548.9 * var(--fx) - 222.5 * var(--hu));
-  top: calc(var(--content-top) - (261.4 + 233) * var(--hu));
-  width: calc(445 * var(--hu));
-  height: calc(466 * var(--hu));
-}
-
-.project-hero--1 {
-  left: calc(1005.6 * var(--fx) - 251 * var(--hu));
-  top: calc(var(--content-top) - (471.2 + 262.85) * var(--hu));
-  width: calc(502 * var(--hu));
-  height: calc(525.7 * var(--hu));
-}
-
-.project-hero__tilt,
-.project-hero picture,
-.project-hero img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.project-hero img {
-  object-fit: cover;
-}
-
 /* A page-coloured band behind the header, over columns 1–2, ending half the
    gap above the stick line: a TOOLS pushed out by the next one slides under
    it instead of over the list. Above the body, under the header. */
@@ -221,16 +173,16 @@
   padding: var(--content-top) var(--grid-margin) 0;
 }
 
-/* One project on the 9-column grid: TOOLS (1–2), text (3–4), media (5–7).
-   The gap to the next project is the block's own padding, so its sticky
-   TOOLS holds until the next block arrives: the next TOOLS reaches the
-   stick line just as it pushes this one out. */
+/* One project on the 9-column grid: TOOLS (1–2), text (4–5), collage (6–8);
+   columns 3 and 9 stay empty, so the content sits a column clear of the
+   list and of the right margin (user request).
+   The gap to the next project is the block's own padding. */
 .project-block {
   display: grid;
   grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
   column-gap: var(--grid-gutter);
   align-items: start;
-  padding-bottom: calc(6 * var(--type-project-body));
+  padding-bottom: calc(9 * var(--type-project-body));
 }
 
 .project-block:last-child {
@@ -238,13 +190,11 @@
 }
 
 /* TOOLS: black, or grey for the ones used a little; the heading in the
-   project's colour (its poster's). Locks under the project list. */
+   project's colour (its poster's). Scrolls with the page (user request: was
+   sticky) and slides under .project__band, out of sight behind the list. */
 .project-block__tools {
   grid-column: 1 / span 2;
   grid-row: 1;
-  position: sticky;
-  top: var(--tools-stick);
-  z-index: 1;
   text-box: trim-both cap alphabetic;
 }
 
@@ -262,17 +212,29 @@
   margin-top: var(--type-project-body);
 }
 
-/* The text, columns 3–4, as tall as the media: the intro at the top (cap
-   top level with the media's top), the description at the foot (its last
-   baseline on the media's bottom edge). Taller copy just grows the row. */
+/* The text, columns 4–5 (Figma "Project Final"): the intro, then, two blank
+   lines under the links (user request: was one), the description (no
+   heading, user request). */
 .project-block__text {
-  grid-column: 3 / span 2;
+  grid-column: 4 / span 2;
   grid-row: 1;
-  align-self: stretch;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: calc(2 * var(--line));
+}
+
+/* Every other block is mirrored (Projects.tsx data-flip; user request: the
+   projects zigzag like Experience's jobs): the collage in columns 3–5, its
+   right edge against the text in 6–7 (user request: the mirrored blocks sit
+   one column left of the plain ones' mirror image). */
+.project-block[data-flip] .project-block__text {
+  grid-column: 6 / span 2;
+}
+
+.project-block[data-flip] .collage {
+  grid-column: 3 / span 3;
+  justify-self: end;
+  margin-inline: 0 var(--collage-gap);
 }
 
 .project-block__intro,
@@ -288,9 +250,9 @@
   text-box: trim-both cap alphabetic;
 }
 
-/* The name, then (2 body sizes down) the tagline; a blank line; the awards. */
+/* The name, then (one body size down; user request: was 2) the tagline; a blank line; the awards. */
 .page .project-block__tagline {
-  margin-top: calc(2 * var(--type-project-body));
+  margin-top: var(--type-project-body);
 }
 
 .page .project-block__awards {
@@ -337,30 +299,118 @@
   }
 }
 
-.project-block .media {
-  grid-column: 5 / span 3;
+/* ---- The collage (Media.tsx): columns 6–8 (3–5 when mirrored), the
+   project's pieces as taped prints (pages/paper/) placed by hand,
+   overlapping and a little crooked (user request: no board behind them).
+   Every length is % of the collage's width (content/projects.ts), in
+   cqw, so it scales with the columns; --collage-h (Media.tsx) is the foot of
+   the lowest print. ---- */
+.collage {
+  --ps-u: var(--pp);
+  /* The collage's share of columns 6–8 (user request: smaller photos); the
+     prints, tape and marks all scale with it. Keep COLLAGE_SCALE in
+     lib/assets.ts in step. Compact resets the width to the column. */
+  --collage-scale: 0.75;
+  /* Air between the prints and their text (user request: the gutter alone
+     looked unnatural), as a share of the three columns: off-grid on purpose,
+     but the collage still ends inside them (scale + gap < 100%). */
+  --collage-gap: 8%;
+  width: calc(var(--collage-scale) * 100%);
+  margin-inline: var(--collage-gap) 0;
+  grid-column: 6 / span 3;
   grid-row: 1;
+  position: relative;
+  /* Its own cqw would resolve against an ancestor, so the height is a ratio. */
+  aspect-ratio: 100 / var(--collage-h);
+  container-type: inline-size;
 }
 
-/* ---- Media (Media.tsx): columns 5–7, at its frame aspect ratio ---- */
-.media {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* One print: width and top-left corner in the collage; later prints lie on top. */
+.collage__piece {
+  position: absolute;
+  left: calc(var(--x) * 1cqw);
+  top: calc(var(--y) * 1cqw);
+  width: calc(var(--w) * 1cqw);
+}
+
+/* The tilt, inside the piece (the piece is the layout box). */
+.collage__tilt {
+  position: relative;
+  rotate: var(--r);
+}
+
+.collage__item {
+  position: relative;
+  display: block;
   width: 100%;
-  background: var(--color-media);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--color-home-text);
   font: inherit;
   letter-spacing: inherit;
-  overflow: hidden;
 }
 
-/* Expanded: the lightbox's copy stands in for it. */
-.media[data-open] {
+.collage__item > .paper {
+  inset: 0;
+}
+
+/* A placeholder: a plain grey sheet. */
+.collage__blank {
+  background: var(--color-media);
+}
+
+/* The strip over the print's top edge, centred --tx% across. */
+.collage__tape {
+  left: calc(var(--tx) * 1%);
+  top: 0;
+  z-index: 1;
+  width: 22cqw;
+  aspect-ratio: 76 / 30;
+  translate: -50% -50%;
+  rotate: var(--tr);
+}
+
+.collage__tape--long {
+  width: 32cqw;
+  aspect-ratio: 135 / 31;
+}
+
+/* Expanded: the lightbox's copy stands in for the print and its tape. */
+.collage__piece[data-open] {
   visibility: hidden;
 }
 
-.media:focus-visible,
+/* Words on a placeholder (% of the sheet). */
+.collage__caption {
+  position: absolute;
+  left: calc(var(--cx) * 1%);
+  top: calc(var(--cy) * 1%);
+  font-size: max(12px, 3cqw);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  text-align: left;
+  color: var(--color-text);
+  text-box: trim-both cap alphabetic;
+}
+
+.collage__caption span {
+  display: block;
+}
+
+/* The hand-drawn marks (the smiley, the heart), drawn on a print. */
+.collage__mark {
+  position: absolute;
+  left: calc(var(--mx) * 1cqw);
+  top: calc(var(--my) * 1cqw);
+  z-index: 2;
+  width: calc(var(--mw) * 1cqw);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.collage__item:focus-visible,
 .lightbox__close:focus-visible,
 .lightbox__arrow:focus-visible,
 .connections__row:focus-visible {
@@ -372,18 +422,12 @@
   font-size: var(--type-project-name);
   letter-spacing: -0.04em;
   line-height: 1;
-  transition: scale 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.media:hover .media__label {
-  scale: 1.06;
-}
-
-/* A video item fills its box (tile and lightbox), cropped to it. */
-.media {
-  position: relative;
-}
-
+/* A video or photo fills the lightbox frame, cropped to it: the frame takes
+   the item's aspect ratio, so only the morph from a piece crops. */
+.media__picture,
+.media__picture img,
 .media__video {
   position: absolute;
   inset: 0;
@@ -393,8 +437,13 @@
   object-fit: cover;
 }
 
+.media__picture {
+  position: absolute;
+  inset: 0;
+}
+
 /* The expanded media, over the page and its chrome, under the transition
-   cover. Media.tsx sizes the frame: from the tile's box to a centred player
+   cover. Media.tsx sizes the frame: from the piece's box to a centred player
    (MEDIA.PLAYER_WIDTH of the window). */
 .lightbox {
   position: fixed;
@@ -405,7 +454,7 @@
   color: var(--color-home-text);
 }
 
-/* The expanded label matches the tile's (Nunito Medium, page.css); Close
+/* The expanded label is Nunito Light (page.css); Close
    keeps the Map box's Helvetica Rounded Bold. */
 .lightbox__frame .media__label {
   font-family: var(--font-text);
@@ -419,11 +468,13 @@
   background: var(--color-lightbox-dim);
 }
 
+/* Media.tsx tweens its border from the piece's frame to none. */
 .lightbox__frame {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 0 solid var(--project-color);
   background: var(--color-media);
   overflow: hidden;
 }
@@ -524,9 +575,7 @@ html.is-scroll-locked {
    sticks (the header: page.css; the footer: footer.css). ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   .project {
-    --content-top: calc(56vw + 40px);
-    --hu: calc(100vw / 860);
-    --type-project-heading: 32px;
+    --type-project-heading: 24px;
   }
 
   .project-list {
@@ -538,30 +587,16 @@ html.is-scroll-locked {
     display: none;
   }
 
-  .project__heroes {
-    position: relative;
-    height: var(--content-top);
-  }
-
-  .project-hero--0 {
-    left: 4vw;
-    top: calc(var(--content-top) - 470 * var(--hu));
-  }
-
-  .project-hero--1 {
-    left: 40vw;
-    top: 16px;
-  }
-
   .project__body {
     padding-top: 24px;
   }
 
-  /* Stacked: the intro, the media, the description, then TOOLS (not sticky). */
+  /* Stacked: the intro, the description, the collage (the column wide, from
+     the text), then TOOLS (not sticky). */
   .project-block {
     display: flex;
     flex-direction: column;
-    padding-bottom: 72px;
+    padding-bottom: 108px;
   }
   .project-block__text {
     display: contents;
@@ -571,14 +606,20 @@ html.is-scroll-locked {
     order: 1;
   }
 
-  .project-block .media {
+  .project-block__desc {
     order: 2;
+    margin-top: 56px;
+  }
+
+  .project-block .collage {
+    order: 3;
+    width: 100%;
     margin-top: 28px;
   }
 
-  .project-block__desc {
-    order: 3;
-    margin-top: 28px;
+  .project-block .collage,
+  .project-block[data-flip] .collage {
+    margin-inline: 0;
   }
 
   .project-block__tools {
@@ -587,9 +628,4 @@ html.is-scroll-locked {
     margin-top: 28px;
   }
 
-  /* Expanded: the whole video, never a crop (the player keeps the tile's
-     aspect, so this only matters if the clip's own differs). */
-  .lightbox__frame .media__video {
-    object-fit: contain;
-  }
 }

@@ -14,6 +14,8 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `anything.svg` | About | the word "anything" inline in the Connect line, raised above the text, static | 59×16, `#FF7700`, drawn 1:1 |
 | `extras.svg` | Experience | the hand-drawn word "extras" above the extra jobs, static | 126×34, `#FF7700`, drawn 1:1, right edge at x 419 |
 | `portfolio-scribble.svg`, `new-portfolio.svg`, `new-oyster.svg`, `new-mango.svg` | (unused) | the old Map pill squiggle and project-list scribbles | **Unused** since the Projects redesign |
+| `project-smiley.svg` | Projects (ReMind) | the orange hand-drawn smiley beside ReMind's photos, static | 64×72, 3 stroked paths, `#FF7700`, 10px stroke, combined from Figma "Project Final" Vectors 839–841 |
+| `project-heart.svg` | Projects (This Portfolio) | the orange heart scribble over the portfolio pieces, static | 145×122, 1 stroked path, `#FF7700`, 2px stroke, Figma "Project Final" Vector 300 |
 | `chat-cat.svg` | station pages (footer), home | the orange cat beside "Let's chat!"; draws itself in (DrawSVG) | 335×459, 3 stroked paths, `#FF7700`, 5px stroke. Exported from the Figma file (Group 100) |
 | `speech.svg` | station pages | the orange speech bubble from "Matthew Lam" | 173×137: a 162×80 rect (r 6) + tail. **Unused**: the speech bubble was removed (user request) |
 | `mango.svg` | (unused) | the old draggable obstacle | **Unused**: the obstacle text was removed |
@@ -22,7 +24,11 @@ None of these SVGs has element IDs. Reference paths by document order.
 
 | File | Page | Role | Notes |
 |---|---|---|---|
-| `project-hero-placeholder.png` | project pages, home | both tilted heroes of every project, and home's two faded corner posters, until real art is supplied | 445×466, exported from the Figma file (image 109). `?print` (was `?hero`) |
+| `project-hero-placeholder.png` | home | home's two faded corner posters (the project heroes are gone since "Project Final") | 445×466, exported from the Figma file (image 109). `?homeposter` |
+| `remind-1.jpg`, `remind-2.png`, `remind-3.jpg` | Projects (ReMind collage) | the team with the robot arm; a selfie on the train; the demo table | 3072×4096, 2316×3088, 1280×960, from Figma "Project Final" (image 142, image 143, "1792474850278 1"). `?collage` (AVIF/WebP 400/800/1600) |
+| `mango-1.png`, `mango-2.png`, `mango-3.png` | Projects (Mango collage) | the team with prizes; the pose tracking; the team selfie | 1280×853, 1054×607, 1215×911 (image 145, Mango 1, image 144). `?collage` |
+| `oyster-news-paper.png` | Projects (Oyster News collage) | the newspaper page behind the screencast placeholder | 876×1151 (image 115). `?collage` |
+| `portfolio-1.png` | Projects (This Portfolio collage) | the Figma board | 1395×899 (image 146). `?collage` |
 | `home-photo.png` | home | the three taped prints (one photo, cropped alike): thumbs up by the water | 2048×1536, from Figma "Home Page Final" (image 122). `?print` (AVIF/WebP 400/800/1200) |
 | `tape-long.png`, `tape-short.png` | home | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
 | `tape-skyline.png` | home | the strip holding the skyline's sheet (Figma "tape1", 452:4941) | 320 wide, cut from the same tape sheet at Figma's crop. Baked like the other tape |
@@ -50,5 +56,5 @@ Empty for now. Files are discovered at build time (spec §9.5), so adding one ne
 | Needed | Page | Seen in mockup |
 |---|---|---|
 | Helvetica Rounded Bold (`assets-src/fonts/helvetica-rounded-bold.woff2`) | project pages, Map box | the Figma file's typeface |
-| Two heroes per project | project pages | Figma "image 109" / "image 110" (placeholders) |
-| Video, Figma board, timeline media per project | project pages | the grey boxes in Figma |
+| The Oyster News screencast | Projects | the grey "future screencast of oyster news" box in "Project Final" |
+| Three references for This Portfolio | Projects | the grey boxes ("future references") in "Project Final" |

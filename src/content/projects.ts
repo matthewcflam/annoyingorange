@@ -1,26 +1,35 @@
 /**
- * The projects on the Projects page (Figma "Project Redesign",
+ * The projects on the Projects page (Figma "Project Final", node 437:3858;
  * pages/projects/). Every project is one block on the same page: its tools,
- * name, tagline, awards, links, its media and a description.
+ * name, tagline, awards, links, a description and a collage of its media.
  */
 import type { Picture } from "../lib/assets";
-import heroPlaceholder from "../../assets-src/images/project-hero-placeholder.png?hero";
+import remind1 from "../../assets-src/images/remind-1.jpg?collage";
+import remind2 from "../../assets-src/images/remind-2.png?collage";
+import remind3 from "../../assets-src/images/remind-3.jpg?collage";
+import mango1 from "../../assets-src/images/mango-1.png?collage";
+import mango2 from "../../assets-src/images/mango-2.png?collage";
+import mango3 from "../../assets-src/images/mango-3.png?collage";
+import oysterPaper from "../../assets-src/images/oyster-news-paper.png?collage";
+import portfolio1 from "../../assets-src/images/portfolio-1.png?collage";
+import smileySvg from "../../assets-src/svg/project-smiley.svg";
+import heartSvg from "../../assets-src/svg/project-heart.svg";
 import remindDemoAv1 from "../../assets-src/videos/remind-demo.webm";
 import remindDemoH264 from "../../assets-src/videos/remind-demo.mp4";
 import remindDemoPoster from "../../assets-src/images/remind-demo-poster.png?poster";
-import { DEVPOST, GITHUB } from "./contact";
 
 export type ProjectSlug = "remind" | "mango" | "oyster-news" | "portfolio";
 
 /**
- * One item of a project's media (pages/projects/Media.tsx). The first is the
- * tile beside the project; the expanded view cycles through all of them.
- * `w` / `h` give the aspect ratio (the tile is always the first item's).
+ * One item of a project's media (pages/projects/Media.tsx), as the expanded
+ * view (the lightbox) shows it. `w` / `h` give its aspect ratio there.
+ * - image: a photo (a `?collage` imagetools picture).
  * - placeholder: a labelled grey box (the Figma file's).
  * - video: a self-hosted, silent clip that autoplays muted and loops (no
  *   YouTube embed). Encode with no audio track; see CLAUDE.md for the command.
  */
 export type Media =
+  | { kind: "image"; label: string; picture: Picture; w: number; h: number }
   | { kind: "placeholder"; label: string; w: number; h: number }
   | { kind: "video"; label: string; sources: VideoSource[]; poster: string; w: number; h: number };
 
@@ -29,6 +38,48 @@ export type Media =
 export interface VideoSource {
   src: string;
   type: string;
+}
+
+/**
+ * One taped print in a project's collage (user request: "order, but
+ * human"; styled like home's and Experience's prints, pages/paper/). Pieces
+ * are placed freely and overlap, each later one over those before. All
+ * lengths are % of the collage's width (three columns), so the collage scales
+ * with the columns. Its height is its media's aspect: the whole photo shows.
+ * On a mirrored block (every other project) the text is on the right, so its
+ * pieces lean right.
+ */
+export interface CollageItem {
+  media: Media;
+  /** Width. */
+  w: number;
+  /** Left edge, from the collage's. */
+  x: number;
+  /** Top edge, from the collage's. */
+  y: number;
+  /** Degrees, about its centre (the tape turns with it). */
+  rotate: number;
+  /** The strip holding it, centred `x`% across its top edge, turned `rotate`
+   *  more; `long` is the longer strip. */
+  tape: { x: number; rotate: number; long?: boolean };
+  /** Text written on a placeholder, at this spot (% of the piece). */
+  caption?: { text: string[]; x: number; y: number };
+}
+
+/** A hand-drawn mark (aria-hidden) on piece `item`: its top-left `x`, `y`
+ *  from the piece's top-left and its width, in % of the collage's width. */
+export interface CollageMark {
+  src: string;
+  item: number;
+  x: number;
+  y: number;
+  w: number;
+}
+
+/** A project's media, taped prints in columns 6–8 (3–5 when mirrored). */
+export interface Collage {
+  items: CollageItem[];
+  marks?: CollageMark[];
 }
 
 /** A tool; `dim` ones are grey (used a little), the rest black. */
@@ -58,31 +109,25 @@ export interface Project {
   /** Groups of tools; a gap separates the groups. */
   tools: Tool[][];
   /** The poster beside the list while the row is hovered (Figma "… Hover"):
-   *  its colour (a tokens.css custom property, also the TOOLS heading's) and
-   *  paragraphs of lines. */
+   *  its colour (a tokens.css custom property, also the TOOLS heading's) and paragraphs of lines. */
   poster: { color: string; text: string[][] };
-  /** The first is the tile on the page; the expanded view cycles them all. */
-  media: Media[];
-  /** Paragraphs, bottom-aligned with the media. */
+  /** The pictures beside the text; a click expands one into the lightbox,
+   *  which cycles through them and then `extraMedia`. */
+  collage: Collage;
+  /** Shown only in the lightbox, after the collage's pieces. */
+  extraMedia?: Media[];
+  /** Paragraphs under the links (no heading); empty for none. */
   description: string[];
 }
 
-/** The two tilted images above the first project: the lower-left one, then
- *  the upper-right one. TODO(open-question #13): placeholder art. */
-export const HEROES: [{ picture: Picture; alt: string }, { picture: Picture; alt: string }] = [
-  { picture: heroPlaceholder, alt: "" },
-  { picture: heroPlaceholder, alt: "" },
-];
-
-const VIDEO: Media = { kind: "placeholder", label: "Video", w: 707, h: 495 };
-const placeholder = (label: string): Media => ({ kind: "placeholder", label, w: 707, h: 495 });
+/** A photo; its lightbox aspect is the picture's own. */
+const photo = (label: string, picture: Picture): Media => ({ kind: "image", label, picture, w: picture.img.w, h: picture.img.h });
+const placeholder = (label: string, w: number, h: number): Media => ({ kind: "placeholder", label, w, h });
 const t = (name: string, dim = false): Tool => ({ name, dim });
 
-// TODO(open-question #12): each project's own repo / Devpost / site URLs.
-const GITHUB_TODO = GITHUB;
-const DEVPOST_TODO = DEVPOST;
 
-/** Page and list order (Figma "Project Redesign"). */
+/** Page and list order: the sections of Figma "Project Final" (its list is in
+ *  another order; user decision: the sections' order for both). */
 export const PROJECTS: readonly Project[] = [
   {
     slug: "remind",
@@ -93,18 +138,25 @@ export const PROJECTS: readonly Project[] = [
     tagline: "Conversational AI for Dementia",
     awards: ["DubHacks ‘26 MLH Best Use of Backboard", "DubHacks ‘26 Perceptron Robotics 2nd Place"],
     links: [
-      { kind: "github", href: GITHUB_TODO },
-      { kind: "devpost", href: DEVPOST_TODO },
+      { kind: "github", href: "https://github.com/remind-dubhacks/dubhacks-2026" },
+      { kind: "devpost", href: "https://devpost.com/software/remind-y8kg9s" },
     ],
     tools: [
       [t("Next.js"), t("TypeScript"), t("Python", true), t("Gemini Live API"), t("Backboard", true), t("MongoDB", true), t("Photon", true), t("SO-101 Robot Arm", true)],
       [t("Claude Code"), t("Grokbot", true), t("Figma", true)],
     ],
     poster: { color: "--color-poster-remind", text: [["Conversational", "AI for Dementia"], ["DubHacks 2x", "Winner"]] },
+    collage: {
+      items: [
+        { media: photo("The ReMind team with the robot arm at DubHacks", remind1), w: 50, x: 2, y: 2, rotate: -1.6, tape: { x: 50, rotate: -3 } },
+        { media: photo("A selfie on the train", remind2), w: 44, x: 48, y: 11, rotate: 2.27, tape: { x: 40, rotate: 6, long: true } },
+        { media: photo("The ReMind demo table: laptops and the SO-101 robot arm", remind3), w: 70, x: 14, y: 61, rotate: -3.1, tape: { x: 62, rotate: -2 } },
+      ],
+      marks: [{ src: smileySvg, item: 2, x: 52, y: 20, w: 13 }],
+    },
     // The demo from YouTube (g9GPV6Mq0zw) from 0:05, re-encoded silent:
     // AV1 (~6 MB), with H.264 (~10 MB) for browsers without AV1.
-    // TODO(open-question #13): placeholders after it.
-    media: [
+    extraMedia: [
       {
         kind: "video",
         label: "ReMind demo",
@@ -116,8 +168,6 @@ export const PROJECTS: readonly Project[] = [
         w: 707,
         h: 495,
       },
-      placeholder("Screenshot"),
-      placeholder("Robot arm"),
     ],
     description: [
       "My grandma has dementia. 10M more people are diagnosed each year, and the population pyramid is shifting upwards.",
@@ -133,15 +183,21 @@ export const PROJECTS: readonly Project[] = [
     tagline: "Gesture Controlled Minecraft",
     awards: ["HelloHacks ‘25 1st Place"],
     links: [
-      { kind: "github", href: GITHUB_TODO },
-      { kind: "devpost", href: DEVPOST_TODO },
+      { kind: "github", href: "https://github.com/minjunminji/minecraftCVcontroller" },
+      { kind: "devpost", href: "https://devpost.com/software/mango-full-body-gesture-control-for-any-game" },
     ],
     tools: [
       [t("Python"), t("MediaPipe Holistic")],
       [t("GitHub Copilot"), t("Cursor"), t("Figma", true)],
     ],
     poster: { color: "--color-poster-mango", text: [["Gesture Controlled", "Minecraft"], ["HelloHacks Winner"]] },
-    media: [VIDEO],
+    collage: {
+      items: [
+        { media: photo("The Mango team with their HelloHacks prizes", mango1), w: 72, x: 26, y: 3, rotate: -2.2, tape: { x: 46, rotate: 4, long: true } },
+        { media: photo("Mango tracking a player’s pose", mango2), w: 52, x: 2, y: 40, rotate: 1.8, tape: { x: 34, rotate: -5 } },
+        { media: photo("The Mango team at HelloHacks", mango3), w: 54, x: 42, y: 57, rotate: -1, tape: { x: 58, rotate: 2 } },
+      ],
+    },
     description: [
       "Minecraft is the most sold video game of all time. But what if you could actually be Steve?",
       "Mango is a computer vision application that allows players to interact with Minecraft using human gestures.",
@@ -156,17 +212,25 @@ export const PROJECTS: readonly Project[] = [
     tagline: "Worldwide News, Mapped",
     awards: [],
     links: [
-      { kind: "github", href: GITHUB_TODO },
-      { kind: "site", href: GITHUB_TODO },
+      { kind: "github", href: "https://github.com/matthewcflam/oysternews" },
+      { kind: "site", href: "https://oysternews.xyz/" },
     ],
     tools: [
       [t("Next.js"), t("TypeScript"), t("MapLibre GL JS", true), t("Cloudflare R2", true), t("GitHub Actions", true)],
       [t("Claude Code"), t("Figma", true)],
     ],
     poster: { color: "--color-poster-oyster-news", text: [["Worldwide News,", "Mapped"]] },
-    media: [VIDEO],
-    // TODO(open-question #12): the Figma frame repeats Mango's copy here.
-    description: ["PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER PLACEHOLDER"],
+    // TODO(open-question #13): the screencast is a placeholder.
+    collage: {
+      items: [
+        { media: photo("A newspaper page", oysterPaper), w: 46, x: 4, y: 2, rotate: -1.8, tape: { x: 50, rotate: -2, long: true } },
+        { media: placeholder("Oyster News screencast", 250, 174), w: 62, x: 36, y: 34, rotate: 2.4, tape: { x: 35, rotate: 7 }, caption: { text: ["future screencast", "of oyster news"], x: 31, y: 41 } },
+      ],
+    },
+    description: [
+      "I’ve ALWAYS wanted to combine the two things I waste time on: maps, and the news.",
+      "Oyster News pulls geolocated articles from the GDELT GKG API, so users can discover stories based on where they happen.",
+    ],
   },
   {
     slug: "portfolio",
@@ -175,23 +239,36 @@ export const PROJECTS: readonly Project[] = [
     year: "2026",
     name: "This Portfolio",
     tagline: "The greatest website ever!!!!",
-    awards: [],
+    awards: ["#1 in never actually being finished"],
     links: [
-      { kind: "github", href: GITHUB_TODO },
-      { kind: "site", href: "/" },
+      { kind: "github", href: "https://github.com/matthewcflam/annoyingorange" },
+      { kind: "site", href: "https://www.matthewlam.ca/" },
     ],
+    // Figma lists Next.js; the site is React (user decision: keep React.js).
     tools: [
       [t("React.js"), t("TypeScript"), t("WebGL")],
       [t("Claude Code"), t("Grokbot", true), t("Figma", true)],
     ],
     poster: { color: "--color-poster-portfolio", text: [[":)"]] },
-    media: [VIDEO],
-    description: [
-      "One day I thought to myself... I want something of my own to represent who I am. So I sat for a ridiculous amount of time on my Figma Board and got to cooking. The result is this transit and Studio Ghibli inspired website.",
-      "I hope you enjoy!",
-    ],
+    // TODO(open-question #13): the three references are placeholders.
+    collage: {
+      items: [
+        { media: photo("This portfolio’s Figma board", portfolio1), w: 70, x: 28, y: 4, rotate: 1.4, tape: { x: 52, rotate: -4, long: true } },
+        { media: placeholder("Reference", 219, 153), w: 40, x: 2, y: 12, rotate: -3, tape: { x: 46, rotate: 3 } },
+        { media: placeholder("Reference", 219, 154), w: 44, x: 8, y: 45, rotate: 2, tape: { x: 60, rotate: -6, long: true } },
+        { media: placeholder("Reference", 220, 153), w: 46, x: 50, y: 51, rotate: -1.6, tape: { x: 50, rotate: 2 }, caption: { text: ["future references"], x: 13, y: 26 } },
+      ],
+      marks: [{ src: heartSvg, item: 3, x: -9, y: 20, w: 16 }],
+    },
+    // Figma "Project Final" has none here (user decision).
+    description: [],
   },
 ];
+
+/** Every item a project's lightbox cycles through: the collage, then the extras. */
+export function lightboxMedia(p: Project): Media[] {
+  return [...p.collage.items.map((i) => i.media), ...(p.extraMedia ?? [])];
+}
 
 /** The project a `/projects/<slug>` path names, if any (old per-project
  *  links: they open /projects scrolled to it). */

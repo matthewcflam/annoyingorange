@@ -3,6 +3,10 @@ declare module "*?hero" {
   const picture: import("./lib/assets").Picture;
   export default picture;
 }
+declare module "*?collage" {
+  const picture: import("./lib/assets").Picture;
+  export default picture;
+}
 declare module "*?frost" {
   /** A data URI. */
   const src: string;

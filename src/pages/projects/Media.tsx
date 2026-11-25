@@ -1,13 +1,19 @@
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "../../lib/gsap";
 import { play } from "../../audio/engine";
 import { prefersReducedMotion } from "../../lib/motion";
 import { lockScroll, unlockScroll } from "../../lib/scroll";
 import { projectScale } from "../../lib/tokens";
-import { whenPageShown } from "../../lib/pageReveal";
+import { collageSizes, type Picture } from "../../lib/assets";
 import { MEDIA } from "../../config/timings";
-import type { Media } from "../../content/projects";
+import { lightboxMedia, type CollageItem, type Media, type Project } from "../../content/projects";
+import ResponsivePicture from "../ResponsivePicture";
+import PaperSheet from "../paper/PaperSheet";
+import type { Sheet } from "../paper/sheets";
+// The same files as Experience's and home's strips (same imports, one download).
+import tapeShort from "../../../assets-src/images/tape-short.png?w=176&paperFibre=88&tape";
+import tapeLong from "../../../assets-src/images/tape-long.png?w=270&paperFibre=135&tape";
 
 type VideoRef = (el: HTMLVideoElement | null) => void | (() => void);
 
@@ -18,10 +24,9 @@ function playMuted(v: HTMLVideoElement) {
   void v.play().catch(() => {});
 }
 
-/** What a piece of media shows, in its tile and expanded: a placeholder's
- *  label, or a silent looping video (played from code, never `autoplay`, so
- *  the tile can pause it offscreen). */
-function MediaContent({ media, videoRef, preload = "metadata" }: { media: Media; videoRef?: VideoRef; preload?: "none" | "metadata" }) {
+/** What a piece of media shows in the lightbox: a photo, a placeholder's
+ *  label, or a silent looping video (played from code, never `autoplay`). */
+function MediaContent({ media, videoRef, previewSizes }: { media: Media; videoRef?: VideoRef; previewSizes?: string }) {
   if (media.kind === "video") {
     return (
       <video
@@ -33,7 +38,7 @@ function MediaContent({ media, videoRef, preload = "metadata" }: { media: Media;
         loop
         playsInline
         disablePictureInPicture
-        preload={preload}
+        preload="metadata"
       >
         {media.sources.map((s) => (
           <source key={s.src} src={s.src} type={s.type} />
@@ -41,87 +46,142 @@ function MediaContent({ media, videoRef, preload = "metadata" }: { media: Media;
       </video>
     );
   }
+  if (media.kind === "image") {
+    // Under the large copy, the size the collage already loaded: it shows at
+    // once while the large one arrives.
+    return (
+      <>
+        {previewSizes && <ResponsivePicture className="media__picture" picture={media.picture} alt="" eager sizes={previewSizes} />}
+        <ResponsivePicture className="media__picture" picture={media.picture} alt={media.label} eager sizes={`${MEDIA.PLAYER_WIDTH * 100}vw`} />
+      </>
+    );
+  }
   return <span className="media__label">{media.label}</span>;
 }
 
-/**
- * A project's media in the page (columns 5–8): the tile shows the first item;
- * a video plays (muted, looping) while the tile is on screen. Clicking it
- * expands it to a centred player (Lightbox), where arrows cycle through every
- * item; clicking again, Close or Escape puts it back.
- */
-export default function MediaTile({ items }: { items: Media[] }) {
-  const first = items[0];
-  const ref = useRef<HTMLButtonElement>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const wasOpen = useRef(false);
+/** A piece's place in the collage (project.css reads the custom properties). */
+function pieceStyle(it: CollageItem, i: number): CSSProperties {
+  return { "--w": it.w, "--x": it.x, "--y": it.y, "--r": `${it.rotate}deg`, zIndex: i + 1 } as CSSProperties;
+}
 
-  // Focus returns to the tile once the lightbox is gone (the page is inert
+/** Room below the lowest print for its tilt (cqw). */
+const COLLAGE_PAD = 3;
+
+/** The collage's height in cqw: down to the foot of its lowest print. */
+function collageHeight(items: CollageItem[]): number {
+  return Math.max(...items.map((it) => it.y + (it.w * it.media.h) / it.media.w)) + COLLAGE_PAD;
+}
+
+/** A photo print (placeholders are a plain grey sheet, project.css). The
+ *  sheet's own box is unused: the piece places it. */
+function printSheet(it: CollageItem, picture: Picture, i: number): Sheet {
+  return { id: `print-${i}`, kind: "photo", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, picture, sizes: collageSizes(it) };
+}
+
+/** Its strip of tape. */
+function tapeSheet(it: CollageItem, i: number): Sheet {
+  return { id: `tape-${i}`, kind: "tape", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, src: it.tape.long ? tapeLong : tapeShort };
+}
+
+/**
+ * A project's media (columns 6–8, or 3–5 on a mirrored block): its pieces as
+ * taped prints (home's and Experience's paper, pages/paper/), placed by hand
+ * overlapping and a little crooked, with hand-drawn marks on them (user
+ * request: no board behind them). A click on a print expands it into a centred player
+ * (Lightbox), where the arrows cycle through every piece and the project's
+ * extra media; Close, Escape or a click shrinks it back into the print.
+ */
+export default function MediaCollage({ project }: { project: Project }) {
+  const { collage } = project;
+  const items = lightboxMedia(project);
+  const pieces = useRef<(HTMLButtonElement | null)[]>([]);
+  const [open, setOpen] = useState<number | null>(null);
+  const wasOpen = useRef<number | null>(null);
+
+  // Focus returns to the piece once the lightbox is gone (the page is inert
   // until its cleanup has run).
   useEffect(() => {
-    if (wasOpen.current && !open) ref.current?.focus({ preventScroll: true });
+    if (wasOpen.current !== null && open === null) pieces.current[wasOpen.current]?.focus({ preventScroll: true });
     wasOpen.current = open;
   }, [open]);
 
-  // The tile's video plays only while it's on screen and not expanded (the
-  // lightbox has its own copy). It loads nothing (preload="none", the poster
-  // shows) until the page has shown, so it never shares bandwidth with the
-  // page transition. With reduced motion it stays on its poster.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (open || prefersReducedMotion()) {
-      v.pause();
-      return;
-    }
-    let io: IntersectionObserver | null = null;
-    let cancelled = false;
-    void whenPageShown().then(() => {
-      if (cancelled) return;
-      io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? playMuted(v) : v.pause()));
-      io.observe(v);
-    });
-    return () => {
-      cancelled = true;
-      io?.disconnect();
-    };
-  }, [open]);
-
   return (
-    <>
-      <button
-        ref={ref}
-        type="button"
-        className="media"
-        style={{ aspectRatio: `${first.w} / ${first.h}` }}
-        aria-haspopup="dialog"
-        aria-label={`Expand ${first.label}`}
-        data-open={open || undefined}
-        data-reveal
-        onPointerEnter={(e) => e.pointerType !== "touch" && play("link.hover")}
-        onClick={() => {
-          play("project.select");
-          setOpen(true);
-        }}
-      >
-        <MediaContent
-          media={first}
-          preload="none"
-          videoRef={(el) => {
-            videoRef.current = el;
-          }}
+    <div className="collage" style={{ "--collage-h": collageHeight(collage.items) } as CSSProperties}>
+      {collage.items.map((it, i) => (
+        <div key={i} className="collage__piece" style={pieceStyle(it, i)} data-open={open === i || undefined}>
+          {/* The tilt lives inside the piece (the piece is the layout box). */}
+          <div className="collage__tilt">
+            <button
+              ref={(el) => {
+                pieces.current[i] = el;
+              }}
+              type="button"
+              className="collage__item"
+              style={{ aspectRatio: `${it.media.w} / ${it.media.h}` }}
+              aria-haspopup="dialog"
+              aria-label={`Expand: ${it.media.label}`}
+              data-kind={it.media.kind}
+              onClick={() => {
+                play("project.select");
+                setOpen(i);
+              }}
+            >
+              {it.media.kind === "image" ? (
+                <PaperSheet sheet={printSheet(it, it.media.picture, i)} />
+              ) : (
+                <span className="paper collage__blank" data-kind="blank" aria-hidden="true" />
+              )}
+              {it.caption && (
+                <span className="collage__caption" style={{ "--cx": it.caption.x, "--cy": it.caption.y } as CSSProperties}>
+                  {it.caption.text.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                </span>
+              )}
+            </button>
+            <PaperSheet
+              sheet={tapeSheet(it, i)}
+              className={it.tape.long ? "collage__tape collage__tape--long" : "collage__tape"}
+              style={{ "--tx": it.tape.x, "--tr": `${it.tape.rotate}deg` } as CSSProperties}
+            />
+            {collage.marks
+              ?.filter((m) => m.item === i)
+              .map((m) => (
+                <img
+                  key={m.src}
+                  className="collage__mark"
+                  src={m.src}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  style={{ "--mx": m.x, "--my": m.y, "--mw": m.w } as CSSProperties}
+                />
+              ))}
+          </div>
+        </div>
+      ))}
+      {open !== null && (
+        <Lightbox
+          items={items}
+          previews={collage.items.map((it) => collageSizes(it))}
+          start={open}
+          origin={() => pieces.current[open]!}
+          rotation={collage.items[open].rotate}
+          color={`var(${project.poster.color})`}
+          onClosed={() => setOpen(null)}
         />
-      </button>
-      {open && <Lightbox items={items} tileRef={ref} tileVideo={videoRef} onClosed={() => setOpen(false)} />}
-    </>
+      )}
+    </div>
   );
 }
 
-const boxOf = (el: HTMLElement) => {
+/** A piece's box without its tilt: its layout size, centred where it is. */
+function originBox(el: HTMLElement) {
   const r = el.getBoundingClientRect();
-  return { left: r.left, top: r.top, width: r.width, height: r.height };
-};
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
+  return { left: r.left + r.width / 2 - width / 2, top: r.top + r.height / 2 - height / 2, width, height };
+}
 
 /** One item shown in the lightbox. `id` is unique per showing, so going back
  *  to an item while its old copy still slides out mounts a fresh one. */
@@ -134,22 +194,30 @@ interface Slide {
 type Leaving = Slide & { dir: number };
 
 /**
- * The expanded media: a copy of the tile, in <body>, that grows from the
- * tile's box to a centred player over the dimmed page (playerBox) and shrinks
- * back into it on close (Close, Escape, or a click on it or the dim). With more
- * than one item, arrows in the lower middle (or ←/→) cycle through them,
- * wrapping at the ends. The page behind it is inert and doesn't scroll
+ * The expanded media: a copy of the clicked piece, in <body>, that grows from
+ * its box (untilting, its frame thinning away) to a centred player over the
+ * dimmed page (playerBox), and shrinks back into it on close (Close, Escape,
+ * or a click on it or the dim). With more than one item, arrows in the lower
+ * middle (or ←/→) cycle through them, wrapping at the ends; the player takes
+ * each item's aspect ratio. The page behind it is inert and doesn't scroll
  * meanwhile.
  */
 function Lightbox({
   items,
-  tileRef,
-  tileVideo,
+  previews,
+  start,
+  origin,
+  rotation,
+  color,
   onClosed,
 }: {
   items: Media[];
-  tileRef: RefObject<HTMLButtonElement | null>;
-  tileVideo: RefObject<HTMLVideoElement | null>;
+  /** The collage pieces' `sizes`, by index (none for the extras). */
+  previews: string[];
+  start: number;
+  origin: () => HTMLElement;
+  rotation: number;
+  color: string;
   onClosed: () => void;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -158,33 +226,38 @@ function Lightbox({
   const navRef = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
 
-  const [current, setCurrent] = useState<Slide>({ index: 0, id: 0 });
+  const [current, setCurrent] = useState<Slide>({ index: start, id: 0 });
   const [leaving, setLeaving] = useState<Leaving[]>([]);
   const nextId = useRef(1);
   const slideEls = useRef(new Map<number, HTMLDivElement>());
-  /** The lightbox's copy of the first item's video, to hand its time back to
-   *  the tile on close so the clip carries on where it was. */
-  const firstVideo = useRef<HTMLVideoElement | null>(null);
   const n = items.length;
 
-  /** The player's box: centred, at the tile's aspect ratio, MEDIA.PLAYER_WIDTH
-   *  of the window wide but never narrower than the tile, and shrunk if it
-   *  would come within PLAYER_GAP_PX of Close or the arrows. */
-  const playerBox = () => {
+  /** The piece's frame (its border width) and box, untilted. */
+  const originFrame = () => {
+    const el = origin();
+    return { ...originBox(el), rotation, borderWidth: getComputedStyle(el).borderTopWidth };
+  };
+
+  /** The player's box for item `index`: centred, at its aspect ratio,
+   *  MEDIA.PLAYER_WIDTH of the window wide but never narrower than the piece,
+   *  and shrunk if it would come within PLAYER_GAP_PX of Close or the arrows. */
+  const playerBox = (index: number) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const aspect = items[0].w / items[0].h;
+    const aspect = items[index].w / items[index].h;
     const gap = MEDIA.PLAYER_GAP_PX * projectScale();
     const closeBottom = closeRef.current?.getBoundingClientRect().bottom ?? 0;
     const navTop = navRef.current?.getBoundingClientRect().top ?? vh;
     // Centred, so it clears the larger of the two bands, top and bottom.
     const clear = Math.max(closeBottom, vh - navTop) + gap;
     const maxH = Math.max(0, vh - 2 * clear);
-    const tileW = tileRef.current?.getBoundingClientRect().width ?? 0;
-    const width = Math.min(Math.max(vw * MEDIA.PLAYER_WIDTH, tileW), maxH * aspect, vw);
+    const pieceW = origin().offsetWidth;
+    const width = Math.min(Math.max(vw * MEDIA.PLAYER_WIDTH, pieceW), maxH * aspect, vw);
     const height = width / aspect;
-    return { left: (vw - width) / 2, top: (vh - height) / 2, width, height };
+    return { left: (vw - width) / 2, top: (vh - height) / 2, width, height, rotation: 0, borderWidth: 0 };
   };
+  const shown = useRef(start);
+  shown.current = current.index;
 
   useLayoutEffect(() => {
     const reduced = prefersReducedMotion();
@@ -199,8 +272,8 @@ function Lightbox({
     const slides = slideEls.current;
     const chrome = [closeRef.current!, navRef.current].filter((el) => el !== null);
     gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: reduced ? 0 : MEDIA.BACKDROP });
-    gsap.fromTo(frame, boxOf(tileRef.current!), {
-      ...playerBox(),
+    gsap.fromTo(frame, originFrame(), {
+      ...playerBox(start),
       duration: reduced ? 0 : MEDIA.OPEN,
       ease: MEDIA.OPEN_EASE,
     });
@@ -208,7 +281,7 @@ function Lightbox({
     const onResize = () => {
       if (closing.current) return;
       gsap.killTweensOf(frame);
-      gsap.set(frame, playerBox());
+      gsap.set(frame, playerBox(shown.current));
     };
     window.addEventListener("resize", onResize);
     // set + to, not a delayed fromTo: killed in StrictMode's effect re-run,
@@ -223,9 +296,9 @@ function Lightbox({
       document.documentElement.classList.remove("is-scroll-locked");
       unlockScroll();
     };
-    // Mount only: playerBox reads refs and the window when called.
+    // Mount only: originFrame and playerBox read refs and the window when called.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tileRef]);
+  }, []);
 
   /** Show item `index`; the current one slides out the other way. */
   const go = (index: number, dir: number) => {
@@ -234,7 +307,8 @@ function Lightbox({
   };
 
   // A new slide comes in from the side it's moving from while the old one
-  // goes the other way. Earlier leavers keep their own tweens.
+  // goes the other way, and the player takes the new item's shape. Earlier
+  // leavers keep their own tweens.
   useLayoutEffect(() => {
     if (current.id === 0) return;
     const out = leaving[leaving.length - 1];
@@ -243,6 +317,7 @@ function Lightbox({
     const dir = out?.dir ?? 0;
     const duration = prefersReducedMotion() ? 0 : MEDIA.SLIDE;
     const off = MEDIA.SLIDE_OFFSET_PX * projectScale();
+    if (!closing.current) gsap.to(frameRef.current, { ...playerBox(current.index), duration, ease: MEDIA.SLIDE_EASE, overwrite: true });
     if (outEl) {
       gsap.to(outEl, {
         x: -dir * off,
@@ -268,22 +343,17 @@ function Lightbox({
     if (closing.current) return;
     closing.current = true;
     play("station.hover");
-    // It lands back on the tile, so it shows the tile's item as it shrinks.
-    if (current.index !== 0) go(0, 0);
+    // It lands back on the piece it came from, so it shows that as it shrinks.
+    if (current.index !== start) go(start, 0);
     const reduced = prefersReducedMotion();
     gsap.to([closeRef.current, navRef.current].filter((el) => el !== null), { opacity: 0, duration: reduced ? 0 : MEDIA.BACKDROP, overwrite: true });
     gsap.to(backdropRef.current, { opacity: 0, duration: reduced ? 0 : MEDIA.CLOSE, overwrite: true });
     gsap.to(frameRef.current, {
-      ...boxOf(tileRef.current!),
+      ...originFrame(),
       duration: reduced ? 0 : MEDIA.CLOSE,
       ease: MEDIA.CLOSE_EASE,
       overwrite: true,
-      onComplete: () => {
-        const from = firstVideo.current;
-        const to = tileVideo.current;
-        if (from && to) to.currentTime = from.currentTime;
-        onClosed();
-      },
+      onComplete: onClosed,
     });
   };
 
@@ -303,27 +373,17 @@ function Lightbox({
     <LightboxSlide
       key={s.id}
       media={items[s.index]}
+      previewSizes={previews[s.index]}
       slideRef={(el) => {
         if (!el) return;
         slideEls.current.set(s.id, el);
         return () => void slideEls.current.delete(s.id);
       }}
-      videoRef={
-        s.index === 0
-          ? (el) => {
-              if (el) firstVideo.current = el;
-              return () => {
-                if (firstVideo.current === el) firstVideo.current = null;
-              };
-            }
-          : undefined
-      }
-      startAt={s.index === 0 ? (tileVideo.current?.currentTime ?? 0) : 0}
     />
   );
 
   return createPortal(
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label={items[current.index].label}>
+    <div className="lightbox" role="dialog" aria-modal="true" aria-label={items[current.index].label} style={{ "--project-color": color } as CSSProperties}>
       <div ref={backdropRef} className="lightbox__backdrop" data-clickable onClick={close} />
       <div ref={frameRef} className="lightbox__frame" onClick={close}>
         {leaving.map(renderSlide)}
@@ -354,29 +414,25 @@ function Lightbox({
 
 /**
  * One item in the lightbox, stacked over the others while they slide. A video
- * starts where the tile's copy was (`startAt`), so it reads as the same clip.
- * With reduced motion it doesn't autoplay; a click on it plays or pauses it.
+ * plays (muted, looping) from the start; with reduced motion it doesn't
+ * autoplay, and a click on it plays or pauses it.
  */
 function LightboxSlide({
   media,
+  previewSizes,
   slideRef,
-  videoRef,
-  startAt,
 }: {
   media: Media;
+  previewSizes?: string;
   slideRef: (el: HTMLDivElement | null) => void | (() => void);
-  videoRef?: VideoRef;
-  startAt: number;
 }) {
   const video = useRef<HTMLVideoElement | null>(null);
   const reduced = prefersReducedMotion();
 
   useEffect(() => {
     const v = video.current;
-    if (!v) return;
-    if (startAt) v.currentTime = startAt;
-    if (!reduced) playMuted(v);
-    // Mount only: the start time is read once.
+    if (v && !reduced) playMuted(v);
+    // Mount only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -392,9 +448,9 @@ function LightboxSlide({
     <div ref={slideRef} className="lightbox__slide" onClick={reduced && media.kind === "video" ? toggle : undefined}>
       <MediaContent
         media={media}
+        previewSizes={previewSizes}
         videoRef={(el) => {
           video.current = el;
-          return videoRef?.(el);
         }}
       />
     </div>

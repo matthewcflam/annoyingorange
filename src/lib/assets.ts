@@ -3,7 +3,7 @@
  * prefetchRoute(); the page transition awaits preloadRoute() before it swaps
  * the page in, so heroes are decoded by the time they're shown.
  */
-import { HEROES } from "../content/projects";
+import { PROJECTS, type CollageItem } from "../content/projects";
 import { ABOUT_PHOTOS } from "../content/aboutPhotos";
 import { EXPERIENCE_PHOTOS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS, POSTER_SIZES } from "../pages/paper/sheets";
@@ -18,8 +18,25 @@ export interface Picture {
   img: { src: string; w: number; h: number };
 }
 
-/** Rendered width of a project hero: at most 502px, less under 1640 wide (project.css --hu). */
+/** ResponsivePicture's default `sizes` (about 502px, under 1640 wide 31vw). */
 export const HERO_SIZES = "(max-width: 1640px) 31vw, 502px";
+
+/** Rotated pieces are resampled by the browser, so they get more pixels than
+ *  they cover to stay crisp. */
+const COLLAGE_OVERSAMPLE = 1.5;
+
+/** The collage's width on the full layout in the 1640 frame: columns 6–8,
+ *  3 columns + 2 gutters (project.css). */
+const COLLAGE_SCALE = 0.75; // --collage-scale in project.css
+const COLLAGE_FRAME_W = ((3 * (1640 - 2 * 15 - 8 * 15)) / 9 + 2 * 15) * COLLAGE_SCALE;
+
+/** The collage piece `it`'s `sizes`: its print is `it.w`% of the collage,
+ *  which is columns 6–8 (COLLAGE_FRAME_W of the 1640 frame) on the full
+ *  layout and about the window's width on compact (project.css). */
+export function collageSizes(it: CollageItem): string {
+  const share = (it.w / 100) * COLLAGE_OVERSAMPLE;
+  return `(max-width: 760px) ${(share * 100).toFixed(1)}vw, ${(((share * COLLAGE_FRAME_W) / 1640) * 100).toFixed(1)}vw`;
+}
 
 interface RouteImage {
   picture: Picture;
@@ -33,7 +50,9 @@ function routeImages(path: string): RouteImage[] {
   if (path === "/") return HOME_PICTURES.filter((p) => !(isCompact() && p.sizes === POSTER_SIZES));
   if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
   if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
-  if (path === "/projects") return HEROES.map((h) => ({ picture: h.picture, sizes: HERO_SIZES }));
+  // Projects: the first project's collage, on screen as the page shows.
+  if (path === "/projects")
+    return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it) }] : []));
   return [];
 }
 

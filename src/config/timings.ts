@@ -264,16 +264,6 @@ export const PROJECT = {
    *  mid-screen. */
   SCROLL_TO: 1.1,
   SCROLL_TO_EASE: "expo.inOut",
-  /** The tilted heroes settle in when the page shows: from this much extra
-   *  tilt (degrees) and drop (px), one after the other. */
-  HERO_IN: 1.1,
-  HERO_IN_EASE: "power3.out",
-  HERO_IN_TILT_DEG: 5,
-  HERO_IN_Y_PX: 40,
-  HERO_STAGGER: 0.12,
-  /** Scroll parallax: each hero moves up this fraction of the scroll faster
-   *  (positive) or slower (negative) than the page. One value per hero. */
-  HERO_PARALLAX: [-0.12, 0.1],
   /** The footer cat draws itself when it scrolls into view. */
   CAT_DRAW: 2.2,
   CAT_DRAW_EASE: "power2.inOut",
@@ -281,8 +271,8 @@ export const PROJECT = {
   ROW_HOVER_SCALE: 1.2,
 } as const;
 
-/** Project media (pages/projects/Media.tsx): a tile expands to a centred
- *  player over the dimmed page. */
+/** Project media (pages/projects/Media.tsx): a collage piece expands to a
+ *  centred player over the dimmed page. */
 export const MEDIA = {
   /** The player's width, as a fraction of the window's (at the tile's aspect
    *  ratio; never smaller than the tile, and shrunk if it would reach Close or
