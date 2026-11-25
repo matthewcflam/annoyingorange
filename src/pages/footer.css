@@ -1,95 +1,105 @@
 /*
  * The site footer (SiteFooter.tsx), on every station page: About, Experience
- * and the project pages. It relies on the page shell (page.css: .page, --line,
+ * and the project pages. It relies on the page shell (page.css: .page,
  * --head-clear).
  */
-/* ---- Footer (SiteFooter.tsx): one rigid composition (the user's
-   reference, the Figma frame's y 2295 on), centred on the Connections card
-   and scaled as a whole by --ft (1 = Figma size). --ft is pinned to the title
-   size (48 / 36, so "Let's chat!" matches "Matthew Lam"; user request) and
-   only shrinks when the window can't hold the composition. Its centre is the
-   card's centre (frame x 820, y 203 from the cat top), at (50%, --fy), and
-   every piece is placed from it in frame units: x(n) = 50% + (n - 820) * --ft.
-   The composition reaches 607 left of that centre (the cat) and 254 below it
-   (the cat's foot), so --ft fits 1214 × 508 into the window (the right side
-   keeps the extra space). The footer is no longer a screen tall (user
-   request): it is the composition with the same gap above the cat's tail as
-   below its foot (--footer-gap, 120 frame units: 83px in the user's
-   reference at --ft 0.70), so at full scroll the page's last content shows
-   above it. --ft also shrinks so the whole footer fits under the fixed
-   header (--head-clear). ---- */
+/* ---- Footer (SiteFooter.tsx; Figma "Experience Final" revised, the 1640
+   frame from y 1422, the cat's top): one rigid composition, scaled as a whole by --ft (1 =
+   Figma px at a 16px body, like the Experience page's --cp). "Let's chat!"
+   left of the Connections card, the cat up and right of it, centred over
+   the credits (user request). Pieces are placed from the frame's centre at
+   50%, so the Connections card (671 + 232 / 2 = 787) is centred on the page
+   (user request): x(n) = 50% + (n - 787) * --ft, and from the cat's top: y(n) =
+   --footer-gap + (n - 1422) * --ft. The composition reaches ~260 left of the
+   centre ("Let's chat!", right-aligned 40 left of the card) and 398 right (the credits) and is 210 tall (cat top to
+   the card's foot), so --ft only shrinks when the window can't hold it, or
+   when the footer wouldn't fit under the fixed header (--head-clear). The
+   same gap (134) sits above the cat and below the card (user request). ---- */
 .site-footer {
   --ft: min(
-    var(--type-project-title) / 36,
-    (100vw - 2 * var(--grid-margin)) / 1214,
-    (100svh - var(--head-clear)) / 697
+    var(--type-project-body) / 16,
+    (50vw - var(--grid-margin)) / 398,
+    (100svh - var(--head-clear)) / 478
   );
-  --footer-gap: calc(120 * var(--ft));
-  --fy: calc(var(--footer-gap) + 203 * var(--ft));
+  --footer-gap: calc(134 * var(--ft));
   position: relative;
-  height: calc(2 * var(--footer-gap) + 457 * var(--ft));
+  height: calc(2 * var(--footer-gap) + 210 * var(--ft));
   margin-top: 0;
 }
 
-/* The cat: 334.9×457 at (213, 0). */
+/* The cat: 132.91×181.77, top 1422 (Figma's 1398, moved down 24 with the
+   credits; user request), centred over the credits (user
+   request; Figma has it at x 1170.9): x 943 + (242 - 132.91) / 2. */
 .site-footer__cat {
   position: absolute;
-  left: calc(50% + (213 - 820) * var(--ft));
-  top: calc(var(--fy) + (0 - 203) * var(--ft));
-  /* Drawn over "Let's chat!" (user request). */
-  z-index: 1;
-  width: calc(334.894 * var(--ft));
+  left: calc(50% + (997.5 - 787) * var(--ft));
+  top: var(--footer-gap);
+  width: calc(132.909 * var(--ft));
   pointer-events: none;
 }
 
+/* Mirrored (Figma): it faces left, toward the card. Home's cat is not. */
 .site-footer__cat svg {
   width: 100%;
   height: auto;
   overflow: visible;
+  scale: -1 1;
 }
 
 /* The cat's hit area: each stroke's implied fill (its ends joined), which
    covers the body, legs, head and tail, plus the stroke itself. A click there
-   redraws the cat (ProjectFooter). The box around it stays click-through. */
+   redraws the cat. The box around it stays click-through. Figma keeps its
+   5px stroke at this size, so in the SVG's own units (334.894 wide) it is
+   5 × 334.894 / 132.909. */
 .site-footer__cat path {
   pointer-events: all;
+  stroke-width: 12.6;
 }
 
-/* "Let's chat!": 36 × --ft (the title size), cap top 108, at x 432 (over the cat's head). */
+/* "Let's chat!": 24, -8% (Figma). Its right edge sits 40 left of the card
+   (x 631), the same gap as the credits on the card's right, and its caps are
+   centred on the card (1466 + 166 / 2 = 1549; user request). */
 .page .site-footer__chat {
   position: absolute;
-  left: calc(50% + (432 - 820) * var(--ft));
-  top: calc(var(--fy) + (108 - 203) * var(--ft));
-  font-size: calc(36 * var(--ft));
-  letter-spacing: -0.04em;
+  right: calc(50% + (787 - 631) * var(--ft));
+  top: calc(var(--footer-gap) + (1549 - 1422) * var(--ft));
+  transform: translateY(-50%);
+  font-size: calc(24 * var(--ft));
+  letter-spacing: -0.08em;
   line-height: 1;
   white-space: nowrap;
   text-box: trim-both cap alphabetic;
 }
 
-/* Credits: body size (user request; 16 in Figma), one body line apart,
-   right edge at x 1374, cap top 336. */
+/* Credits: the body font (Figma has Nunito Regular; Light kept, user
+   decision), 16, left-aligned at x 943 under the cat (Figma 975; 40 right of the card, user request), cap tops 1621 and 1639 (Figma's 1597 / 1615, moved down 24 with the cat; user request). */
 .page .site-footer__credits {
   position: absolute;
-  right: calc(50% - (1374 - 820) * var(--ft));
-  top: calc(var(--fy) + (336 - 203) * var(--ft));
-  font-size: var(--type-project-body);
-  line-height: var(--line);
-  text-align: right;
+  left: calc(50% + (943 - 787) * var(--ft));
+  top: calc(var(--footer-gap) + (1621 - 1422) * var(--ft));
+  font-family: var(--font-text);
+  font-weight: var(--weight-text);
+  font-size: calc(16 * var(--ft));
+  line-height: calc(18 * var(--ft));
+  letter-spacing: -0.04em;
+  color: var(--color-text);
+  text-align: left;
   white-space: nowrap;
   text-box: trim-both cap alphabetic;
 }
 
-/* ---- Connections: the Map box's open card (346×196, same rows) at
-   (647, 105), centred on the footer. The logos (21 boxes) stand where the
-   Map card has its dots. ---- */
+/* ---- Connections: at (671, 1466), 232 wide (Figma), text 24. Taller than
+   Figma's 147 (user request): the rows are 31 apart, the Map card's station
+   pitch (mapbox.css, 31 per 24px of text), so the card is 166 tall. The title
+   sits 7 in from the top-right; the rows start 38.5 down, labels' right edges
+   7 in, each logo (21 box) 8 in on the left, centred on its label. ---- */
 .connections {
   position: absolute;
-  left: calc(50% + (647 - 820) * var(--ft));
-  top: calc(var(--fy) + (105 - 203) * var(--ft));
-  width: calc(346 * var(--ft));
-  height: calc(196 * var(--ft));
-  padding-top: calc(64 * var(--ft));
+  left: calc(50% + (671 - 787) * var(--ft));
+  top: calc(var(--footer-gap) + (1466 - 1422) * var(--ft));
+  width: calc(232 * var(--ft));
+  height: calc(166 * var(--ft));
+  padding-top: calc(38.5 * var(--ft));
   background: var(--color-map-box);
   color: var(--color-map-box-text);
   font-size: calc(24 * var(--ft));
@@ -98,16 +108,19 @@
 
 .page .connections__title {
   position: absolute;
-  top: calc(9 * var(--ft));
-  right: calc(9 * var(--ft));
+  top: calc(7 * var(--ft));
+  right: calc(7 * var(--ft));
   text-box: trim-both cap alphabetic;
 }
 
+/* "email copied!": right of the card, level with the Email row. */
 .page .connections__toast {
   position: absolute;
-  top: calc(9 * var(--ft));
-  left: calc(11 * var(--ft));
+  top: calc(49 * var(--ft));
+  left: calc(100% + 12 * var(--ft));
   font-size: calc(16 * var(--ft));
+  color: var(--color-text);
+  white-space: nowrap;
   text-box: trim-both cap alphabetic;
   opacity: 0;
   visibility: hidden;
@@ -119,7 +132,7 @@
   align-items: center;
   width: 100%;
   height: calc(31 * var(--ft));
-  padding: 0 calc(9 * var(--ft)) 0 calc(11 * var(--ft));
+  padding: 0 calc(7 * var(--ft)) 0 calc(8 * var(--ft));
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
@@ -154,7 +167,8 @@
   text-box: trim-both cap alphabetic;
 }
 
-/* ---- Compact layout (global.css): the footer stacks. ---- */
+/* ---- Compact layout (global.css): the footer stacks: the cat, "Let's
+   chat!" over the card, then the credits. ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   .site-footer {
     --ft: 1px;
@@ -168,27 +182,26 @@
     position: relative;
     left: auto;
     top: auto;
-    width: min(230px, 60vw);
   }
 
   .page .site-footer__chat {
-    left: min(150px, 39vw);
-    top: 74px;
+    position: static;
+    transform: none;
+    margin-top: 32px;
   }
 
   .connections {
     position: relative;
     left: auto;
     top: auto;
-    width: min(346px, 100%);
-    margin-top: 32px;
+    margin-top: 16px;
   }
 
   .page .site-footer__credits {
     position: static;
-    right: auto;
-    margin-top: 40px;
-    /* Body size no longer fits a phone on one line. */
+    translate: none;
+    margin-top: 48px;
+    text-align: left;
     white-space: normal;
   }
 }

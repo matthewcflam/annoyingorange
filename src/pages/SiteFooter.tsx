@@ -15,9 +15,9 @@ const LINKS: { label: string; icon: keyof typeof ICONS; href: string | null }[] 
 
 /**
  * The foot of every station page (About, Experience, the projects; Figma
- * "Portfolio", y 2295 on): the cat,
- * "Let's chat!", the blue Connections box (each connection's logo on the
- * left, its name on the right) and the credits. The cat draws itself when it
+ * "Experience Final", y 1449 on): the cat, "Let's chat!" by its foot, the
+ * blue Connections box (each connection's logo on the left where Figma has
+ * dots (user decision), its name on the right) and the credits. The cat draws itself when it
  * scrolls into view.
  */
 export default function SiteFooter() {
@@ -63,9 +63,9 @@ export default function SiteFooter() {
         </ul>
       </nav>
       <p className="site-footer__credits" data-reveal>
-        LAST UPDATED {LAST_UPDATED}
+        Last Updated {LAST_UPDATED}
         <br />
-        DESIGNED AND BUILT BY MATTHEW LAM
+        Designed and Built by Matthew Lam
       </p>
     </footer>
   );

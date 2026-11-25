@@ -8,4 +8,4 @@ export const SPOTIFY = "https://open.spotify.com/user/wxqcdpsqabuzcr025uop6b53c?
 export const LETTERBOXD = "https://letterboxd.com/matthewlam/";
 
 /** The footer's "LAST UPDATED" line (Figma). TODO(last-updated): hand-written; could be stamped at build time. */
-export const LAST_UPDATED = "NOV 10TH 2026";
+export const LAST_UPDATED = "November 17th 2026";
