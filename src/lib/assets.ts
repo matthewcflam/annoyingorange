@@ -1,5 +1,5 @@
 /**
- * Page code and image preload/decode (spec §10.3). Station and project-list hover call
+ * Page code and image preload/decode (spec §10.3). Station-link hover calls
  * prefetchRoute(); the page transition awaits preloadRoute() before it swaps
  * the page in, so heroes are decoded by the time they're shown.
  */
@@ -17,9 +17,6 @@ export interface Picture {
   sources: Record<string, string>;
   img: { src: string; w: number; h: number };
 }
-
-/** ResponsivePicture's default `sizes` (about 502px, under 1640 wide 31vw). */
-export const HERO_SIZES = "(max-width: 1640px) 31vw, 502px";
 
 /** Rotated pieces are resampled by the browser, so they get more pixels than
  *  they cover to stay crisp. */
@@ -89,7 +86,7 @@ function load({ picture: pic, sizes }: RouteImage): Promise<void> {
 const urlLoads = new Map<string, Promise<void>>();
 
 /** Fetch and decode a plain image URL (home's tape, the Experience logos). */
-export function decodeUrl(src: string): Promise<void> {
+function decodeUrl(src: string): Promise<void> {
   let p = urlLoads.get(src);
   if (!p) {
     const img = new Image();

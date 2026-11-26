@@ -11,7 +11,6 @@ import App from "./App";
 import { preloadSounds } from "./audio/engine";
 import { setTransitionRunner } from "./lib/router";
 import { pageTransition } from "./transition/pageTransition";
-import { GATE } from "./config/timings";
 import { initScroll } from "./lib/scroll";
 import { prefetchPages, prefetchRoute } from "./lib/assets";
 import { registerRoundedFont } from "./lib/fonts";
@@ -24,10 +23,6 @@ registerRoundedFont();
 window.addEventListener("vite:preloadError", (e) => {
   if (reloadOnce()) e.preventDefault();
 });
-
-// Page theme changes fade (only visible on a deep link's intro; elsewhere
-// they happen under the transition cover).
-document.documentElement.style.setProperty("--theme-fade", `${GATE.DEEP_LINK_FADE}s`);
 
 // The router owns scrolling (spec §4.3).
 history.scrollRestoration = "manual";

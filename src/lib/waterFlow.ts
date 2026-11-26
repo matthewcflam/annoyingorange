@@ -25,7 +25,7 @@ export function shapePath({ w, h, bl, bb, r }: Shape): string {
   );
 }
 
-export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 /**
  * A rush of water from the shape `s` to the box `to`, as a function of one

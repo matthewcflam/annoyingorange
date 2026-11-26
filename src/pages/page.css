@@ -10,8 +10,6 @@
  * lacks it, text sits a few px lower).
  */
 .page {
-  /* Stretching x: 1px of the 1640 frame. */
-  --fx: calc(100vw / 1640);
   /* One line of body text: 19px at 16. */
   --line: calc(var(--type-project-body) * var(--project-lh));
   /* How far below the top the footer's cat must stay, clear of the fixed
@@ -72,20 +70,6 @@
   outline-offset: 4px;
 }
 
-/* A page-coloured band under the header (About, Experience), so content
-   scrolls under it rather than through the name: the Map box with the same
-   margin below it as above. The Map box (.layer--chrome) sits above it. */
-.page__bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--station-head-h);
-  background: var(--color-bg);
-  z-index: 2;
-  pointer-events: none;
-}
-
 /* Section headings (TOOLS) are orange. */
 .page-heading {
   color: var(--color-orange);
@@ -122,9 +106,5 @@
   .page .page__name {
     margin-top: calc(var(--station-row-mid) - 13px);
     font-size: min(var(--type-project-title), (100vw - 2 * var(--grid-margin) - var(--map-w) - 16px) / 5.9);
-  }
-
-  .page__bar {
-    display: none;
   }
 }

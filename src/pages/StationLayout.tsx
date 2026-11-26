@@ -16,7 +16,6 @@ export default function StationLayout({
   className,
   rootRef,
   style,
-  bar,
   nav,
   footer = true,
   children,
@@ -24,8 +23,6 @@ export default function StationLayout({
   className?: string;
   rootRef?: Ref<HTMLDivElement>;
   style?: CSSProperties;
-  /** A page-coloured band under the header that content scrolls under. */
-  bar?: boolean;
   nav?: ReactNode;
   /** The site footer (About has none). */
   footer?: boolean;
@@ -33,7 +30,6 @@ export default function StationLayout({
 }) {
   return (
     <div ref={rootRef} className={`page${className ? ` ${className}` : ""}`} style={style}>
-      {bar && <div className="page__bar" aria-hidden="true" />}
       <header className="page__head">
         <h1 className="page__name">
           <a

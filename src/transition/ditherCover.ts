@@ -149,7 +149,7 @@ export interface HideOptions {
   onUnlock?: () => void;
 }
 
-export class DitherCover {
+class DitherCover {
   readonly canvas = document.createElement("canvas");
   /** CSS fallback and reduced-motion cover. */
   readonly fade = document.createElement("div");
@@ -191,21 +191,12 @@ export class DitherCover {
     return this.mode === "dither" && this.progress > 0;
   }
 
-  /** Tone of the next transition: the layer's title colours follow it
-   *  (transition.css), and the CSS fade takes the cover's colour token. Set
-   *  before show(). */
-  setTone(tone: "dark" | "light", color: `--${string}`): void {
-    const layer = this.canvas.parentElement;
-    if (!layer) return;
-    layer.dataset.tone = tone;
-    layer.style.setProperty("--bg", `var(${color})`);
-  }
-
-  /** Dither in, bottom to top, in the colour of token `color`. Resolves when
-   *  fully covered. */
-  show(reduced: boolean, color: `--${string}`): Promise<void> {
+  /** Dither in, bottom to top, in --color-cover-dark (every page is light,
+   *  so every cover is dark; transition.css colours the CSS fade the same).
+   *  Resolves when fully covered. */
+  show(reduced: boolean): Promise<void> {
     this.tween?.kill();
-    this.color = hexToRgb(readToken(color) || "#212121");
+    this.color = hexToRgb(readToken("--color-cover-dark"));
     this.mode = reduced || !this.gl ? "fade" : "dither";
     if (this.mode === "fade") return this.fadeTo(1, reduced ? T.REDUCED_FADE : T.SHOW * 0.3, 0);
     this.direction = 1;

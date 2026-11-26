@@ -5,12 +5,12 @@ import { FONTS } from "../config/timings";
  * packages add a " Variable" suffix; the short name silently falls back.
  * These must match the stacks in config/tokens.css.
  */
-export const FAMILY = {
+const FAMILY = {
   body: "Inter Variable",
 } as const;
 
 /** Build a CSS `font` shorthand. */
-export function fontString(weight: number, sizePx: number, family: string): string {
+function fontString(weight: number, sizePx: number, family: string): string {
   return `${weight} ${sizePx}px "${family}"`;
 }
 

@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "./lib/gsap";
 import { waitForFonts } from "./lib/fonts";
-import { GATE_UI } from "./config/timings";
+import { APP } from "./config/timings";
 import { introTimeline } from "./chrome/intro";
 import Outlet from "./pages/Outlet";
 import { useRoute } from "./lib/router";
@@ -12,7 +12,6 @@ import Cursor from "./chrome/Cursor";
 import ScrollBar from "./chrome/ScrollBar";
 import GridOverlay from "./chrome/GridOverlay";
 import PageErrorBoundary from "./chrome/PageErrorBoundary";
-import { routeFor } from "./config/routes";
 
 /**
  * Layer stack (spec §4.1), bottom to top:
@@ -30,13 +29,6 @@ export default function App() {
   const rootRef = useRef<HTMLDivElement>(null);
   const route = useRoute();
   const home = route === "/";
-  // A route commits under the transition cover, so the colours swap unseen.
-  const theme = routeFor(route).theme;
-
-  useLayoutEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
   useEffect(() => {
     let cancelled = false;
     // Fonts for the route the visitor landed on (home skips the body font).
@@ -49,11 +41,11 @@ export default function App() {
   useGSAP(
     () => {
       if (!fontsReady) return;
-      gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: GATE_UI.FADE_IN });
+      gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: APP.FADE_IN });
       // The intro (§6.5). Runs once, for the route the visitor landed on.
       const tl = introTimeline({
         root: rootRef.current!,
-        home: route === "/",
+        home,
         reduced: prefersReducedMotion(),
       });
       if (import.meta.env.DEV) Object.assign(window, { __intro: tl });

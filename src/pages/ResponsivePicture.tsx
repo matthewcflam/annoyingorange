@@ -1,17 +1,18 @@
-import { HERO_SIZES, type Picture } from "../lib/assets";
+import type { Picture } from "../lib/assets";
 
-/** An imagetools `?hero` picture: AVIF/WebP sources with an <img> fallback. */
+/** An imagetools picture (an `as: 'picture'` preset, vite.config.ts): AVIF/WebP
+ *  sources with an <img> fallback. */
 export default function ResponsivePicture({
   picture,
   alt,
   eager,
-  sizes = HERO_SIZES,
+  sizes,
   className,
 }: {
   picture: Picture;
   alt: string;
   eager: boolean;
-  sizes?: string;
+  sizes: string;
   className?: string;
 }) {
   return (

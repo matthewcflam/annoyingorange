@@ -21,8 +21,6 @@ import { readToken } from "../lib/tokens";
 import { SPRAY } from "../config/timings";
 import { SPRAY_PACE } from "../config/sprayPace";
 import { alongAt, maxSpeed, sampleGuide, speedShape, timeMap, type Guide } from "./paceModel";
-// TODO(spray rattle): restore with the play() call in spray().
-// import { play } from "../audio/engine";
 import { startHiss, type Hiss } from "../audio/sprayHiss";
 
 // ---------------------------------------------------------------------------
@@ -176,11 +174,10 @@ export class SprayEngine {
     this.timeline = tl;
 
     if (!instant) {
-      // The hiss starts silent. TODO(spray rattle): the rattle that led the
-      // first stroke (§7.2) was cut: it was ~8 dB louder than the full hiss.
+      // The hiss starts silent. (The rattle that led the first stroke, §7.2,
+      // was cut at the user's request: ~8 dB louder than the full hiss.)
       tl.call(() => {
         if (this.fastForward) return;
-        // play("spray.rattle");
         this.hiss ??= startHiss();
       }, undefined, 0);
     }

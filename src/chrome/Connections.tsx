@@ -16,7 +16,7 @@ const LINKS: { label: string; icon: keyof typeof ICONS; href: string | null }[] 
 /**
  * The blue Connections card: each connection's logo on the left (where Figma
  * has dots, user decision) and its name on the right; Email copies the
- * address and shows "email copied!" beside the card. Styled in footer.css
+ * address and shows "email copied!" beside the card. Styled in connections.css
  * (× --ft); the footer and About's collage (station.css) each place it.
  */
 export default function Connections({

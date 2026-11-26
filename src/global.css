@@ -29,12 +29,6 @@
      the composition instead of leaving the right side empty. Use it for x
      positions only; sizes stay in --px. */
   --vx: calc(100vw / 1767);
-  /* Station pages (About (2).png): the header's inset from the top and the
-     sides (user request: the same on both). The name's cap top and left, and
-     the Map pill's top and right, sit this far in. Unitless mockup px. */
-  --station-edge: 30;
-  /* The same as a length: the compact layout replaces it with its own. */
-  --station-edge-len: calc(var(--station-edge) * var(--px));
   /* The Map box (keychain/MapBox.tsx; Figma "Portfolio" and "Portfolio - Map
      Expanded"): closed 102×66 in Figma, enlarged to the user's reference (box 5.7 × 3.7 cap heights of "Map": 98×64 × --map-k), open 346×196, 20 from the top (all × --ps, tokens.css), its right edge
      on the grid margin. Fixed px, on every station page. The open card and
@@ -51,13 +45,10 @@
   /* The fixed header bar (user request): the Map box with the same margin
      below it as above. */
   --station-head-h: calc(2 * var(--map-top) + var(--map-h));
-  /* Corner rounding on every photo (user request): 10 mockup px. */
-  --image-radius: calc(10 * var(--px));
 }
 
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
   :root {
-    --station-edge-len: var(--gutter);
     --map-top: 14px;
     --map-k: 1px;
   }
@@ -75,19 +66,10 @@
   font-style: normal;
 }
 
-/* Page theme: light on home and the project pages, dark on About
-   and Experience. App sets
-   data-theme while the transition cover hides the page (--theme-fade is set
-   from timings.ts in main.tsx; it only shows on a deep link's intro). */
-:root,
-:root[data-theme="light"] {
+/* Every page is light. */
+:root {
   --color-bg: var(--color-home-bg);
   --color-text: var(--color-home-text);
-}
-
-:root[data-theme="dark"] {
-  --color-bg: var(--color-station-bg);
-  --color-text: var(--color-station-text);
 }
 
 html,
@@ -104,7 +86,6 @@ html {
 /* The page colour comes from body; no layer paints an opaque full-screen background (spec §4.1). */
 body {
   background: var(--color-bg);
-  transition: background-color var(--theme-fade, 0s), color var(--theme-fade, 0s);
   color: var(--color-text);
   font-family: var(--font-body);
   letter-spacing: -0.04em; /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */

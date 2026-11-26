@@ -6,7 +6,7 @@ import type { SoundId } from "../config/sounds";
 
 /** Where the page must scroll to put a block mid-screen: the centre of the
  *  block without the gap below it (its padding-bottom). */
-export function centreOf(el: HTMLElement): number {
+function centreOf(el: HTMLElement): number {
   const top = el.getBoundingClientRect().top + window.scrollY;
   const gap = parseFloat(getComputedStyle(el).paddingBottom);
   return top + (el.offsetHeight - gap) / 2 - window.innerHeight / 2;

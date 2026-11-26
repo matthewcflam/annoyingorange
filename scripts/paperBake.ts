@@ -8,8 +8,6 @@
  *   paperFill=<css colour token>   replace every pixel with that colour (the
  *                                  blank skyline sheet: the source is a stub)
  *   paperTint=<css colour token>   multiply by the token's colour, mixed by its alpha (tape)
- *   paperHalftone=<box width>      45° dot screen, HALFTONE_PX CSS px per cell
- *                                  when the image is shown <box width> CSS px wide
  *   paperFibre=<sheet width>       faint long fibre, in sheet (mockup) px
  *
  * Colour tokens are read from src/config/tokens.css, so the tokens stay the
@@ -60,18 +58,12 @@ function noise(x: number, y: number): number {
   return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
 }
 
-const smoothstep = (e0: number, e1: number, x: number) => {
-  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
-  return t * t * (3 - 2 * t);
-};
-
 export const paperTransform: TransformFactory = (config, ctx) => {
   const fill = config.paperFill as string | undefined;
   const tint = config.paperTint as string | undefined;
-  const halftone = config.paperHalftone ? Number(config.paperHalftone) : 0;
   const fibre = config.paperFibre ? Number(config.paperFibre) : 0;
-  if (!fill && !tint && !halftone && !fibre) return;
-  for (const k of ["paperFill", "paperTint", "paperHalftone", "paperFibre"]) if (config[k]) ctx.useParam(k);
+  if (!fill && !tint && !fibre) return;
+  for (const k of ["paperFill", "paperTint", "paperFibre"]) if (config[k]) ctx.useParam(k);
 
   return async function paper(state, image) {
     // Runs last, so the resize has already been applied to these pixels.
@@ -79,7 +71,6 @@ export const paperTransform: TransformFactory = (config, ctx) => {
     const { width: w, height: h } = info;
     const fillC = fill ? token(fill) : null;
     const tintC = tint ? token(tint) : null;
-    const cell = halftone ? (PAPER.HALFTONE_PX * w) / halftone : 0;
     const perSheetPx = fibre ? fibre / w : 0; // sheet px per image px
 
     for (let y = 0; y < h; y++) {
@@ -93,21 +84,6 @@ export const paperTransform: TransformFactory = (config, ctx) => {
           g = fillC[1] / 255;
           b = fillC[2] / 255;
           data[i + 3] = Math.round(fillC[3] * 255);
-        }
-        if (cell) {
-          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-          const px = (x + 0.5) / cell;
-          const py = (y + 0.5) / cell;
-          const hx = 0.7071 * px + 0.7071 * py;
-          const hy = -0.7071 * px + 0.7071 * py;
-          const dd = Math.hypot(hx - Math.floor(hx) - 0.5, hy - Math.floor(hy) - 0.5);
-          const rad = Math.sqrt(1 - lum) * 0.62;
-          const ink = 1 - smoothstep(rad - 0.12, rad + 0.12, dd);
-          const mix = PAPER.HALFTONE_MIX;
-          const ht = (c: number) => Math.min(c * 1.1 + 0.07, 1) * (1 - ink) + c * 0.72 * ink;
-          r = r + (ht(r) - r) * mix;
-          g = g + (ht(g) - g) * mix;
-          b = b + (ht(b) - b) * mix;
         }
         if (tintC) {
           const a = tintC[3];

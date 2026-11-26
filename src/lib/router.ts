@@ -50,7 +50,6 @@ export function takeProjectFocus(): ProjectSlug | null {
   projectFocus = null;
   return slug;
 }
-export const isInputLocked = () => transitioning;
 
 /** Resolves once no transition (or queued one) is running; immediately if idle.
  *  A page that mounts at commit uses it to start its entrance afterwards. */
@@ -114,7 +113,7 @@ function go(path: string, { push }: { push: boolean }) {
   run(to).catch(reportError);
 }
 
-/** Station, link or mini-map click. */
+/** Go to `path` (a station or page link) with the page transition. */
 export function navigate(path: string): void {
   go(path, { push: true });
 }

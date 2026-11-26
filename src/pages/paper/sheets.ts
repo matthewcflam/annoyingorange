@@ -39,7 +39,7 @@ const PHOTO_CROP = { x: -0.3058, y: -0.0952, w: 1.5207, h: 1.0952 };
 /** The prints' image is 213.82 × 1.5207 ≈ 325 mockup px wide (the big ones;
  *  all three share one `sizes`, so they share one download). Compact: ~310px.
  */
-export const PRINT_SIZES = compactSizes("310px", frameSizes(325));
+const PRINT_SIZES = compactSizes("310px", frameSizes(325));
 
 /** The three prints, back to front, and their tape. */
 export const PHOTO_SHEETS: Sheet[] = [

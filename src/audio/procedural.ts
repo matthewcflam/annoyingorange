@@ -35,33 +35,11 @@ export function whiteNoise(seconds = 2): AudioBuffer {
 }
 
 /**
- * Seamlessly looping brown noise (drag grain). The tail is
- * crossfaded into the head so the loop point is continuous.
- */
-export function brownNoise(seconds = 3): AudioBuffer {
-  const buf = makeBuffer(seconds);
-  const d = buf.getChannelData(0);
-  const xfade = Math.round(0.05 * SAMPLE_RATE);
-  const raw = new Float32Array(d.length + xfade);
-  let last = 0;
-  for (let i = 0; i < raw.length; i++) {
-    last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
-    raw[i] = last * 3.5;
-  }
-  for (let i = 0; i < d.length; i++) {
-    d[i] = i < xfade ? raw[i] * (i / xfade) + raw[d.length + i] * (1 - i / xfade) : raw[i];
-  }
-  return buf;
-}
-
-/**
  * Stand-in for a sound whose file doesn't exist yet. Each ID has a distinct
  * pitch or color (config/sounds.ts) so timing is audible during development;
  * variants are detuned so round-robin is audible too.
  */
 export function synthPlaceholder(p: Placeholder, variant = 0): AudioBuffer {
-  if (p.type === "brown") return brownNoise(p.dur);
-
   const buf = makeBuffer(p.dur);
   const d = buf.getChannelData(0);
 

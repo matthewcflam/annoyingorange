@@ -1,8 +1,7 @@
 /*
  * Page transition layer: the dither cover and its title, over everything.
  * Title styles ported from 2xa.studio's typer (.page-transition [data-typer]).
- * data-tone (set per transition): dark = dark cover, light text; light = the
- * reverse.
+ * Every page is light, so the cover is always dark with light text.
  */
 .layer--transition {
   z-index: 50;
@@ -12,11 +11,6 @@
   --fg: var(--color-station-text);
   --bg: var(--color-cover-dark);
   --accent: var(--color-transition-accent);
-}
-
-.layer--transition[data-tone="light"] {
-  --fg: var(--color-home-text);
-  --bg: var(--color-cover-light);
 }
 
 .transition__canvas,

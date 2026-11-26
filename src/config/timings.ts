@@ -10,21 +10,21 @@ export const FONTS = {
   TIMEOUT_MS: 2000,
 } as const;
 
-/** Load (the sound gate was removed: user change). */
-export const GATE_UI = {
-  /** The app fades in once fonts are ready. */
+/** The app fades in once fonts are ready (App.tsx). */
+export const APP = {
   FADE_IN: 0.3,
 } as const;
 
 /** Intro timeline on load (chrome/intro.ts). Positions are seconds from the
  *  moment fonts are ready (the app's fade-in starts then too). */
-export const GATE = {
+export const INTRO = {
   /** whenPageShown() resolves here. */
   PAGE_SHOWN: 0,
   // ---- Home (Figma "Home Page Final"; chrome/intro.ts) ----
   /** "Matthew Lam" fades up. */
   NAME_IN: 0.25,
   NAME_IN_DURATION: 0.5,
+  NAME_IN_EASE: "power2.out",
   /** The centre card rushes open (its flow is MAP_BOX.OPEN / OPEN_EASE). */
   CARD_OPEN: 0.45,
   /** The social glyphs fade up. */
@@ -33,6 +33,7 @@ export const GATE = {
   /** The cat draws itself (like the footer's). */
   CAT_IN: 0.9,
   CAT_DRAW: 1.6,
+  CAT_DRAW_EASE: "power2.inOut",
   /** TODO(open-question #1): deep link — the requested page fades in
    *  instead of the home sequence. */
   DEEP_LINK_FADE: 0.4,
@@ -105,21 +106,21 @@ export const SPRAY = {
   HISS_FLOOR: 0.4,
 } as const;
 
-/** Home: the "email copied to clipboard!" toast by the icons. */
-export const HOME = {
-  TOAST_IN: 0.25,
-  TOAST_EASE: "power2.out",
-  TOAST_RISE_PX: 6,
-  TOAST_HOLD: 1.6,
-  TOAST_OUT: 0.4,
+/** The "email copied" toasts (home's glyphs, the Connections card;
+ *  chrome/useToast.ts): rise and fade in, hold, fade out. */
+export const TOAST = {
+  IN: 0.25,
+  EASE: "power2.out",
+  RISE_PX: 6,
+  HOLD: 1.6,
+  OUT: 0.4,
 } as const;
 
 /**
  * Page transition between pages (transition/pageTransition.ts), copied from
  * 2xa.studio: a cover dithers in over everything, "Now arriving at: <name>"
  * scramble-types on it, the page swaps underneath, then the cover dithers away
- * bottom to top. The cover is dark leaving a light page (home, projects),
- * light leaving a dark one (About, Experience).
+ * bottom to top. Every page is light, so the cover is always dark.
  * Defaults are 2xa's own values.
  */
 export const TRANSITION = {
@@ -165,20 +166,20 @@ export const TRANSITION = {
 } as const;
 
 /** Scroll reveals on the station pages (lib/scrollReveal.ts). Seconds unless noted. */
-export const EXPERIENCE = {
-  /** Scroll reveal (lib/scrollReveal.ts): each element fades up once as it
-   *  enters the window. Rise in mockup px. */
-  REVEAL_Y: 24,
-  REVEAL_DURATION: 0.8,
-  REVEAL_EASE: "power3.out",
+/** Scroll reveal (lib/scrollReveal.ts; only the station footer uses it):
+ *  each element fades up once as it enters the window. Rise in mockup px. */
+export const REVEAL = {
+  Y: 24,
+  DURATION: 0.8,
+  EASE: "power3.out",
   /** Between elements that enter together (the first screen cascades). */
-  REVEAL_STAGGER: 0.06,
+  STAGGER: 0.06,
   /** After the page starts to appear, before the first screen reveals. */
-  REVEAL_DELAY: 0.2,
+  DELAY: 0.2,
   /** Reveal once this fraction of an element is in the window. (A fraction,
    *  not a margin above the bottom edge: elements at the page's foot, like
    *  the footer, could never scroll past such a line.) */
-  REVEAL_THRESHOLD: 0.25,
+  THRESHOLD: 0.25,
 } as const;
 
 /**
@@ -237,11 +238,13 @@ export const PROJECT = {
    *  mid-screen. */
   SCROLL_TO: 1.1,
   SCROLL_TO_EASE: "expo.inOut",
-  /** The footer cat draws itself when it scrolls into view. */
-  CAT_DRAW: 2.2,
-  CAT_DRAW_EASE: "power2.inOut",
-  /** Connections rows: the logo grows on hover, like a station dot. */
-  ROW_HOVER_SCALE: 1.2,
+} as const;
+
+/** The footer cat (chrome/DrawnCat.tsx) draws itself when it scrolls into
+ *  view, and again on a click. */
+export const CAT = {
+  DRAW: 2.2,
+  DRAW_EASE: "power2.inOut",
 } as const;
 
 /** Project media (pages/projects/Media.tsx): a collage piece expands to a
@@ -260,10 +263,6 @@ export const MEDIA = {
   CLOSE_EASE: "expo.out",
   /** The page-coloured backdrop behind the growing tile. */
   BACKDROP: 0.3,
-  /** Hover: the tile's label lifts. */
-  HOVER_SCALE: 1.06,
-  HOVER: 0.3,
-  HOVER_EASE: "power3.out",
   /** Expanded: switching items with the arrows (←/→). The old item slides
    *  out and fades as the new one slides in from the side it came from. */
   SLIDE: 0.45,
@@ -329,19 +328,15 @@ export const SCROLLBAR = {
   IDLE: 0.8,
 } as const;
 
-/** Home's paper texture, baked into the poster, tape and skyline-sheet images
+/** Home's paper texture, baked into the tape and skyline-sheet images
  *  at build time (scripts/paperBake.ts, the `paper*` directives in
  *  vite.config.ts): flat, matte paper (user request: no glass, no blur, no
  *  lighting). Restart the dev server after changing these. The drop shadows
  *  are CSS (--paper-shadow* in tokens.css). */
 export const PAPER = {
-  /** Paper fibre: luminance wobble (± fraction), on the posters, tape and the
+  /** Paper fibre: luminance wobble (± fraction), on the tape and the
    *  skyline's sheet. */
   FIBRE: 0.035,
-  /** A fine halftone screen over the posters: CSS px per cell at their shown
-   *  size, mixed at this strength. */
-  HALFTONE_PX: 3,
-  HALFTONE_MIX: 0.32,
 } as const;
 
 /**

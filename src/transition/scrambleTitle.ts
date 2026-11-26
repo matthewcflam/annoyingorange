@@ -54,7 +54,7 @@ interface CharNode {
   cls: string;
 }
 
-export class ScrambleTitle {
+class ScrambleTitle {
   readonly el = document.createElement("span");
 
   private chars: CharNode[] = [];

@@ -23,19 +23,6 @@ const compactMql = window.matchMedia(COMPACT_QUERY);
 
 export const isCompact = () => compactMql.matches;
 
-/** Calls `fn` whenever the layout switches between compact and full; returns
- *  the unsubscribe. */
-export function onCompactChange(fn: () => void): () => void {
-  compactMql.addEventListener("change", fn);
-  return () => compactMql.removeEventListener("change", fn);
-}
-
-/** The viewport's size in mockup px (it can be wider or taller than the frame). */
-export function viewportInMockupPx() {
-  const px = pxScale();
-  return { w: window.innerWidth / px, h: window.innerHeight / px };
-}
-
 /** `<source sizes>` for an image box `w` mockup px wide in the --px frame. */
 export const frameSizes = (w: number) =>
   `(min-aspect-ratio: 1767/1024) ${((w / FRAME.H) * 100).toFixed(2)}vh, ${((w / FRAME.W) * 100).toFixed(2)}vw`;

@@ -2,7 +2,7 @@
  * The Projects page (Projects.tsx), from the Figma frames "Portfolio" and
  * "Project Redesign": 1640 wide, on the 9-column grid; everything sits on
  * column edges (the frame's stray 17/23/743 x values are snapped). The shell (font, the fixed name, the
- * element resets, --line, --fx) is page.css; the footer is footer.css.
+ * element resets, --line) is page.css; the footer is footer.css.
  */
 .project {
   /* Where TOOLS locks while the page scrolls: one list row below the last
@@ -339,16 +339,12 @@
   rotate: var(--r);
 }
 
+/* A <button>: global.css already resets its padding, border, background and font. */
 .collage__item {
   position: relative;
   display: block;
   width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
   color: var(--color-home-text);
-  font: inherit;
-  letter-spacing: inherit;
 }
 
 .collage__item > .paper {
@@ -435,11 +431,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.media__picture {
-  position: absolute;
-  inset: 0;
 }
 
 /* The expanded media, over the page and its chrome, under the transition

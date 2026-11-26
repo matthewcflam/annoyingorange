@@ -4,7 +4,7 @@ import { EMAIL } from "../content/contact";
 import { useToast } from "./useToast";
 
 /**
- * Copy the email address and show the "copied" toast (HOME.TOAST_*). Put
+ * Copy the email address and show the "copied" toast (TOAST). Put
  * `toastRef` on a status element that renders "email copied to clipboard!"
  * while `copied` is true.
  */

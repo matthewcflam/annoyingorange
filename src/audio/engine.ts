@@ -2,9 +2,8 @@
  * The sound engine (spec §9). Module-level singletons only, never created in
  * effects, so React StrictMode can't double them (§4.2).
  *
- *   sources ─┬─> ui bus ─────────┐
- *            ├─> transition bus ─┼─> master gain ─> limiter ─> destination
- *            └─> ambient bus ────┘
+ *   sources ─┬─> ui bus ──────┬─> master gain ─> limiter ─> destination
+ *            └─> ambient bus ─┘
  *
  * Lifecycle:
  * 1. preloadSounds() at app start: fetch + decode every discovered file on an
@@ -80,13 +79,6 @@ export function preloadSounds(): Promise<void> {
   return Promise.all(jobs).then(() => undefined);
 }
 
-/** Dev inspection: where each file key's audio comes from. */
-export function soundReport(): Record<string, Source | "decoding"> {
-  const out: Record<string, Source | "decoding"> = {};
-  for (const [key, l] of buffers) out[key] = l.buffer ? l.source : "decoding";
-  return out;
-}
-
 // ---------------------------------------------------------------------------
 // Context + graph
 // ---------------------------------------------------------------------------
@@ -154,7 +146,6 @@ export function unlock({ muted: startMuted }: { muted: boolean }): void {
 
   buses = {
     ui: new GainNode(ctx),
-    transition: new GainNode(ctx),
     ambient: new GainNode(ctx),
   };
   for (const bus of Object.values(buses)) bus.connect(master);
@@ -205,29 +196,15 @@ if (import.meta.hot) {
 export interface PlayOptions {
   /** AudioContext time to start at. Schedule rhythmic sounds up front (§9.3). */
   when?: number;
-  /** Multiplies the manifest gain. */
-  gain?: number;
-  /** Multiplies playbackRate (e.g. station.hover pitch by index). */
-  rate?: number;
-  /** -1 (left) … 1 (right). */
-  pan?: number;
-  loop?: boolean;
-  /** Random ±rate/gain variation. Default: on, except for loops. */
-  vary?: boolean;
 }
 
-export interface Voice {
+interface Voice {
+  stopped: boolean;
   /** Fade out and stop. Safe to call more than once. */
   stop(fade?: number): void;
-  /** Smoothly set gain (relative to the play's base gain), e.g. per frame. */
-  setGain(value: number, timeConstant?: number): void;
 }
 
-interface ActiveVoice extends Voice {
-  stopped: boolean;
-}
-
-const voices = new Map<SoundId, ActiveVoice[]>();
+const voices = new Map<SoundId, Voice[]>();
 const roundRobin = new Map<SoundId, number>();
 
 const spread = (amount: number) => 1 + (Math.random() * 2 - 1) * amount;
@@ -248,33 +225,24 @@ function nextBuffer(id: SoundId): AudioBuffer | null {
 }
 
 /**
- * Play a sound. Returns a Voice handle (for loops and live gain), or null if
- * the engine isn't unlocked or the buffer isn't ready. Muted plays still run
- * (master gain is 0), so unmuting mid-loop just works.
+ * Play a sound, with a little random gain and rate variation. A no-op until
+ * the engine is unlocked or while the buffer isn't ready. Muted plays still
+ * run (master gain is 0).
  */
-export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
-  if (!ctx || !buses) return null;
+export function play(id: SoundId, opts: PlayOptions = {}): void {
+  if (!ctx || !buses) return;
   const buffer = nextBuffer(id);
-  if (!buffer) return null;
+  if (!buffer) return;
 
   const context = ctx;
-  const def = SOUNDS[id] as SoundDef;
-  const vary = opts.vary ?? !opts.loop;
-  const baseGain = (def.gain ?? 1) * (opts.gain ?? 1) * (vary ? spread(AUDIO.GAIN_VARIATION) : 1);
-
+  const def: SoundDef = SOUNDS[id];
   const src = new AudioBufferSourceNode(context, {
     buffer,
-    loop: opts.loop ?? false,
-    playbackRate: (opts.rate ?? 1) * (vary ? spread(AUDIO.RATE_VARIATION) : 1),
+    playbackRate: spread(AUDIO.RATE_VARIATION),
   });
-  const gain = new GainNode(context, { gain: baseGain });
+  const gain = new GainNode(context, { gain: (def.gain ?? 1) * spread(AUDIO.GAIN_VARIATION) });
   src.connect(gain);
-  let tail: AudioNode = gain;
-  if (opts.pan) {
-    tail = new StereoPannerNode(context, { pan: opts.pan });
-    gain.connect(tail);
-  }
-  tail.connect(buses[def.bus]);
+  gain.connect(buses[def.bus]);
 
   // Voice limit: fade out the oldest before adding a new one.
   const list = voices.get(id) ?? [];
@@ -282,7 +250,7 @@ export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
   const limit = def.voices ?? AUDIO.DEFAULT_VOICE_LIMIT;
   while (list.length >= limit) list[0].stop(AUDIO.VOICE_STEAL_FADE);
 
-  const voice: ActiveVoice = {
+  const voice: Voice = {
     stopped: false,
     stop(fade = AUDIO.VOICE_STEAL_FADE) {
       if (voice.stopped) return;
@@ -295,10 +263,6 @@ export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
       gain.gain.linearRampToValueAtTime(0, t + fade);
       src.stop(t + fade + 0.005);
     },
-    setGain(value, timeConstant = 0.015) {
-      if (voice.stopped) return;
-      gain.gain.setTargetAtTime(baseGain * value, context.currentTime, timeConstant);
-    },
   };
   list.push(voice);
 
@@ -306,10 +270,8 @@ export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
     voice.stopped = true;
     const i = list.indexOf(voice);
     if (i >= 0) list.splice(i, 1);
-    tail.disconnect();
-    if (tail !== gain) gain.disconnect();
+    gain.disconnect();
   };
 
   src.start(Math.max(opts.when ?? 0, context.currentTime));
-  return voice;
 }

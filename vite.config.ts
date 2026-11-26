@@ -3,29 +3,26 @@ import { defineConfig, type Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { paperTransform } from './scripts/paperBake.ts'
 
-/** Image presets (spec §10.3). `?hero` on an image import generates AVIF +
- *  WebP at 1× and 2× the rendered width and returns a `Picture` (see
- *  src/imagetools.d.ts). Hero boxes are 600 mockup px wide; 700 leaves room
- *  for `object-fit: cover` cropping. */
+/** Image presets (spec §10.3): `?<name>` on an image import applies its
+ *  directives. `as: 'picture'` presets return a `Picture` (AVIF + WebP
+ *  srcsets; src/imagetools.d.ts). */
 const PRESETS: Record<string, Record<string, string>> = {
-  hero: { w: '700;1400', format: 'avif;webp', as: 'picture' },
   // The project collages' photos (content/projects.ts): ~250–420 CSS px in
   // the page (asked for at 1.5x, since they're rotated; collageSizes()), up
   // to 60% of the window in the lightbox. Quality is above sharp's AVIF
   // default (50), which looked soft at these sizes.
   collage: { w: '600;1000;1600;2400', format: 'avif;webp', quality: '72', as: 'picture' },
-  // A <video> poster: one URL (the attribute takes no srcset), wide enough
-  // for the expanded lightbox.
   // Experience's index logos: ~14–26 CSS px boxes (the TQD sprite shows a
   // third of its width), so one 160px WebP covers 3x screens.
   logo: { w: '160', format: 'webp', quality: '85' },
+  // A <video> poster: one URL (the attribute takes no srcset), wide enough
+  // for the expanded lightbox.
   poster: { w: '1280', format: 'webp', quality: '75' },
-  // Home's paper (pages/paper/sheets.ts). The texture is baked in at build
-  // time (scripts/paperBake.ts), so the page ships plain images.
-  // The taped prints: shown ~325 CSS px wide at the reference size, up to
+  // Paper prints (home, About, Experience; pages/paper/): shown ~325 CSS px wide at the reference size, up to
   // ~460 on a big screen, so 400/800/1200 covers 1x–2.6x.
   print: { w: '400;800;1200', format: 'avif;webp', as: 'picture' },
-  // The faded posters: the source is the 445 px box itself; halftone + fibre.
+  // The paper texture below is baked in at build time (scripts/paperBake.ts),
+  // so the page ships plain images.
   // Tape: alpha WebP, warmed by --tape-tint, with fibre. Pass `w` (2x its box)
   // and `paperFibre` (its box width, mockup px) on the import.
   tape: { format: 'webp', quality: '90', paperTint: '--tape-tint' },

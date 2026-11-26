@@ -77,9 +77,8 @@ function JobSection({ job, ref }: { job: Job; ref: (el: HTMLElement | null) => v
 /**
  * Experience (Figma "Experience Final"): three jobs staggered across the
  * grid, then the site footer. The index (ExperienceList.tsx) sits fixed
- * under "Matthew Lam" in the page header, like the Projects list; its extra rows
- * (Aquatics, Geering Up) have no section. Everything fades up as it's
- * scrolled into view (lib/scrollReveal.ts).
+ * under "Matthew Lam" in the page header, like the Projects list. Only the
+ * footer fades up as it's scrolled into view (lib/scrollReveal.ts).
  */
 export default function Experience() {
   const rootRef = useRef<HTMLDivElement>(null);

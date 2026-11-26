@@ -11,8 +11,6 @@
      request; --font-rounded below). ---- */
   --font-body:    var(--font-rounded);
   --font-name:    var(--font-rounded);
-  --font-sound:   var(--font-rounded);
-  --font-muted:   var(--font-rounded);
   /* Body text (user request): Nunito Light, from @fontsource/nunito (only the
      300 weight is imported, main.tsx). The home bio, About and Experience
      copy, and the project text; the names, Map box, Connections card,
@@ -26,17 +24,15 @@
      its mockup size times --px, with its own floor (user request: legible on
      phones, and the floors keep the hierarchy name > label > head > body >
      small). The floors are in rem, so browser zoom and a larger default
-     font size still apply. --tu is --px floored at 1rem / 18. ---- */
-  --tu:           max(var(--px), 1rem / 18);
+     font size still apply. ---- */
   --type-name:    max(1.75rem, 48 * var(--px));   /* "Matthew Lam" (home, station header), transition title: floor 28 */
-  --type-label:   max(1.125rem, 30 * var(--px));  /* home map labels: floor 18 */
   --type-small:   max(0.8125rem, 20 * var(--px)); /* Map / Close, toasts: floor 13 */
   /* Social glyphs: the unit of the 36-unit icon box. It is --type-small / 20,
      the Map button's own unit (user request), so the glyphs and the button
      always scale together and share its floor. */
   --iu:           calc(var(--type-small) / 20);
 
-  /* ---- Base: --color-bg / --color-text follow data-theme (global.css) ---- */
+  /* ---- Base: --color-bg / --color-text (global.css) ---- */
   --color-home-bg:      #FFFFF8;  /* home */
   --color-home-text:    #000000;
   --color-station-bg:   #212121;  /* the dark cover (every page is light now) */
@@ -57,16 +53,13 @@
   --cursor-label-size:  16px;
   --cursor-label-pad:   0.3em 0.5em 0.25em;
 
-  /* ---- Transit map ---- */
-  --color-route:          #0664DF;  /* spec said ≈#0A64E0; sampled */
-  --color-station-fill:   #FFFFFF;
-  --color-station-active: #FFA62A;  /* mini-map current dot, sampled */
+  /* ---- Focus rings ---- */
+  --color-route:          #0664DF;  /* the old transit-map blue, sampled */
 
   /* ---- Page transition (2xa.studio dither cover) ----
      The cover is the opposite of the page being left: dark leaving a light
      page, light leaving a dark one (transition/pageTransition.ts). */
   --color-cover-dark:        var(--color-station-bg);
-  --color-cover-light:       var(--color-home-bg);
   --color-transition-accent: var(--color-orange); /* the site orange (user request; 2xa uses its blue) */
   --font-transition: var(--font-rounded);
 
@@ -139,7 +132,6 @@
   --type-project-name:  calc(2.25rem * var(--ps)); /* 24 (36 compact): media labels */
   --type-project-card:  calc(24 * var(--map-k)); /* 21 (24 compact): the Map box, matching Connections (24 × --ft) */
   --type-project-body:  calc(1.5rem * var(--ps));  /* 16 (24 compact): everything else, footer credits included (user request; 16 in Figma) */
-  --type-project-small: max(11px, 1rem * var(--ps)); /* 11 (16 compact): the copy toast */
   --project-lh:         1.1875;    /* 19px lines at 16 (measured from the frame) */
   --color-grey:  #939393;          /* inactive projects, tools, list rules */
   --color-media: #C6C6C6;          /* media placeholders */

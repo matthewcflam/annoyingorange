@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "../lib/gsap";
 import { prefersReducedMotion } from "../lib/motion";
 import { whenPageShown } from "../lib/pageReveal";
-import { PROJECT } from "../config/timings";
+import { CAT } from "../config/timings";
 import catSvg from "../../assets-src/svg/chat-cat.svg?raw";
 
 /**
@@ -26,7 +26,7 @@ export default function DrawnCat({ className, drawOnView = false }: { className:
     const draw = () => {
       if (prefersReducedMotion()) return;
       tween?.kill();
-      tween = gsap.fromTo(paths, { drawSVG: "0%" }, { drawSVG: "100%", duration: PROJECT.CAT_DRAW, ease: PROJECT.CAT_DRAW_EASE });
+      tween = gsap.fromTo(paths, { drawSVG: "0%" }, { drawSVG: "100%", duration: CAT.DRAW, ease: CAT.DRAW_EASE });
     };
 
     if (drawOnView && !prefersReducedMotion()) {
