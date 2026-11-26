@@ -9,7 +9,7 @@ import type { IndexRow } from "../../content/experience";
  * 1–2, a row per job (logo, name, its year). The row of the job in
  * focus (`active`, lib/useScrollIndex.ts) is black, the others grey; a click
  * glides the page to that job. Compact: it sits under the name and scrolls
- * with the page (station.css).
+ * with the page (experience.css).
  */
 export default function ExperienceList({
   rows,

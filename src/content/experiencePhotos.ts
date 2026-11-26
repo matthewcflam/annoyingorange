@@ -1,13 +1,13 @@
 /**
  * Experience's taped photos (Figma "Experience Final"), by job id, styled
- * like home's prints (pages/paper/). Kept out of content/experience.ts, which
+ * like home's prints (components/paper/). Kept out of content/experience.ts, which
  * the main chunk imports for the index logos: only the Experience chunk and
  * preloadRoute("/experience") (a dynamic import) load these.
  *
  * A cluster's top-left is `dx` right of column `col`'s left edge and `dy`
  * below the job's company cap top; `w`×`h` is its box. Each sheet is placed
  * by its centre inside that box, with its unrotated size and CSS rotation.
- * All Figma px (× --cp in station.css).
+ * All Figma px (× --cp in experience.css).
  *
  * Column 9 stays empty (user request): the columns stretch but the photos
  * don't, so where a cluster would cross column 8's right edge, `fit` slides

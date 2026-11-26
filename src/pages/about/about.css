@@ -35,7 +35,7 @@
   --ps-u: var(--au);
 }
 
-/* The Connections card (chrome/Connections.tsx, Figma "Group 122"): a
+/* The Connections card (components/Connections.tsx, Figma "Group 122"): a
    collage piece placed like the prints, in front of them, at
    --about-card-opacity (Figma 70%). Every footer measure is × --ft, so --ft
    is the collage unit here, then Figma's sizes: 308×168, text 21.33, rows

@@ -1,7 +1,7 @@
 /*
  * The Connections card (Connections.tsx), sized in --ft, which the place
  * that shows it defines: the footer (footer.css) and About's collage
- * (station.css). Each also places it.
+ * (about.css). Each also places it.
  */
 /* ---- Connections: at (671, 1466), 232 wide (Figma), text 24. Taller than
    Figma's 147 (user request): the rows are 31 apart, the Map card's station

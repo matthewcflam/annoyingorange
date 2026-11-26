@@ -30,7 +30,7 @@
      the composition instead of leaving the right side empty. Use it for x
      positions only; sizes stay in --px. */
   --vx: calc(100vw / 1767);
-  /* The Map box (keychain/MapBox.tsx; Figma "Portfolio" and "Portfolio - Map
+  /* The Map box (components/MapBox.tsx; Figma "Portfolio" and "Portfolio - Map
      Expanded"): closed 102×66 in Figma, enlarged to the user's reference (box 5.7 × 3.7 cap heights of "Map": 98×64 × --map-k), open 346×196, 20 from the top (all × --ps, tokens.css), its right edge
      on the grid margin. Fixed px, on every station page. The open card and
      its text scale by --map-k, the footer Connections card's --ft cap (24 ×

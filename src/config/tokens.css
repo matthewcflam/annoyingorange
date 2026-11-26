@@ -78,7 +78,7 @@
   --color-transition-accent: var(--color-orange); /* the site orange (user request; 2xa uses its blue) */
   --font-transition: var(--font-rounded);
 
-  /* ---- Station chrome: the Map box (keychain/MapBox.tsx, Figma "Portfolio" /
+  /* ---- Station chrome: the Map box (components/MapBox.tsx, Figma "Portfolio" /
      "Portfolio - Map Expanded") ---- */
   --color-map-box:      var(--color-route);
   --color-map-box-text: #FFFFFF;
@@ -92,7 +92,7 @@
   --color-poster-mango:       #F89E21;
   --color-poster-text:        #FFFFFF;
 
-  /* ---- Home's paper (Figma "Home Page Final"; pages/paper/): the prints
+  /* ---- Home's paper (Figma "Home Page Final"; components/paper/): the prints
      are see-through like the reference (opacity), warmed by Figma's 10%
      orange. The tape is a little more orange than Figma's (user request:
      realistic masking tape), and the photo under it shows through. The

@@ -39,7 +39,7 @@ function JobPhotos({ job }: { job: Job }) {
 /** One job, placed on the 9-column grid where Figma staggers it (three
  *  columns from `col`, `drop` below its row's top): the company, the role
  *  and date in grey, then the points, and its taped photos (placed from
- *  their own column, station.css). */
+ *  their own column, experience.css). */
 function JobSection({ job, ref }: { job: Job; ref: (el: HTMLElement | null) => void }) {
   const p = JOB_PHOTOS[job.id];
   return (

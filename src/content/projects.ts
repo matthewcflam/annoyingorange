@@ -22,7 +22,7 @@ import type { ProjectSlug } from "../config/routes";
 export type { ProjectSlug };
 
 /**
- * One item of a project's media (pages/projects/Media.tsx), as the expanded
+ * One item of a project's media (pages/projects/Collage.tsx, Lightbox.tsx), as the expanded
  * view (the lightbox) shows it. `w` / `h` give its aspect ratio there.
  * - image: a photo (a `?collage` imagetools picture).
  * - placeholder: a labelled grey box (the Figma file's).
@@ -43,7 +43,7 @@ export interface VideoSource {
 
 /**
  * One taped print in a project's collage (user request: "order, but
- * human"; styled like home's and Experience's prints, pages/paper/). Pieces
+ * human"; styled like home's and Experience's prints, components/paper/). Pieces
  * are placed freely and overlap, each later one over those before. All
  * lengths are % of the collage's width (three columns), so the collage scales
  * with the columns. Its height is its media's aspect: the whole photo shows.

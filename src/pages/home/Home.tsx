@@ -33,14 +33,14 @@ const SprayDebug =
 
 /**
  * Home (Figma "Home Page Final", 1767×1024): "Matthew Lam" over the centre
- * card (the Map card, pinned open: keychain/MapBox.tsx variant="home"), the
+ * card (the Map card, pinned open: components/MapBox.tsx variant="home"), the
  * social glyphs and sound toggle beside an orange cat, the Vancouver skyline,
  * taped photos (HomePhotos.tsx, paper/PaperSheet.tsx), two faded tech papers
  * bleeding off the top, and "who?" sprayed in orange under a glass card that
  * lists the experiences and links to Experience. The skyline and "who?"
  * replay on click.
  *
- * The intro on load (chrome/intro.ts) reveals the pieces and opens the card;
+ * The intro on load (intro.ts) reveals the pieces and opens the card;
  * every later visit shows them finished. Placement is home.css.
  */
 export default function Home() {
@@ -171,7 +171,7 @@ export default function Home() {
         ))}
       </a>
 
-      {/* The intro draws it the first time (chrome/intro.ts); a click redraws it. */}
+      {/* The intro draws it the first time (intro.ts); a click redraws it. */}
       <DrawnCat className="home__cat" />
       <SocialLinks className="home__social">
         <MuteToggle />

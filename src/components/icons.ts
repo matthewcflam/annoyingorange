@@ -1,6 +1,6 @@
 /** Font Awesome 7's github, linkedin-in, devpost (brands) and regular envelope, copied
  *  as plain paths: the same glyphs without FA's runtime and CSS (~26 kB gz).
- *  The base styles FA gave them are in chrome.css (.social-links__icon svg).
+ *  The base styles FA gave them are in social-links.css (.social-links__icon svg).
  *  `ink` is the box the glyph actually fills (measured with getBBox), for
  *  rows that line glyphs up by their ink (home's social row). */
 export const ICONS = {

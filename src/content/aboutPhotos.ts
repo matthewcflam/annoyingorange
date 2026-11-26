@@ -1,9 +1,9 @@
 /**
  * About's collage (Figma "ABOUT FINAL", node 501:94): eight prints of
- * me-final.png, styled like home's (pages/paper/: 80% opacity, the orange
+ * me-final.png, styled like home's (components/paper/: 80% opacity, the orange
  * tint, the shadow), no tape. Back to front. Each sheet is its centre in the
  * 1600×998 frame, its unrotated size and its CSS rotation, all Figma px
- * (× --au in station.css). Every print is object-fit: cover of the same
+ * (× --au in about.css). Every print is object-fit: cover of the same
  * image, so they share one download. Figma's ninth print (501:111) sits off
  * the frame and is left out.
  */

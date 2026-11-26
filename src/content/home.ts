@@ -1,4 +1,4 @@
-/** Home's copy (pages/Home.tsx). */
+/** Home's copy (pages/home/Home.tsx). */
 
 /** The tech papers' lists, back to front (Figma "Group 123", "Group 124"). */
 export const TECH_PAPERS: readonly (readonly string[])[] = [

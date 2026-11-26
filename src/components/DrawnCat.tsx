@@ -11,7 +11,7 @@ import { CURSOR_LABEL } from "../content/ui";
  * A click inside it (the area its strokes enclose: its paths take
  * pointer-events, the box around it stays click-through; home.css,
  * footer.css) draws it again. Its first draw is either the home intro's
- * (chrome/intro.ts, which selects `.home__cat path`) or, with `drawOnView`,
+ * (pages/home/intro.ts, which selects `.home__cat path`) or, with `drawOnView`,
  * the first time it scrolls into view once the page shows (the footer).
  */
 export default function DrawnCat({ className, drawOnView = false }: { className: string; drawOnView?: boolean }) {

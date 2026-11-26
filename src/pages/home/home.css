@@ -235,7 +235,7 @@
   pointer-events: all;
 }
 
-/* ---- GitHub, LinkedIn, mail and sound (chrome.css places the glyphs):
+/* ---- GitHub, LinkedIn, mail and sound (social-links.css places the glyphs):
    Figma's 124-wide row of three at (301, 515), centred on y 536.5. Kept
    186 frame px right of the cat, so a wide screen doesn't pull them apart. ---- */
 .home .home__social {

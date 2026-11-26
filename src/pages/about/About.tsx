@@ -29,7 +29,7 @@ function Span({ span }: { span: AboutSpan }) {
  * About (Figma "ABOUT FINAL"): one screen, no footer. A collage of prints
  * of me-final.png on the left (content/aboutPhotos.ts), placed in Figma px
  * from the frame's centre, and the greeting and copy starting at grid
- * column 6, centred vertically in the window (station.css).
+ * column 6, centred vertically in the window (about.css).
  */
 export default function About() {
   return (

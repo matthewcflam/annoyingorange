@@ -7,7 +7,7 @@ import Connections from "./Connections";
 /**
  * The foot of every station page (About, Experience, the projects; Figma
  * "Experience Final", y 1449 on): the cat, "Let's chat!" by its foot, the
- * blue Connections box (chrome/Connections.tsx) and the credits. The cat
+ * blue Connections box (components/Connections.tsx) and the credits. The cat
  * draws itself when it scrolls into view.
  */
 export default function SiteFooter() {

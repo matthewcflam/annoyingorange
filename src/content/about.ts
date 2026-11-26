@@ -1,4 +1,4 @@
-/** About's copy (pages/About.tsx; Figma "ABOUT FINAL"). */
+/** About's copy (pages/about/About.tsx; Figma "ABOUT FINAL"). */
 import type { StationId } from "../config/routes";
 
 /** A run of text: plain, orange (`accent`), or an orange link to a station. */

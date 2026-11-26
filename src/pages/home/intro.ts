@@ -5,7 +5,7 @@
  *
  * On home (Figma "Home Page Final"): the paper (tech papers, photos, tape,
  * the skyline's sheet) is simply there, sharp, from the first frame
- * (pages/paper/); the name fades up, the centre card rushes
+ * (components/paper/); the name fades up, the centre card rushes
  * open, the cat draws itself and the glyphs fade up. The skyline and "who?"
  * are there finished from the first frame (user request: only the cat
  * animates on load; a click replays either, see Home.tsx). Every later visit shows all of it finished.

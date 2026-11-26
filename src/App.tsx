@@ -22,7 +22,7 @@ import PageErrorBoundary from "./chrome/PageErrorBoundary";
  *   z50 transition        — the dither cover and its title, over everything
  *
  * There is no sound gate (user change): once fonts are ready everything
- * mounts and the intro timeline (chrome/intro.ts) reveals it. Sound starts
+ * mounts and the intro timeline (pages/home/intro.ts) reveals it. Sound starts
  * muted; home's toggle turns it on.
  */
 export default function App() {

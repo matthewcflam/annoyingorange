@@ -1,5 +1,5 @@
 /**
- * The Map box's water flow (keychain/MapBox.tsx), shared with the project
+ * The Map box's water flow (components/MapBox.tsx), shared with the project
  * poster (pages/projects/ProjectList.tsx): one set of flow numbers, MAP_BOX.
  */
 import { MAP_BOX as M } from "../config/timings";

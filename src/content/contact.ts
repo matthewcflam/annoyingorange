@@ -10,7 +10,7 @@ export type ContactId = "email" | "linkedin" | "github" | "devpost";
 export interface ContactLink {
   id: ContactId;
   label: string;
-  /** chrome/icons.ts */
+  /** components/icons.ts */
   icon: "mail" | "linkedin" | "github" | "devpost";
   /** Opens in a new tab; null: Email, which copies the address instead. */
   href: string | null;
@@ -19,7 +19,7 @@ export interface ContactLink {
 }
 
 /** Every way to reach me, in the Connections card's order (Figma). Home's
- *  glyph row (chrome/SocialLinks.tsx) shows the same links in its own order. */
+ *  glyph row (components/SocialLinks.tsx) shows the same links in its own order. */
 export const CONTACT_LINKS: readonly ContactLink[] = [
   { id: "email", label: "Email", icon: "mail", href: null, cursor: "Copy Email" },
   { id: "linkedin", label: "LinkedIn", icon: "linkedin", href: LINKEDIN, cursor: "View LinkedIn" },

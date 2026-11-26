@@ -3,7 +3,7 @@
    static CSS (--paper-shadow* in tokens.css), painted once. An outer
    box-shadow is never drawn under the box, so none shows through the
    see-through prints. Shared by home (home.css places the sheets) and
-   the Experience photos (station.css); --ps-u, the unit the shadows scale by,
+   the Experience photos (experience.css); --ps-u, the unit the shadows scale by,
    is home's --us unless the page sets it on the sheet. ---- */
 .paper {
   --ps-u: var(--us);

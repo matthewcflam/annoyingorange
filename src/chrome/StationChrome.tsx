@@ -6,7 +6,7 @@ import MapBox from "../components/MapBox";
  * Chrome on station pages: the Map box top-right (the site's navigation).
  * Mounted while the route is a station page, so it persists from one station
  * to the next. The social links live in the footer's Connections box
- * (pages/SiteFooter.tsx); the name top-left goes home (pages/StationLayout.tsx).
+ * (components/SiteFooter.tsx); the name top-left goes home (components/StationLayout.tsx).
  */
 export default function StationChrome() {
   const route = useRoute();

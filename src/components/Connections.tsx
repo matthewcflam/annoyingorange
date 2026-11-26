@@ -8,7 +8,7 @@ import { CONTACT_LINKS, EMAIL } from "../content/contact";
  * The blue Connections card: each connection's logo on the left (where Figma
  * has dots, user decision) and its name on the right; Email copies the
  * address and shows "email copied!" beside the card. Styled in connections.css
- * (× --ft); the footer and About's collage (station.css) each place it.
+ * (× --ft); the footer and About's collage (about.css) each place it.
  */
 export default function Connections({
   className = "",

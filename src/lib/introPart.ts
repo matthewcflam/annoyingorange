@@ -1,6 +1,6 @@
 /**
  * One piece of home's intro that plays once, then shows finished on every
- * later visit: the centre card (pages/homeIntro.ts). chrome/intro.ts calls
+ * later visit: the centre card (pages/home/homeCard.ts). pages/home/intro.ts calls
  * start() at the piece's time,
  * or skip() on a deep link; the page component, which remounts on every
  * visit, reads the state and listens for the start. Module state, because

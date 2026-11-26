@@ -1,6 +1,6 @@
 /**
  * The WebGL1 setup the page transition's dither cover (transition/ditherCover.ts)
- * and home's glass card (pages/glass/glassRenderer.ts) share: a transparent,
+ * and home's glass card (pages/home/glass/glassRenderer.ts) share: a transparent,
  * non-antialiased context, a full-screen quad on attribute 0 (`aPos`), and
  * programs that throw on a compile or link error (each caller falls back to
  * CSS then).

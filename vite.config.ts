@@ -19,7 +19,7 @@ const PRESETS: Record<string, Record<string, string>> = {
   // A <video> poster: one URL (the attribute takes no srcset), wide enough
   // for the expanded lightbox.
   poster: { w: '1280', format: 'webp', quality: '75' },
-  // Paper prints (home, About, Experience; pages/paper/): shown ~325 CSS px wide at the reference size, up to
+  // Paper prints (home, About, Experience; components/paper/): shown ~325 CSS px wide at the reference size, up to
   // ~460 on a big screen, so 400/800/1200 covers 1x–2.6x.
   print: { w: '400;800;1200', format: 'avif;webp', as: 'picture' },
   // The paper texture below is baked in at build time (scripts/paperBake.ts),

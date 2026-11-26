@@ -15,12 +15,12 @@ export const APP = {
   FADE_IN: 0.3,
 } as const;
 
-/** Intro timeline on load (chrome/intro.ts). Positions are seconds from the
+/** Intro timeline on load (pages/home/intro.ts). Positions are seconds from the
  *  moment fonts are ready (the app's fade-in starts then too). */
 export const INTRO = {
   /** whenPageShown() resolves here. */
   PAGE_SHOWN: 0,
-  // ---- Home (Figma "Home Page Final"; chrome/intro.ts) ----
+  // ---- Home (Figma "Home Page Final"; pages/home/intro.ts) ----
   /** "Matthew Lam" fades up. */
   NAME_IN: 0.25,
   NAME_IN_DURATION: 0.5,
@@ -40,7 +40,7 @@ export const INTRO = {
   DEEP_LINK_FADE: 0.4,
 } as const;
 
-/** Home's skyline redraws on click (pages/skylineDraw.ts, user request): from
+/** Home's skyline redraws on click (pages/home/skylineDraw.ts, user request): from
  *  the peak down the ridges, then the city top to bottom. Distances are the
  *  SVG's own px (664×143 at the reference size). Seconds. */
 export const SKYLINE = {
@@ -118,7 +118,7 @@ export const SPRAY = {
 } as const;
 
 /** The "email copied" toasts (home's glyphs, the Connections card;
- *  chrome/useToast.ts): rise and fade in, hold, fade out. */
+ *  components/useToast.ts): rise and fade in, hold, fade out. */
 export const TOAST = {
   IN: 0.25,
   EASE: "power2.out",
@@ -210,7 +210,7 @@ export const REVEAL = {
 } as const;
 
 /**
- * The Map box, top-right on station pages (keychain/MapBox.tsx; Figma
+ * The Map box, top-right on station pages (components/MapBox.tsx; Figma
  * "Portfolio" → "Portfolio - Map Expanded"). Opening, the blue box flows out
  * like poured liquid (soft corners, the moving edges bowed outward, width
  * leading height), then hardens into the square-cornered card, and only then
@@ -267,7 +267,7 @@ export const PROJECT = {
   SCROLL_TO_EASE: "expo.inOut",
 } as const;
 
-/** The footer cat (chrome/DrawnCat.tsx) draws itself when it scrolls into
+/** The footer cat (components/DrawnCat.tsx) draws itself when it scrolls into
  *  view, and again on a click. */
 export const CAT = {
   DRAW: 2.2,
@@ -276,7 +276,7 @@ export const CAT = {
   VIEW_THRESHOLD: 0.3,
 } as const;
 
-/** Project media (pages/projects/Media.tsx): a collage piece expands to a
+/** Project media (pages/projects/Collage.tsx, Lightbox.tsx): a collage piece expands to a
  *  centred player over the dimmed page. */
 export const MEDIA = {
   /** The player's width, as a fraction of the window's (at the tile's aspect
@@ -380,7 +380,7 @@ export const PAPER = {
 } as const;
 
 /**
- * Home's glass card over "who?" (pages/glass/glassRenderer.ts). The first
+ * Home's glass card over "who?" (pages/home/glass/glassRenderer.ts). The first
  * seven are Figma's Glass effect on "Rectangle 157" as set in the file (Plugin
  * API: radius 4, refraction 0.8, depth 20, light -45° at 0.8, dispersion 0.5,
  * splay 0); lengths are frame px. Figma's shader isn't public: the gains below

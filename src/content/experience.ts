@@ -2,7 +2,7 @@
  * Experience page copy (Figma "Experience Final", node 460:182). Each job
  * has a section (company, role, date, points) and a row in the index
  * (`listName`, `listDate`, its logo); logo boxes are Figma px at a 16px body
- * (× --cp in station.css), centred on the row; `crop` is Figma's image
+ * (× --cp in experience.css), centred on the row; `crop` is Figma's image
  * placement inside the box, in % (the TQD logo is a sprite).
  */
 import enersysLogo from "../../assets-src/images/enersys-logo.png?logo";
@@ -71,7 +71,7 @@ export const JOBS: Job[] = [
     listDate: "2026",
     logo: { src: sailbotLogo, w: 21, h: 21, x: 0 },
     // Cap top 580: 88.4 below the foot of EnerSys's photos (491.6), which
-    // its row reaches (station.css; content/experiencePhotos.ts), or below
+    // its row reaches (experience.css; content/experiencePhotos.ts), or below
     // its text if that runs longer.
     col: 6,
     row: 2,
