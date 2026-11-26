@@ -61,6 +61,8 @@ function synthPlaceholders() {
 export function preloadSounds(): Promise<void> {
   if (preloadStarted) return Promise.resolve();
   preloadStarted = true;
+  // No Web Audio at all (some embedded and test browsers): the site runs silent.
+  if (!HAS_WEB_AUDIO) return Promise.resolve();
 
   // Module-level decoder: an offline context never triggers autoplay rules,
   // and AudioBuffers are not tied to the context that decoded them.
@@ -100,6 +102,10 @@ export function preloadSounds(): Promise<void> {
 // Context + graph
 // ---------------------------------------------------------------------------
 
+/** Every browser the site targets has Web Audio; without it, sound stays off
+ *  (play() returns null) instead of the boot throwing. */
+const HAS_WEB_AUDIO = typeof AudioContext !== "undefined" && typeof OfflineAudioContext !== "undefined";
+
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let buses: Record<Bus, GainNode> | null = null;
@@ -131,6 +137,7 @@ type AudioSessionNavigator = Navigator & { audioSession?: { type: string } };
  * running context (§6.4).
  */
 export function unlock({ muted: startMuted }: { muted: boolean }): void {
+  if (!HAS_WEB_AUDIO) return;
   muted = startMuted;
 
   if (ctx) {
