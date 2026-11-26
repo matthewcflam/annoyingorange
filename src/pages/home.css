@@ -271,7 +271,7 @@
    photos, the name, the card, the glyphs, "who?", then the cat beside the
    skyline. No tech papers; the glass card overlaps the foot of "who?" as on
    the full layout. ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   .home {
     --col: min(var(--compact-w), 444px);
     --hk: calc(var(--col) / 444);

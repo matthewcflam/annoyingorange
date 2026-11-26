@@ -336,7 +336,7 @@
 
 /* ---- Compact layout (global.css): one column under the (scrolling)
    header. ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   /* About: the collage across the column (x 124–788, y 156–844), then
      the text, scrolling. */
   .about__stage {

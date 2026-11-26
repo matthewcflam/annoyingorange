@@ -11,8 +11,9 @@
  *
  * Compact layout (open question #7, user decision): narrow, portrait or short
  * windows don't fit the 1767×1024 composition, so pages stack and scroll
- * instead. The query is COMPACT_QUERY in lib/frame.ts; CSS repeats it as
- *   @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px)
+ * instead. The query is COMPACT_QUERY in config/media.ts; CSS writes it as
+ *   @media (--compact)
+ * which vite.config.ts expands to the same query.
  * --m is the compact unit: 1px of a 390-wide phone (or 390-tall, for a
  * phone on its side), capped so a portrait tablet doesn't balloon. Compact content is at most --compact-w wide, with
  * a 16px gutter.
@@ -47,7 +48,7 @@
   --station-head-h: calc(2 * var(--map-top) + var(--map-h));
 }
 
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   :root {
     --map-top: 14px;
     --map-k: 1px;
@@ -114,7 +115,7 @@ html.lenis body {
    appearing at a page commit shifted the cover, its title and the right-hand
    chrome, and the browser draws it above the cover. Touch bars overlay, so
    they stay. */
-@media (hover: hover) and (pointer: fine) {
+@media (--fine-pointer) {
   html {
     scrollbar-width: none;
   }
@@ -187,7 +188,7 @@ canvas {
    on a portrait tablet (above the map labels there); under ~340px wide it may
    drop to 24 so the station header row (name, glyphs, Map) still fits on one
    line. The glyphs keep following the Map button (--iu). */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   :root:root {
     --type-name: max(1.5rem, 28 * var(--m));
   }

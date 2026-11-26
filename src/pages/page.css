@@ -90,7 +90,7 @@
 
 /* ---- Compact layout (global.css): the header scrolls with the page (the
    Map box stays), with no band. ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   .page__head {
     position: relative;
     left: auto;

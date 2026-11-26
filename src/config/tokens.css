@@ -142,7 +142,7 @@
 }
 
 /* The compact layout (global.css) keeps the project pages at full size. */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   :root {
     --ps: 1;
   }

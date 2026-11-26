@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { paperTransform } from './scripts/paperBake.ts'
+import { CUSTOM_MEDIA } from './src/config/media.ts'
 
 /** Image presets (spec §10.3): `?<name>` on an image import applies its
  *  directives. `as: 'picture'` presets return a `Picture` (AVIF + WebP
@@ -56,10 +57,26 @@ function preloadFonts(): Plugin {
   }
 }
 
+/** `@media (--compact)` and the other names in src/config/media.ts become
+ *  their queries in every stylesheet, so CSS and TS share one definition
+ *  (CSS has no cross-file custom media). Runs before Vite's CSS pipeline. */
+function customMedia(): Plugin {
+  const re = new RegExp(`@media \\((${Object.keys(CUSTOM_MEDIA).join('|')})\\)`, 'g')
+  return {
+    name: 'custom-media',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/\.css(\?|$)/.test(id)) return
+      return { code: code.replace(re, (_m, name: string) => `@media ${CUSTOM_MEDIA[name]}`), map: null }
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    customMedia(),
     preloadFonts(),
     imagetools({
       extendTransforms: (builtins) => [...builtins, paperTransform],

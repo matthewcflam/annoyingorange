@@ -96,7 +96,7 @@
 
 /* ---- Compact layout (global.css): the footer stacks: the cat, "Let's
    chat!" over the card, then the credits. ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   .site-footer {
     --ft: 1px;
     height: auto;

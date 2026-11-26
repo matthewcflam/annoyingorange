@@ -551,7 +551,7 @@ html.is-scroll-locked {
 /* ---- Compact layout (global.css): one column. The name and list scroll
    with the page (page.css), each project stacks and its TOOLS no longer
    sticks (the header: page.css; the footer: footer.css). ---- */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   .project-list {
     margin-top: 20px;
   }

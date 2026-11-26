@@ -10,10 +10,7 @@ export function pxScale(): number {
   return Math.min(window.innerWidth / FRAME.W, window.innerHeight / FRAME.H);
 }
 
-/** Narrow, portrait or short windows get the stacked compact layout (open
- *  question #7, user decision). CSS repeats this query (global.css). */
-const COMPACT_CLAUSES = ["(max-width: 760px)", "(max-aspect-ratio: 1/1)", "(max-height: 500px)"] as const;
-export const COMPACT_QUERY = COMPACT_CLAUSES.join(", ");
+import { COMPACT_CLAUSES, COMPACT_QUERY } from "../config/media";
 
 /** A `<source sizes>` value: `compact` under any compact clause, else `full`. */
 export const compactSizes = (compact: string, full: string) =>
