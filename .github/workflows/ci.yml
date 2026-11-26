@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: Regenerate the Linux screenshot baselines (uploaded as an artifact to commit)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      # prebuild checks asset names (Linux is case-sensitive); postbuild
+      # enforces the size budget.
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 3
+
+  e2e:
+    name: Browser tests
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The image the Linux baselines are made in (scripts/e2e-snapshots.mjs),
+    # browsers included; keep its version in step with @playwright/test.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+      options: --ipc=host
+    env:
+      CI: '1'
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Playwright
+        if: ${{ !inputs.update-snapshots }}
+        run: npx playwright test
+      - name: Regenerate screenshot baselines
+        if: ${{ inputs.update-snapshots }}
+        run: npx playwright test --project=chromium --grep @snapshot --update-snapshots
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.update-snapshots }}
+        with:
+          name: linux-screenshots
+          path: e2e/__screenshots__/linux
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
