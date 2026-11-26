@@ -1,0 +1,6 @@
+/* Applied to every screenshot (playwright.config.ts): the custom cursor sits
+   wherever the pointer last was, which differs between runs. */
+.cursor,
+.cursor-label {
+  visibility: hidden !important;
+}
