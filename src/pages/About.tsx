@@ -57,7 +57,7 @@ export default function About() {
           </h2>
           <div className="about__copy">
             <p>
-              I’m a curious, user focused developer that loves to understand problems and use technology to solve them. I’m
+              I’m a curious, user-focused developer that loves to understand problems and use technology to solve them. I’m
               currently pursuing a degree in Computer Engineering at the{" "}
               <span className="about__accent">University of British Columbia</span>.
             </p>

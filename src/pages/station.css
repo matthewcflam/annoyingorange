@@ -390,10 +390,19 @@
     height: calc(688 * var(--au));
   }
 
-  .about__collage .paper,
-  .about__collage .about__connections {
+  .about__collage .paper {
     left: calc((var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
     top: calc((var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  }
+
+  /* The Connections card keeps its text at 13px or more (the small-type
+     floor; the collage unit alone makes it 11.5 on a phone). It grows from
+     its bottom-right corner, which stays where the collage puts it, so it
+     spreads over the prints and never past the column. */
+  .about__collage .about__connections {
+    --au: max(var(--compact-w) / 664, 13px / 21.33);
+    left: calc((var(--cx) + var(--w) / 2 - var(--ax)) * var(--compact-w) / 664 - var(--w) * var(--au));
+    top: calc((var(--cy) + var(--h) / 2 - var(--ay)) * var(--compact-w) / 664 - var(--h) * var(--au));
   }
 
   .about__text {

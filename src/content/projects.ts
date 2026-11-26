@@ -177,7 +177,7 @@ export const PROJECTS: readonly Project[] = [
     ],
     description: [
       "My grandma has dementia. 10M more people are diagnosed each year, and the population pyramid is shifting upwards.",
-      "ReMind is a conversational AI assistant that closes the gap; it can play cognitive stimulation therapy games based on research, one of which is a memory game with an SO-101 Robot Arm trained of Perceptron AI’s Isaac 0.5 Model.",
+      "ReMind is a conversational AI assistant that closes the gap; it can play cognitive stimulation therapy games based on research, one of which is a memory game with an SO-101 Robot Arm trained on Perceptron AI’s Isaac 0.5 Model.",
     ],
   },
   {

@@ -85,7 +85,7 @@ export const JOBS: Job[] = [
     role: "Software and Operations Lead",
     date: "April 2026 - Present",
     listName: "UBC Third\nQuadrant Design",
-    listDate: "2024",
+    listDate: "2026",
     logo: { src: tqdLogo, w: 21, h: 27, x: 0, crop: { w: 314.93, h: 245.35, x: -8.96, y: -66.28 } },
     // Column 4 (under EnerSys; its text runs into Sailbot's columns, but
     // well below it). Cap top 979: 487.4 below EnerSys's photos.

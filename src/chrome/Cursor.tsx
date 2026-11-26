@@ -122,8 +122,11 @@ export default function Cursor() {
       if (shown) evaluate(document.elementFromPoint(px, py));
     };
 
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+    // Follow the pointer, and show the cursor on the first event that says
+    // where it is. pointerover counts: it can arrive before any pointermove
+    // (a page loads or changes under a resting mouse), and the label must
+    // never show before it has been placed.
+    const track = (e: PointerEvent) => {
       px = e.clientX;
       py = e.clientY;
       setDotX(px);
@@ -136,8 +139,12 @@ export default function Cursor() {
         root.classList.add("has-cursor");
       }
     };
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") track(e);
+    };
     const onOver = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
+      track(e);
       evaluate(e.target);
     };
     // Left the window: hide until the next move.
