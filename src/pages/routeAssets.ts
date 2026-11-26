@@ -19,14 +19,26 @@ export interface PageLoader {
   loaded(): ComponentType | null;
 }
 
-function pageLoader(load: () => Promise<{ default: ComponentType }>): PageLoader {
+export function pageLoader(load: () => Promise<{ default: ComponentType }>): PageLoader {
   let page: ComponentType | null = null;
+  // One import() for every caller: Vite's preload helper waits for a chunk's
+  // CSS only on the first import of it (a later one sees the <link> already
+  // there and resolves without waiting), so a second import could mount the
+  // page before its stylesheet applied (an unstyled first layout, and a deep
+  // link scrolled against it). A failed load is forgotten, to retry.
+  let pending: Promise<{ default: ComponentType }> | null = null;
   return Object.assign(
     () =>
-      load().then((m) => {
-        page = m.default;
-        return m;
-      }),
+      (pending ??= load().then(
+        (m) => {
+          page = m.default;
+          return m;
+        },
+        (err: unknown) => {
+          pending = null;
+          throw err;
+        },
+      )),
     { loaded: () => page },
   );
 }
