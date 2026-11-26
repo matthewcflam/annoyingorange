@@ -67,7 +67,7 @@
   text-box: trim-both cap alphabetic;
 }
 
-.page .project-block__tools h3 {
+.page .project-block__tools-title {
   color: var(--project-color);
   font-family: var(--font-rounded);
   font-weight: var(--weight-rounded);

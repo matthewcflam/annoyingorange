@@ -19,8 +19,11 @@ export interface Logo {
 }
 
 /** A row in the index. */
+/** The jobs, in page order. */
+export type JobId = "enersys" | "sailbot" | "tqd";
+
 export interface IndexRow {
-  id: string;
+  id: JobId;
   /** The index row's name; "\n" breaks the line. */
   listName: string;
   listDate: string;

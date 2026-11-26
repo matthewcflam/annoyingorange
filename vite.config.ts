@@ -33,11 +33,12 @@ const PRESETS: Record<string, Record<string, string>> = {
 
 /** Preloads the fonts the first render waits for (src/lib/fonts.ts
  *  waitForFonts), so they download alongside the JS instead of after it has
- *  run and injected the CSS: Inter, and Helvetica Rounded once the user
- *  supplies it. Nunito (station body text) isn't preloaded: home never uses
+ *  run and injected the CSS: Helvetica Rounded once the user supplies it,
+ *  else Inter, its fallback (with the file there, Inter never shows). Nunito (station body text) isn't preloaded: home never uses
  *  it, and a station landing loads it with the page. Build only: the files
  *  are hashed, so they're found in the bundle. */
-const PRELOAD_FONTS = [/\/inter-latin-wght-normal-[\w-]+\.woff2$/, /\/helvetica-rounded-bold-[\w-]+\.woff2$/]
+const ROUNDED_FONT = /\/helvetica-rounded-bold-[\w-]+\.woff2$/
+const INTER_FONT = /\/inter-latin-wght-normal-[\w-]+\.woff2$/
 
 function preloadFonts(): Plugin {
   return {
@@ -45,14 +46,15 @@ function preloadFonts(): Plugin {
     apply: 'build',
     transformIndexHtml: {
       order: 'post',
-      handler: (_html, ctx) =>
-        Object.keys(ctx.bundle ?? {})
-          .filter((file) => PRELOAD_FONTS.some((re) => re.test(file)))
-          .map((file) => ({
-            tag: 'link',
-            attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
-            injectTo: 'head' as const,
-          })),
+      handler: (_html, ctx) => {
+        const files = Object.keys(ctx.bundle ?? {})
+        const rounded = files.filter((file) => ROUNDED_FONT.test(file))
+        return (rounded.length ? rounded : files.filter((file) => INTER_FONT.test(file))).map((file) => ({
+          tag: 'link',
+          attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+          injectTo: 'head' as const,
+        }))
+      },
     },
   }
 }

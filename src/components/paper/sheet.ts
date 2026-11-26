@@ -33,5 +33,5 @@ type Box = { cx: number; cy: number; w: number; h: number; rotate: number };
 
 /** A box (centre, unrotated size, rotation) as the custom properties the
  *  paper CSS places it by (home.css, about.css, experience.css). */
-export const placeAt = (b: Box) =>
-  ({ "--cx": b.cx, "--cy": b.cy, "--w": b.w, "--h": b.h, "--r": `${b.rotate}deg` }) as CSSProperties;
+export const placeAt = (b: Box): CSSProperties =>
+  ({ "--cx": b.cx, "--cy": b.cy, "--w": b.w, "--h": b.h, "--r": `${b.rotate}deg` });

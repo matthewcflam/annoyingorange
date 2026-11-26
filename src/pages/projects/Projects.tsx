@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { gsap } from "../../lib/gsap";
 import { onNavClick, takeProjectFocus } from "../../lib/router";
 import { revealOnScroll } from "../../lib/scrollReveal";
@@ -40,7 +40,7 @@ export default function Projects() {
     initial: takeProjectFocus,
   });
   // The first project's TOOLS and each group's lines: what must fit on the first screen.
-  const first = PROJECTS[0];
+  const first = PROJECTS[0]!;
   const toolLines = 1 + first.tools.reduce((n, g) => n + g.length, 0);
 
   // The footer pieces fade up as they scroll in (only the footer reveals).
@@ -50,7 +50,7 @@ export default function Projects() {
     <StationLayout
       className="project"
       rootRef={rootRef}
-      style={{ "--tool-lines": toolLines, "--tool-groups": first.tools.length } as CSSProperties}
+      style={{ "--tool-lines": toolLines, "--tool-groups": first.tools.length }}
       nav={<ProjectList active={active} onSelect={select} />}
     >
       <div className="project__band" aria-hidden="true" />
@@ -82,10 +82,10 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
       className="project-block"
       data-flip={flip || undefined}
       aria-labelledby={`project-${p.slug}`}
-      style={{ "--project-color": `var(${p.poster.color})` } as CSSProperties}
+      style={{ "--project-color": `var(${p.poster.color})` }}
     >
       <aside className="project-block__tools" aria-label={`${p.name} tools`}>
-        <h3>TOOLS</h3>
+        <p className="project-block__tools-title">TOOLS</p>
         {p.tools.map((group, i) => (
           <ul key={i}>
             {group.map((tool) => (

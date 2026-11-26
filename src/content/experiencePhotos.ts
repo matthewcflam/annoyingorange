@@ -21,6 +21,7 @@ import tqdTeam from "../../assets-src/images/tqd-team.jpg?print";
 import { TAPE_SHORT as tape } from "../components/paper/tapes";
 import type { Sheet } from "../components/paper/sheet";
 import { compactSizes } from "../lib/frame";
+import type { JobId } from "./experience";
 
 export interface PhotoCluster {
   col: number;
@@ -42,7 +43,7 @@ const tapeStrip = (id: string, cx: number, cy: number, w: number, h: number, rot
   id, kind: "tape", cx, cy, w, h, rotate, src: tape,
 });
 
-export const JOB_PHOTOS: Record<string, PhotoCluster> = {
+export const JOB_PHOTOS: Record<JobId, PhotoCluster> = {
   enersys: {
     col: 7, dx: 16.67, dy: 15, w: 296.1, h: 333.6,
     fit: ["enersys-demo", "enersys-tape-1"],

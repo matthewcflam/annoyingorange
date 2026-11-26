@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 import "./connections.css";
 import { useCopyEmail } from "./useCopyEmail";
 import Icon from "./Icon";
@@ -11,19 +11,17 @@ import { CONTACT_LINKS, EMAIL } from "../content/contact";
  * (× --ft); the footer and About's collage (station.css) each place it.
  */
 export default function Connections({
-  titleId,
   className = "",
   reveal = false,
   style,
 }: {
-  /** The heading's id (aria-labelledby), unique per card on the page. */
-  titleId: string;
   className?: string;
   /** Fade up on scroll ([data-reveal], lib/scrollReveal.ts). */
   reveal?: boolean;
   style?: CSSProperties;
 }) {
   const { copyEmail, toastRef, copied } = useCopyEmail();
+  const titleId = useId();
 
   return (
     <nav className={`connections ${className}`} aria-labelledby={titleId} data-reveal={reveal || undefined} style={style}>

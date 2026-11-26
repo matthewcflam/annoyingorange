@@ -22,6 +22,7 @@ import { gsap } from "../lib/gsap";
 import { readToken } from "../lib/tokens";
 import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../lib/webgl";
 import { TRANSITION } from "../config/timings";
+import { onBrowserIdle } from "../lib/idle";
 
 const T = TRANSITION;
 
@@ -147,6 +148,8 @@ class DitherCover {
   readonly fade = document.createElement("div");
 
   private gl: WebGLRenderingContext | null = null;
+  /** WebGL set up (or tried): deferred off the boot path (ensureGL). */
+  private initialised = false;
   private loc = {} as Uniforms<typeof UNIFORMS>;
   private progress = 0;
   private direction = 1;
@@ -175,7 +178,9 @@ class DitherCover {
       this.safeInit();
       this.draw();
     });
-    this.safeInit();
+    // Compiling the shader isn't needed until the first transition: do it
+    // when the browser is idle after load, not during boot.
+    onBrowserIdle(() => this.ensureGL(), { timeoutMs: T.INIT_IDLE_TIMEOUT_MS, fallbackMs: T.INIT_IDLE_FALLBACK_MS });
     window.addEventListener("resize", this.onResize);
   }
 
@@ -189,6 +194,7 @@ class DitherCover {
    *  Resolves when fully covered. */
   show(reduced: boolean): Promise<void> {
     this.tween?.kill();
+    this.ensureGL();
     const [r, g, b] = parseColor(readToken("--color-cover-dark"));
     this.color = [r, g, b];
     this.mode = reduced || !this.gl ? "fade" : "dither";
@@ -251,6 +257,7 @@ class DitherCover {
   /** Dev: draw one frame by hand (progress 0..1, direction 1 show / 0 hide). */
   drawAt(progress: number, direction: number): void {
     this.tween?.kill();
+    this.ensureGL();
     this.mode = "dither";
     this.progress = progress;
     this.direction = direction;
@@ -269,8 +276,15 @@ class DitherCover {
     });
   }
 
+  /** Set up WebGL the first time it's needed. */
+  private ensureGL() {
+    if (this.initialised) return;
+    this.initialised = true;
+    this.safeInit();
+  }
+
   /** WebGL set up, or left null (every transition then uses the CSS fade).
-   *  This runs at import, so a failure here must never stop the app booting. */
+   *  A failure here must never stop the app. */
   private safeInit() {
     try {
       this.init();

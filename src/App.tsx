@@ -30,6 +30,18 @@ export default function App() {
   const rootRef = useRef<HTMLDivElement>(null);
   const route = useRoute();
   const home = route === PATHS.home;
+  const mainRef = useRef<HTMLElement>(null);
+  const shownRoute = useRef(route);
+  const [announcement, setAnnouncement] = useState("");
+
+  // After a page change, keyboard and screen reader users start at the new
+  // page: focus moves to <main> and the page's title is announced.
+  useEffect(() => {
+    if (route === shownRoute.current) return;
+    shownRoute.current = route;
+    mainRef.current?.focus({ preventScroll: true });
+    setAnnouncement(document.title);
+  }, [route]);
   useEffect(() => {
     let cancelled = false;
     // Fonts for the route the visitor landed on (home skips the body font).
@@ -64,7 +76,7 @@ export default function App() {
       <GridOverlay />
       {fontsReady && (
         <>
-          <main className="layer--page">
+          <main ref={mainRef} className="layer--page" tabIndex={-1}>
             {/* Keyed so a failed page doesn't stay failed on the next route. */}
             <PageErrorBoundary key={route}>
               <Outlet />
@@ -74,6 +86,9 @@ export default function App() {
           <div className="layer layer--chrome">{!home && <StationChrome />}</div>
 
           <TransitionLayer />
+          <p className="sr-only" aria-live="polite">
+            {announcement}
+          </p>
         </>
       )}
     </div>

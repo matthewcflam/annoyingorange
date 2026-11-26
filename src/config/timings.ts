@@ -140,6 +140,11 @@ export const TRANSITION = {
   SHOW_EASE: "expo.out",
   /** Cover stays solid after the page swap, before clearing. */
   HOLD: 0.5,
+  /** The cover's WebGL is set up once the browser is idle after load (or
+   *  after this long at the latest; at once if a transition starts first). */
+  INIT_IDLE_TIMEOUT_MS: 2000,
+  /** Without requestIdleCallback (Safari before 18). */
+  INIT_IDLE_FALLBACK_MS: 500,
   /** Cover clears (progress 1 → 0). expo.out: mostly gone by ~0.4s. Was 3 (2xa). */
   HIDE: 1.5,
   HIDE_EASE: "expo.out",
@@ -297,6 +302,11 @@ export const MEDIA = {
 
 /** Sound engine (§9). */
 export const AUDIO = {
+  /** After sound is first turned on, the remaining placeholder sounds are
+   *  synthesized when the browser is idle, or after this long at the latest. */
+  SYNTH_IDLE_TIMEOUT_MS: 1000,
+  /** Without requestIdleCallback (Safari before 18). */
+  SYNTH_IDLE_FALLBACK_MS: 200,
   /** ± playbackRate variation per play. */
   RATE_VARIATION: 0.05,
   /** ± gain variation per play. */

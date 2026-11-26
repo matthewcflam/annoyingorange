@@ -2,9 +2,10 @@ import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, type Mous
 import { createPortal } from "react-dom";
 import { gsap } from "../../lib/gsap";
 import { hoverSound, play } from "../../audio/engine";
-import { prefersReducedMotion } from "../../lib/motion";
+import { prefersReducedMotion, useReducedMotion } from "../../lib/motion";
 import { lockScroll, unlockScroll } from "../../lib/scroll";
 import { projectScale } from "../../lib/tokens";
+import { onWindowResize } from "../../lib/resize";
 import { MEDIA } from "../../config/timings";
 import type { Media } from "../../content/projects";
 import ResponsivePicture from "../../components/ResponsivePicture";
@@ -169,20 +170,14 @@ export default function Lightbox({
       duration: reduced ? 0 : MEDIA.OPEN,
       ease: MEDIA.OPEN_EASE,
     });
-    let raf = 0;
-    const onResize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => fit());
-    };
-    window.addEventListener("resize", onResize);
+    const stopFitting = onWindowResize(() => fit());
     // set + to, not a delayed fromTo: killed in StrictMode's effect re-run,
     // a delayed fromTo kept re-initialising each frame, stamping opacity 0.
     gsap.set(chrome, { opacity: 0 });
     gsap.to(chrome, { opacity: 1, duration: reduced ? 0 : MEDIA.BACKDROP, delay: reduced ? 0 : MEDIA.OPEN / 2 });
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(raf);
+      stopFitting();
       gsap.killTweensOf([frame, backdrop, ...chrome, ...slides.values()]);
       root?.removeAttribute("inert");
       document.documentElement.classList.remove("is-scroll-locked");
@@ -290,7 +285,10 @@ export default function Lightbox({
       aria-keyshortcuts={shown.kind === "video" ? "Space" : undefined}
       style={{ "--project-color": color }}
     >
+      {/* A click on the dim or the player closes it; keyboards have Close and Escape. */}
+      {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div ref={backdropRef} className="lightbox__backdrop" data-clickable data-cursor={CURSOR_LABEL.close} onClick={close} />
+      {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div ref={frameRef} className="lightbox__frame" data-cursor={CURSOR_LABEL.close} onClick={close}>
         {leaving.map(renderSlide)}
         {renderSlide(current)}
@@ -333,8 +331,7 @@ function LightboxSlide({
   slideRef: (el: HTMLDivElement | null) => void | (() => void);
 }) {
   const video = useRef<HTMLVideoElement | null>(null);
-  // Read once: a slide keeps the motion setting it was shown with.
-  const [reduced] = useState(prefersReducedMotion);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const v = video.current;
@@ -348,7 +345,9 @@ function LightboxSlide({
     togglePlay(v);
   };
 
+  // Keyboards play and pause with Space (Lightbox's onKey).
   return (
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div ref={slideRef} className="lightbox__slide" onClick={reduced && media.kind === "video" ? toggle : undefined}>
       <MediaContent
         media={media}

@@ -151,7 +151,7 @@ class ScrambleTitle {
     for (const c of this.chars) {
       const e = clamp(snap(h - c.cp, T.TITLE_PROGRESS_SNAP), 0, 1);
       let variant = "charInit";
-      if (e > 0) variant = this.variations[Math.round(mapRange(e, 0, 1, 0, T.TITLE_CYCLES)) % this.variations.length];
+      if (e > 0) variant = this.variations[Math.round(mapRange(e, 0, 1, 0, T.TITLE_CYCLES)) % this.variations.length]!;
       if (e >= 1) variant = "";
       const moving = variant ? `char ${variant}` : "char";
       const cls = out

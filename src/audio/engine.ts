@@ -17,6 +17,7 @@
 import { MASTER_GAIN, SOUNDS, SOUND_FILES, variantKeys, type Bus, type SoundDef, type SoundId } from "../config/sounds";
 import { AUDIO } from "../config/timings";
 import { SAMPLE_RATE, synthPlaceholder } from "./procedural";
+import { onBrowserIdle } from "../lib/idle";
 
 // ---------------------------------------------------------------------------
 // Buffers
@@ -24,7 +25,8 @@ import { SAMPLE_RATE, synthPlaceholder } from "./procedural";
 
 type Source = "file" | "placeholder";
 interface Loaded {
-  buffer: AudioBuffer | null; // null while a file is still decoding
+  /** null while a file is still decoding, or a placeholder not yet made. */
+  buffer: AudioBuffer | null;
   source: Source;
 }
 
@@ -37,9 +39,24 @@ function placeholderFor(id: SoundId, key: string): AudioBuffer {
   return synthPlaceholder((SOUNDS[id] as SoundDef).placeholder, variant);
 }
 
+/** A placeholder's buffer, synthesized the first time it's needed (most
+ *  visitors never turn sound on, so boot never pays for them). */
+function bufferOf(id: SoundId, key: string): AudioBuffer | null {
+  const entry = buffers.get(key);
+  if (!entry) return null;
+  if (!entry.buffer && entry.source === "placeholder") entry.buffer = placeholderFor(id, key);
+  return entry.buffer;
+}
+
+/** Synthesize every placeholder not made yet (after unlock, when idle). */
+function synthPlaceholders() {
+  for (const id of Object.keys(SOUNDS) as SoundId[]) for (const key of variantKeys(id)) bufferOf(id, key);
+}
+
 /**
- * Decode every discovered sound file and synthesize placeholders for the
- * rest. Idempotent. Resolves when every file has decoded or fallen back.
+ * Decode every discovered sound file; the rest (and any that fail) fall back
+ * to synthesized placeholders, made on first use. Idempotent. Resolves when
+ * every file has decoded or fallen back.
  */
 export function preloadSounds(): Promise<void> {
   if (preloadStarted) return Promise.resolve();
@@ -56,7 +73,7 @@ export function preloadSounds(): Promise<void> {
       const url = SOUND_FILES.get(key);
       if (!url) {
         missing.push(key);
-        buffers.set(key, { buffer: placeholderFor(id, key), source: "placeholder" });
+        buffers.set(key, { buffer: null, source: "placeholder" });
         continue;
       }
       buffers.set(key, { buffer: null, source: "file" });
@@ -67,7 +84,7 @@ export function preloadSounds(): Promise<void> {
           .then((buffer) => void buffers.set(key, { buffer, source: "file" }))
           .catch((err) => {
             if (import.meta.env.DEV) console.warn(`[audio] "${key}" failed to decode; using placeholder.`, err);
-            buffers.set(key, { buffer: placeholderFor(id, key), source: "placeholder" });
+            buffers.set(key, { buffer: null, source: "placeholder" });
           }),
       );
     }
@@ -152,6 +169,8 @@ export function unlock({ muted: startMuted }: { muted: boolean }): void {
 
   installLifecycle(ctx);
   notify();
+  // Sound is on: make the rest of the placeholders before they're asked for.
+  onBrowserIdle(synthPlaceholders, { timeoutMs: AUDIO.SYNTH_IDLE_TIMEOUT_MS, fallbackMs: AUDIO.SYNTH_IDLE_FALLBACK_MS });
 }
 
 function applyMute() {
@@ -215,7 +234,7 @@ function nextBuffer(id: SoundId): AudioBuffer | null {
   const start = roundRobin.get(id) ?? 0;
   for (let k = 0; k < keys.length; k++) {
     const i = (start + k) % keys.length;
-    const buffer = buffers.get(keys[i])?.buffer;
+    const buffer = bufferOf(id, keys[i]!);
     if (buffer) {
       roundRobin.set(id, i + 1);
       return buffer;
@@ -248,7 +267,7 @@ export function play(id: SoundId, opts: PlayOptions = {}): void {
   const list = voices.get(id) ?? [];
   voices.set(id, list);
   const limit = def.voices ?? AUDIO.DEFAULT_VOICE_LIMIT;
-  while (list.length >= limit) list[0].stop(AUDIO.VOICE_STEAL_FADE);
+  while (list.length >= limit) list[0]!.stop(AUDIO.VOICE_STEAL_FADE);
 
   const voice: Voice = {
     stopped: false,

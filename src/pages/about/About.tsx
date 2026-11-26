@@ -13,7 +13,7 @@ import "./about.css";
 /** An orange word that goes to another station (Experience, Projects). */
 function StationLink({ to, children }: { to: StationId; children: string }) {
   return (
-    <a className="about__link" data-cursor={CURSOR_LABEL.view(`${children[0].toUpperCase()}${children.slice(1)}`)} {...navLinkProps(PATHS[to])}>
+    <a className="about__link" data-cursor={CURSOR_LABEL.view(`${children.charAt(0).toUpperCase()}${children.slice(1)}`)} {...navLinkProps(PATHS[to])}>
       {children}
     </a>
   );
@@ -40,7 +40,7 @@ export default function About() {
           {ABOUT_SHEETS.map((s, i) => (
             <PaperSheet key={s.id} sheet={s} eager={i === ABOUT_SHEETS.length - 1} style={placeAt(s)} />
           ))}
-          <Connections className="about__connections" titleId="about-connections-title" style={placeAt(ABOUT_CARD)} />
+          <Connections className="about__connections" style={placeAt(ABOUT_CARD)} />
         </div>
         <div className="about__text">
           <h2 className="about__hello">

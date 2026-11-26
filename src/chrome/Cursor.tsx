@@ -8,7 +8,7 @@ import { whenPageShown } from "../lib/pageReveal";
 import "./cursor.css";
 
 /** What counts as clickable: the ring shows over these (when they have no label). */
-const CLICKABLE = 'a[href]:not([aria-current]), button:not(:disabled), [role="button"], [data-clickable]';
+const CLICKABLE = 'a[href]:not([aria-current="page"]), button:not(:disabled), [role="button"], [data-clickable]';
 /** Elements that say what a click does (user request): `data-cursor="View Projects"`. */
 const LABELLED = "[data-cursor]";
 
@@ -196,7 +196,7 @@ export default function Cursor() {
         ref={dotRef}
         className="cursor"
         aria-hidden="true"
-        style={{ "--cursor-ring": CURSOR.RING_PX, "--cursor-stroke": CURSOR.RING_STROKE_PX } as React.CSSProperties}
+        style={{ "--cursor-ring": CURSOR.RING_PX, "--cursor-stroke": CURSOR.RING_STROKE_PX }}
       />
       <div ref={labelRef} className="cursor-label" aria-hidden="true" />
     </>,

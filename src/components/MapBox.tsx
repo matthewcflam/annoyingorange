@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useId, useLayoutEffect, useRef } from "react";
 import { gsap } from "../lib/gsap";
 import { prefersReducedMotion } from "../lib/motion";
 import { useRoute } from "../lib/router";
@@ -8,6 +8,7 @@ import { HOME_LABEL } from "../content/site";
 import { MAP_BOX as M } from "../config/timings";
 import { emptyShape, flowShape, runFlow, shapePath, snapShape } from "../lib/waterFlow";
 import { useTimer } from "../lib/useTimer";
+import { onWindowResize } from "../lib/resize";
 import "./mapbox.css";
 
 /** The rows: Home, then the stations in line order. */
@@ -99,22 +100,19 @@ export default function MapBox({
         prevRow = rowAt;
         prevDot = dotAt;
         t.to(el, { opacity: 1, duration: M.LABEL_FADE, ease: M.LABEL_FADE_EASE }, rowAt);
-        t.to(dotRefs.current[i], { scale: 1, duration: M.DOT_POP, ease: M.DOT_POP_EASE }, dotAt);
+        t.to(dotRefs.current[i]!, { scale: 1, duration: M.DOT_POP, ease: M.DOT_POP_EASE }, dotAt);
       });
     }
     return () => void t.kill();
   }, [open]);
 
   // The sizes are CSS (they change on the compact layout): refit on resize.
-  useEffect(() => {
-    const fit = () => {
-      tl.current?.progress(1);
-      snapShape(shape.current, open ? openSize() : closedSize());
-      draw();
-    };
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, [open]);
+  const fit = useEffectEvent(() => {
+    tl.current?.progress(1);
+    snapShape(shape.current, open ? openSize() : closedSize());
+    draw();
+  });
+  useEffect(() => onWindowResize(() => fit()), []);
 
   const openNow = useRef(open);
   useLayoutEffect(() => {
@@ -133,24 +131,28 @@ export default function MapBox({
   const hoverTo = (v: boolean) => hoverTimer.set(() => setOpen(v), v ? M.HOVER_OPEN_DELAY : M.HOVER_CLOSE_DELAY);
 
   // Escape or a press outside closes it.
+  const onKey = useEffectEvent((e: KeyboardEvent) => {
+    if (e.key !== "Escape") return;
+    hoverTimer.clear();
+    setOpen(false);
+    toggleRef.current?.focus();
+  });
+  const onDown = useEffectEvent((e: PointerEvent) => {
+    if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+  });
   useEffect(() => {
     if (!open || pinned) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      hoverTimer.clear();
-      setOpen(false);
-      toggleRef.current?.focus();
-    };
-    const onDown = (e: PointerEvent) => {
-      if (!boxRef.current!.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onDown);
+    const key = (e: KeyboardEvent) => onKey(e);
+    const down = (e: PointerEvent) => onDown(e);
+    window.addEventListener("keydown", key);
+    document.addEventListener("pointerdown", down);
     return () => {
-      window.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("keydown", key);
+      document.removeEventListener("pointerdown", down);
     };
-  });
+  }, [open, pinned]);
+
+  const navId = useId();
 
   /** The last press's pointer type: a mouse click on "Map" never closes the
    *  card it hovered open; touch and keyboard (detail 0) toggle. */
@@ -186,7 +188,7 @@ export default function MapBox({
           type="button"
           className="map-box__toggle"
           aria-expanded={open}
-          aria-controls="map-box-nav"
+          aria-controls={navId}
           onPointerDown={(e) => (pressType.current = e.pointerType)}
           onClick={(e) => {
             hoverTimer.clear();
@@ -198,7 +200,7 @@ export default function MapBox({
       )}
       <nav
         ref={panelRef}
-        id={pinned ? undefined : "map-box-nav"}
+        id={pinned ? undefined : navId}
         className="map-box__panel"
         aria-label={pinned ? "Map" : "Stations"}
         inert={!open}

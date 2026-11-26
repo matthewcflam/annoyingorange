@@ -6,7 +6,7 @@ import MapBox from "../../components/MapBox";
 import SocialLinks from "../../components/SocialLinks";
 import MuteToggle from "../../components/MuteToggle";
 import HomePhotos from "./HomePhotos";
-import { isHomeCardOpen, onHomeCardOpen } from "./homeCard";
+import { useHomeCardOpen } from "./homeCard";
 import DrawnCat from "../../components/DrawnCat";
 import { attachSkyline } from "./skylineDraw";
 import { loadSkyline, skylineMarkup } from "./skyline";
@@ -44,14 +44,13 @@ const SprayDebug =
  * every later visit shows them finished. Placement is home.css.
  */
 export default function Home() {
-  const [home, setHome] = useState<HTMLElement | null>(null);
+  // Dev only (/?spray-debug): the overlay needs the "who?" box.
+  const [whoBox, setWhoBox] = useState<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glassRef = useRef<HTMLAnchorElement>(null);
   const glassCanvasRef = useRef<HTMLCanvasElement>(null);
   const skylineRef = useRef<HTMLDivElement>(null);
-  const [cardOpen, setCardOpen] = useState(isHomeCardOpen);
-
-  useEffect(() => onHomeCardOpen(() => setCardOpen(true)), []);
+  const cardOpen = useHomeCardOpen();
 
   // Dev only: /?glass-lab, the glass card's calibration bench (glass/glassLab.ts).
   useEffect(() => {
@@ -112,7 +111,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div ref={setHome} className="home">
+    <div className="home">
       {/* The tech papers (Figma "Group 123/124"), bleeding off the top edge. */}
       {TECH_PAPERS.map((lines, i) => (
         <div key={i} className={`home__tech home__tech--${i}`}>
@@ -131,8 +130,10 @@ export default function Home() {
 
       <HomePhotos />
 
-      {/* A click sprays it again (spray/who.ts, user request). */}
-      <div className="home__who" data-clickable data-cursor={CURSOR_LABEL.spray} onClick={respray}>
+      {/* A click sprays it again (spray/who.ts, user request): a mouse-only
+          flourish, so it has no key handler or role. */}
+      {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div ref={SprayDebug ? setWhoBox : undefined} className="home__who" data-clickable data-cursor={CURSOR_LABEL.spray} onClick={respray}>
         <canvas
           ref={canvasRef}
           className="home__who-canvas"
@@ -143,12 +144,12 @@ export default function Home() {
               "--who-w": WHO_BOX.width,
               "--who-h": WHO_BOX.height,
               "--who-pad": SPRAY.CANVAS_PAD_PX,
-            } as React.CSSProperties
+            }
           }
         />
-        {home && SprayDebug && (
+        {whoBox && SprayDebug && (
           <Suspense>
-            <SprayDebug glass={home.querySelector<HTMLElement>(".home__who")!} />
+            <SprayDebug glass={whoBox} />
           </Suspense>
         )}
       </div>

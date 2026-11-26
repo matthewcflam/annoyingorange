@@ -326,6 +326,8 @@ export class GlassRenderer {
     // 2. Frost: H into target 0, V into target 1 (sigma in source texels).
     const [tw, th] = [src.width, src.height];
     this.ensureTargets(tw, th);
+    const [t0, t1] = this.targets;
+    if (!t0 || !t1) return;
     const sigma = P.FROST * P.FROST_SCALE * unit * (tw / sw);
     gl.useProgram(this.blurProg);
     gl.uniform1i(this.blurLoc.uTex, 0);
@@ -333,8 +335,8 @@ export class GlassRenderer {
     gl.uniform1f(this.blurLoc.uSigma, sigma);
     gl.viewport(0, 0, tw, th);
     const passes: [WebGLTexture, Target, [number, number]][] = [
-      [this.srcTex!, this.targets[0], [1, 0]],
-      [this.targets[0].tex, this.targets[1], [0, 1]],
+      [this.srcTex!, t0, [1, 0]],
+      [t0.tex, t1, [0, 1]],
     ];
     for (const [from, to, dir] of passes) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, to.fb);
@@ -347,7 +349,7 @@ export class GlassRenderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.useProgram(this.glassProg);
-    gl.bindTexture(gl.TEXTURE_2D, this.targets[1].tex);
+    gl.bindTexture(gl.TEXTURE_2D, t1.tex);
     const L = this.glassLoc;
     const k = unit * dpr; // device px per design px
     const a = (P.LIGHT_ANGLE * Math.PI) / 180;

@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react";
 import { useTimer } from "../../lib/useTimer";
+import { onWindowResize } from "../../lib/resize";
 import { mapRef } from "../../lib/mapRef";
 import { gsap } from "../../lib/gsap";
 import { prefersReducedMotion } from "../../lib/motion";
@@ -138,17 +139,14 @@ export default function ProjectList({ active, onSelect }: { active: ProjectSlug;
   }, [peek]);
 
   // The sizes are CSS: refit on resize.
-  useEffect(() => {
-    const fit = () => {
-      tl.current?.progress(1);
-      snapShape(back.current, { w: 0, h: 0 });
-      drawBack();
-      snapShape(front.current, peek && !isCompact() ? sizeFor(peek) : { w: 0, h: 0 });
-      drawFront();
-    };
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, [peek]);
+  const fit = useEffectEvent(() => {
+    tl.current?.progress(1);
+    snapShape(back.current, { w: 0, h: 0 });
+    drawBack();
+    snapShape(front.current, peek && !isCompact() ? sizeFor(peek) : { w: 0, h: 0 });
+    drawFront();
+  });
+  useEffect(() => onWindowResize(() => fit()), []);
 
   return (
     <nav className="project-list" aria-label="Projects" data-peek={peek || undefined}>
@@ -161,6 +159,7 @@ export default function ProjectList({ active, onSelect }: { active: ProjectSlug;
                 href={projectPath(p.slug)}
                 className="project-list__link"
                 data-active={p.slug === active || undefined}
+                aria-current={p.slug === active ? "location" : undefined}
                 onClick={(e) => {
                   if (!isPlainClick(e)) return;
                   e.preventDefault();

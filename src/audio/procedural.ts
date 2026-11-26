@@ -21,8 +21,8 @@ function edgeFade(data: Float32Array, fadeSeconds = S.EDGE_FADE) {
   const n = Math.min(Math.round(fadeSeconds * SAMPLE_RATE), data.length >> 1);
   for (let i = 0; i < n; i++) {
     const g = i / n;
-    data[i] *= g;
-    data[data.length - 1 - i] *= g;
+    data[i]! *= g;
+    data[data.length - 1 - i]! *= g;
   }
 }
 

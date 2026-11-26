@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef } from "react";
 import PaperSheet from "../../components/paper/PaperSheet";
 import { placeAt } from "../../components/paper/sheet";
 import StationLayout from "../../components/StationLayout";
@@ -23,13 +23,13 @@ function JobPhotos({ job }: { job: Job }) {
     <div
       className="experience-photos"
       aria-hidden="true"
-      style={{ "--pfit": p.fit === "cluster" ? 1 : 0, "--dy": p.dy, "--w": p.w, "--h": p.h } as CSSProperties}
+      style={{ "--pfit": p.fit === "cluster" ? 1 : 0, "--dy": p.dy, "--w": p.w, "--h": p.h }}
     >
       {p.sheets.map((s) => (
         <PaperSheet
           key={s.id}
           sheet={s}
-          style={{ ...placeAt(s), "--shift": shifted.includes(s.id) ? 1 : 0 } as CSSProperties}
+          style={{ ...placeAt(s), "--shift": shifted.includes(s.id) ? 1 : 0 }}
         />
       ))}
     </div>
@@ -52,7 +52,7 @@ function JobSection({ job, ref }: { job: Job; ref: (el: HTMLElement | null) => v
       style={{
         "--col": job.col, "--row": job.row, "--drop": job.drop, "--ph": p.dy + p.h,
         "--pk": p.col - job.col, "--pdx": p.dx, "--pw": p.w,
-      } as CSSProperties}
+      }}
     >
       <div className="experience-job__head">
         <h2 id={`job-${job.id}`} className="experience-job__company">

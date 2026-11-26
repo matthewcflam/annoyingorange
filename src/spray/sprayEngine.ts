@@ -31,7 +31,7 @@ import { startHiss, type Hiss } from "../audio/sprayHiss";
 const TAU = Math.PI * 2;
 
 const guideDoc = new DOMParser().parseFromString(whoSvg, "image/svg+xml");
-const [, , VIEW_W, VIEW_H] = guideDoc.documentElement.getAttribute("viewBox")!.split(/\s+/).map(Number);
+const [, , VIEW_W, VIEW_H] = guideDoc.documentElement.getAttribute("viewBox")!.split(/\s+/).map(Number) as [number, number, number, number];
 /** Guide box size in mockup px; the canvas adds CANVAS_PAD_PX on every side. */
 export const WHO_BOX = { width: VIEW_W, height: VIEW_H } as const;
 
@@ -59,7 +59,7 @@ if (import.meta.hot) {
 /** A stroke's time map (seconds at every sample) from the pace table. The
  *  word's last real stroke (the ?-hook) gets the model's finishing rush. */
 export function strokeTimes(i: number): Float32Array {
-  const g = loadGuides()[i];
+  const g = loadGuides()[i]!;
   const ms = pace.strokes[i]?.segmentsMs ?? [];
   if (import.meta.env.DEV && ms.length !== g.anchors.length - 1) {
     console.warn(`sprayPace: "${pace.strokes[i]?.letter}" has ${ms.length} segments, its path has ${g.anchors.length - 1}`);
@@ -74,7 +74,7 @@ function pointAt(g: Guide, along: number): [number, number] {
   const i = Math.min(Math.floor(f), g.segments - 1);
   const t = f - i;
   const p = g.pts;
-  return [p[i * 2] + (p[i * 2 + 2] - p[i * 2]) * t, p[i * 2 + 1] + (p[i * 2 + 3] - p[i * 2 + 1]) * t];
+  return [p[i * 2]! + (p[i * 2 + 2]! - p[i * 2]!) * t, p[i * 2 + 1]! + (p[i * 2 + 3]! - p[i * 2 + 1]!) * t];
 }
 
 // ---------------------------------------------------------------------------
@@ -190,7 +190,7 @@ export class SprayEngine {
     loadGuides().forEach((guide, i) => {
       const times = strokeTimes(i);
       tl.add(this.strokeTween(guide, times), t);
-      lastEnd = t + times[times.length - 1];
+      lastEnd = t + times[times.length - 1]!;
       t = lastEnd + (pace.strokes[i]?.liftMs ?? 0) / 1000;
       if (drips < SPRAY.DRIP_MAX && Math.random() < SPRAY.DRIP_CHANCE) {
         drips++;
@@ -280,8 +280,8 @@ export class SprayEngine {
     const peakSpeed = maxSpeed(guide, times);
 
     const tween: gsap.core.Tween = gsap.to(nozzle, {
-      time: times[times.length - 1],
-      duration: times[times.length - 1],
+      time: times[times.length - 1]!,
+      duration: times[times.length - 1]!,
       ease: "none",
       onStart: () => {
         lastAlong = 0;
@@ -434,7 +434,7 @@ export class SprayEngine {
     this.applyTransform(); // resizing the canvas already cleared it and reset state
     this.rng = seeded(this.seed);
     const s = this.stamps;
-    for (let i = 0; i < s.length; i += 3) this.drawStamp(s[i], s[i + 1], s[i + 2]);
+    for (let i = 0; i < s.length; i += 3) this.drawStamp(s[i]!, s[i + 1]!, s[i + 2]!);
     for (const d of this.drips) this.drawDrip(d, 0, d.progress);
     this.notify();
   }

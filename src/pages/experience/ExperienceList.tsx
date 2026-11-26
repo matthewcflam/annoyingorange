@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { hoverSound } from "../../audio/engine";
 import { isPlainClick } from "../../lib/router";
 import type { IndexRow } from "../../content/experience";
@@ -29,6 +29,7 @@ export default function ExperienceList({
               href={`#${row.id}`}
               className="experience-list__link"
               data-active={row.id === active || undefined}
+              aria-current={row.id === active ? "location" : undefined}
               onClick={(e) => {
                 if (!isPlainClick(e)) return;
                 e.preventDefault();
@@ -51,7 +52,7 @@ function RowInner({ row }: { row: IndexRow }): ReactNode {
       <span className="experience-list__logo" aria-hidden="true">
         <span
           className="experience-list__mark"
-          style={{ "--w": row.logo.w, "--h": row.logo.h, "--x": row.logo.x } as CSSProperties}
+          style={{ "--w": row.logo.w, "--h": row.logo.h, "--x": row.logo.x }}
         >
           <img
             src={row.logo.src}
@@ -59,7 +60,7 @@ function RowInner({ row }: { row: IndexRow }): ReactNode {
             data-crop={row.logo.crop ? "" : undefined}
             style={
               row.logo.crop &&
-              ({ "--cw": row.logo.crop.w, "--ch": row.logo.crop.h, "--cx": row.logo.crop.x, "--cy": row.logo.crop.y } as CSSProperties)
+              ({ "--cw": row.logo.crop.w, "--ch": row.logo.crop.h, "--cx": row.logo.crop.x, "--cy": row.logo.crop.y })
             }
           />
         </span>

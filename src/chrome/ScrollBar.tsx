@@ -74,7 +74,7 @@ export default function ScrollBar() {
       ref={ref}
       className="scrollbar"
       aria-hidden="true"
-      style={{ "--scrollbar-w": SCROLLBAR.WIDTH_PX, "--scrollbar-inset": SCROLLBAR.INSET_PX } as React.CSSProperties}
+      style={{ "--scrollbar-w": SCROLLBAR.WIDTH_PX, "--scrollbar-inset": SCROLLBAR.INSET_PX }}
     />,
     document.body,
   );

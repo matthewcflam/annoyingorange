@@ -29,7 +29,7 @@ export function useScrollIndex<Id extends string>(
   root: RefObject<HTMLElement | null>,
   opts: { sound: SoundId; duration: number; ease: string; initial?: () => Id | null },
 ): { active: Id; select: (id: Id) => void } {
-  const [active, setActive] = useState<Id>(ids[0]);
+  const [active, setActive] = useState<Id>(ids[0]!);
   const pinned = useRef(false);
   const initial = useRef(opts.initial);
 
@@ -38,10 +38,13 @@ export function useScrollIndex<Id extends string>(
     const map = blocks.current;
     let tops: { id: Id; top: number }[] = [];
     const measure = () => {
-      tops = ids.map((id) => ({ id, top: map.get(id)!.getBoundingClientRect().top + window.scrollY }));
+      tops = ids.flatMap((id) => {
+        const el = map.get(id);
+        return el ? [{ id, top: el.getBoundingClientRect().top + window.scrollY }] : [];
+      });
     };
     const pick = (scroll: number) => {
-      if (pinned.current) return;
+      if (pinned.current || !tops[0]) return;
       const mid = scroll + window.innerHeight / 2;
       let id = tops[0].id;
       for (const t of tops) if (mid >= t.top) id = t.id;
@@ -49,7 +52,8 @@ export function useScrollIndex<Id extends string>(
     };
 
     const focus = initial.current?.();
-    if (focus) scrollToY(centreOf(map.get(focus)!), { duration: 0, ease: "none", immediate: true });
+    const focusEl = focus && map.get(focus);
+    if (focusEl) scrollToY(centreOf(focusEl), { duration: 0, ease: "none", immediate: true });
     measure();
     pick(window.scrollY);
 
@@ -78,10 +82,12 @@ export function useScrollIndex<Id extends string>(
   }, [ids, blocks, root]);
 
   const select = (id: Id) => {
+    const el = blocks.current.get(id);
+    if (!el) return;
     play(opts.sound);
     pinned.current = true;
     setActive(id);
-    scrollToY(centreOf(blocks.current.get(id)!), {
+    scrollToY(centreOf(el), {
       duration: opts.duration,
       ease: opts.ease,
       immediate: prefersReducedMotion(),
