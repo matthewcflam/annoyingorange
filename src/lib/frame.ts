@@ -25,9 +25,10 @@ import { COMPACT_CLAUSES, COMPACT_QUERY } from "../config/media";
 export const compactSizes = (compact: string, full: string) =>
   [...COMPACT_CLAUSES.map((q) => `${q} ${compact}`), full].join(", ");
 
-const compactMql = window.matchMedia(COMPACT_QUERY);
+/** Created on first use, so the pure helpers here import without a window (tests). */
+let compactMql: MediaQueryList | null = null;
 
-export const isCompact = () => compactMql.matches;
+export const isCompact = () => (compactMql ??= window.matchMedia(COMPACT_QUERY)).matches;
 
 /** `<source sizes>` for an image box `w` mockup px wide in the --px frame. */
 export const frameSizes = (w: number) =>

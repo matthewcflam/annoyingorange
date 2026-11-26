@@ -38,12 +38,17 @@ export function shapePath({ w, h, bl, bb, r }: Shape): string {
  * rule (the distances are negative: the edges bow inward, draining). A bow or
  * radius left by an interrupted flow fades out over the first part.
  * `reach(axis, size)` is the progress at which that axis first reaches `size`.
+ * `maxR` caps the leading corners' radius (CSS px; defaults to the page's).
  */
-export function flowShape(s: Shape, to: { w: number; h: number }, ease: (p: number) => number) {
+export function flowShape(
+  s: Shape,
+  to: { w: number; h: number },
+  ease: (p: number) => number,
+  maxR = M.FRONT_RADIUS_PX * projectScale(),
+) {
   const from = { ...s };
   const lagged = (p: number) => ease(clamp01((p - M.H_LAG) / (1 - M.H_LAG)));
   const at = (axis: "w" | "h", p: number) => from[axis] + (to[axis] - from[axis]) * (axis === "w" ? ease(p) : lagged(p));
-  const maxR = M.FRONT_RADIUS_PX * projectScale();
   const corner = (w: number, h: number, dw: number, dh: number) =>
     Math.max(0, Math.min(maxR, Math.max(Math.abs(dw), Math.abs(dh)), w / 2, h / 2));
   const start = {
