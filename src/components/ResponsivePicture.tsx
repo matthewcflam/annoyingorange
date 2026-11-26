@@ -1,4 +1,4 @@
-import type { Picture } from "../lib/assets";
+import type { Picture } from "../lib/picture";
 import PictureSources from "./PictureSources";
 
 /** An imagetools picture (an `as: 'picture'` preset, vite.config.ts): AVIF/WebP

@@ -1,8 +1,8 @@
-import { gsap } from "../../lib/gsap";
-import { GLASS } from "../../config/timings";
-import { readToken } from "../../lib/tokens";
-import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../../lib/webgl";
-import type { SprayEngine } from "../../spray/sprayEngine";
+import { gsap } from "../../../lib/gsap";
+import { GLASS } from "../../../config/timings";
+import { readToken } from "../../../lib/tokens";
+import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../../../lib/webgl";
+import type { SprayEngine } from "../../../spray/sprayEngine";
 
 /**
  * Figma's Glass effect, drawn in WebGL1 from a canvas that lies under the

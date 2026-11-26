@@ -1,5 +1,6 @@
-import { placeAt, type Sheet } from "./sheets";
+import { placeAt, type Sheet } from "./sheet";
 import PictureSources from "../PictureSources";
+import type { CSSProperties, ReactNode } from "react";
 import "./paper.css";
 
 /**
@@ -16,6 +17,7 @@ export default function PaperSheet({
   className = "",
   placed = false,
   eager = false,
+  lazy = false,
   style: ownStyle,
   children,
 }: {
@@ -25,9 +27,11 @@ export default function PaperSheet({
   placed?: boolean;
   /** The first thing anyone sees (the front print): fetch it first. */
   eager?: boolean;
+  /** Off screen at first (later project collages): load when scrolled near. */
+  lazy?: boolean;
   /** Placement by the page itself (used when not `placed`). */
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
+  style?: CSSProperties;
+  children?: ReactNode;
 }) {
   const style = placed ? placeAt(sheet) : ownStyle;
   const c = sheet.crop;
@@ -43,6 +47,7 @@ export default function PaperSheet({
             alt=""
             decoding="async"
             fetchPriority={eager ? "high" : undefined}
+            loading={lazy ? "lazy" : undefined}
             draggable={false}
             style={crop}
           />

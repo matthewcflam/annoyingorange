@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "./lib/gsap";
 import { waitForFonts } from "./lib/fonts";
 import { APP } from "./config/timings";
-import { introTimeline } from "./chrome/intro";
+import { introTimeline } from "./pages/home/intro";
 import Outlet from "./pages/Outlet";
 import { useRoute } from "./lib/router";
 import { PATHS } from "./config/routes";

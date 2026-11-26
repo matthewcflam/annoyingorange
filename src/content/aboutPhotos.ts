@@ -8,7 +8,7 @@
  * the frame and is left out.
  */
 import meFinal from "../../assets-src/images/me-final.png?print";
-import type { Sheet } from "../pages/paper/sheets";
+import type { Sheet } from "../components/paper/sheet";
 import { compactSizes } from "../lib/frame";
 
 /** The prints are 204–492 CSS px wide at the usual size (the wide one sets it). */

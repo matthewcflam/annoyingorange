@@ -3,7 +3,7 @@
  * pages/projects/). Every project is one block on the same page: its tools,
  * name, tagline, awards, links, a description and a collage of its media.
  */
-import type { Picture } from "../lib/assets";
+import type { Picture } from "../lib/picture";
 import remind1 from "../../assets-src/images/remind-1.jpg?collage";
 import remind2 from "../../assets-src/images/remind-2.png?collage";
 import remind3 from "../../assets-src/images/remind-3.jpg?collage";

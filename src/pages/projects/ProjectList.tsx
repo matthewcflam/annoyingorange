@@ -10,6 +10,7 @@ import { isPlainClick } from "../../lib/router";
 import { MAP_BOX as M, PROJECT_POSTER as P } from "../../config/timings";
 import { PROJECTS, type ProjectSlug } from "../../content/projects";
 import { projectPath } from "../../config/routes";
+import "./project-list.css";
 
 /**
  * The project list (fixed in columns 1–2), an index of the page: the row of

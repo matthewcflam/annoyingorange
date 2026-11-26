@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useRoute } from "../lib/router";
-import MapBox from "../keychain/MapBox";
+import MapBox from "../components/MapBox";
 
 /**
  * Chrome on station pages: the Map box top-right (the site's navigation).

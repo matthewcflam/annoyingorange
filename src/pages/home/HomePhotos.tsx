@@ -1,5 +1,5 @@
-import PaperSheet from "./paper/PaperSheet";
-import { PHOTO_SHEETS, PHOTO_TAPES } from "./paper/sheets";
+import PaperSheet from "../../components/paper/PaperSheet";
+import { PHOTO_SHEETS, PHOTO_TAPES } from "./homeSheets";
 
 /**
  * The taped photos top-right on home (Figma "Home Page Final"): three prints

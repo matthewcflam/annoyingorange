@@ -1,13 +1,14 @@
-import StationLayout from "./StationLayout";
-import PaperSheet from "./paper/PaperSheet";
-import { placeAt } from "./paper/sheets";
-import Connections from "../chrome/Connections";
-import { ABOUT_CARD, ABOUT_SHEETS } from "../content/aboutPhotos";
-import { navLinkProps } from "../lib/navLink";
-import { PATHS, type StationId } from "../config/routes";
-import { ABOUT_COPY, ABOUT_HELLO, type AboutSpan } from "../content/about";
-import { CURSOR_LABEL } from "../content/ui";
-import "./station.css";
+import StationLayout from "../../components/StationLayout";
+import PaperSheet from "../../components/paper/PaperSheet";
+import { placeAt } from "../../components/paper/sheet";
+import Connections from "../../components/Connections";
+import { ABOUT_CARD, ABOUT_SHEETS } from "../../content/aboutPhotos";
+import { navLinkProps } from "../../lib/navLink";
+import { PATHS, type StationId } from "../../config/routes";
+import { ABOUT_COPY, ABOUT_HELLO, type AboutSpan } from "../../content/about";
+import { CURSOR_LABEL } from "../../content/ui";
+import "../../components/station.css";
+import "./about.css";
 
 /** An orange word that goes to another station (Experience, Projects). */
 function StationLink({ to, children }: { to: StationId; children: string }) {

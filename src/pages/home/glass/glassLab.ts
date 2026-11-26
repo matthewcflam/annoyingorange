@@ -1,7 +1,7 @@
-import whoUrl from "../../../design/figma-glass/who-4x.png";
-import figmaUrl from "../../../design/figma-glass/glass-4x.png";
+import whoUrl from "../../../../design/figma-glass/who-4x.png";
+import figmaUrl from "../../../../design/figma-glass/glass-4x.png";
 import { GlassRenderer, homeGlassOptions, type GlassParams } from "./glassRenderer";
-import { readToken } from "../../lib/tokens";
+import { readToken } from "../../../lib/tokens";
 
 /**
  * Dev only (/?glass-lab): the calibration bench for the glass card. Renders

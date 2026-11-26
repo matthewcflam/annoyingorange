@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
-import { hoverSound } from "../audio/engine";
-import { isPlainClick } from "../lib/router";
-import type { IndexRow } from "../content/experience";
+import { hoverSound } from "../../audio/engine";
+import { isPlainClick } from "../../lib/router";
+import type { IndexRow } from "../../content/experience";
 
 /**
  * The Experience index (Figma "Experience Final"): fixed top-left under

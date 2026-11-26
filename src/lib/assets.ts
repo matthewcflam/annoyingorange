@@ -1,94 +1,53 @@
 /**
  * Page code and image preload/decode (spec §10.3). Station-link hover calls
  * prefetchRoute(); the page transition awaits preloadRoute() before it swaps
- * the page in, so heroes are decoded by the time they're shown.
+ * the page in, so the images are decoded by the time they're shown.
+ *
+ * This file is the machinery only: what each route needs is
+ * pages/routeAssets.ts, registered from main.tsx. Station pages list their
+ * images in their own `*.preload.ts`, fetched with the page's chunk, so their
+ * content stays out of the main chunk.
  */
-import { PROJECTS, type CollageItem } from "../content/projects";
-import { ABOUT_PICTURES } from "../content/aboutPhotos";
-import { LOGO_URLS } from "../content/experience";
-import { HOME_PICTURES, HOME_URLS } from "../pages/paper/sheets";
+import type { Picture } from "./picture";
 import { loadTextFont } from "./fonts";
-import { compactSizes, gridSpan, PROJECT_FRAME_W } from "./frame";
 import { onBrowserIdle } from "./idle";
 import { PREFETCH } from "../config/timings";
-import { PATHS, type RoutePath } from "../config/routes";
-import skylineUrl from "../../assets-src/svg/home-skyline.svg";
+import type { RoutePath } from "../config/routes";
 
-/** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
-export interface Picture {
-  /** Format ("avif", "webp") → srcset. */
-  sources: Record<string, string>;
-  img: { src: string; w: number; h: number };
-}
-
-/** Rotated pieces are resampled by the browser, so they get more pixels than
- *  they cover to stay crisp. */
-const COLLAGE_OVERSAMPLE = 1.5;
-
-/** The collage's width on the full layout in the project frame: columns 6–8,
- *  3 columns + 2 gutters (project.css). */
-const COLLAGE_SCALE = 0.75; // --collage-scale in project.css
-const COLLAGE_COLUMNS_W = gridSpan(3);
-
-/** The collage piece `it`'s `sizes`: its print is `it.w`% of the collage,
- *  which is `scale` of columns 6–8 (COLLAGE_COLUMNS_W of the project frame) on the full
- *  layout and about the window's width on compact (project.css). */
-export function collageSizes(it: CollageItem, scale = COLLAGE_SCALE): string {
-  const share = (it.w / 100) * COLLAGE_OVERSAMPLE * coverZoom(it);
-  return compactSizes(`${(share * 100).toFixed(1)}vw`, `${(((share * COLLAGE_COLUMNS_W * scale) / PROJECT_FRAME_W) * 100).toFixed(1)}vw`);
-}
-
-/** How much wider than its print a cropped photo is drawn (object-fit: cover). */
-function coverZoom(it: CollageItem): number {
-  const media = it.media.w / it.media.h;
-  return it.aspect && media > it.aspect ? media / it.aspect : 1;
-}
-
-interface RouteImage {
+/** A picture and the `sizes` the page shows it at. */
+export interface RouteImage {
   picture: Picture;
   sizes: string;
 }
 
-/** What each route needs before it shows (above the fold). */
-interface RouteAssets {
+/** The images a route shows above the fold. */
+export interface RoutePreload {
   /** Pictures to decode. */
-  images?: () => RouteImage[];
-  /** Plain image URLs to decode (home's tape, the Experience logos). */
-  urls?: () => string[];
-  /** The page's own chunk (home is in the main chunk). */
-  page?: () => Promise<unknown>;
-  /** Anything else: home's skyline markup, images in a page's own chunk. */
+  images?: readonly RouteImage[];
+  /** Plain image URLs to decode (tape, logos). */
+  urls?: readonly string[];
+  /** Anything else to wait for (home's skyline markup). */
   extras?: () => Promise<unknown>;
 }
 
-const ROUTE_ASSETS: Record<RoutePath, RouteAssets> = {
-  [PATHS.home]: {
-    images: () => HOME_PICTURES,
-    urls: () => HOME_URLS,
-    extras: () => loadSkyline().catch(() => undefined),
-  },
-  [PATHS.about]: {
-    images: () => ABOUT_PICTURES,
-    page: () => PAGE_LOADERS.about(),
-  },
-  [PATHS.experience]: {
-    urls: () => LOGO_URLS,
-    page: () => PAGE_LOADERS.experience(),
-    // Experience's first photos and tape live in its own chunk: fetched
-    // through a dynamic import so the main chunk doesn't carry them.
-    extras: () =>
-      import("../content/experiencePhotos").then(
-        (m) => Promise.all([...m.PRELOAD_PICTURES.map(load), decodeUrl(m.TAPE_URL)]),
-        () => undefined,
-      ),
-  },
-  [PATHS.projects]: {
-    // The first project's collage, on screen as the page shows.
-    images: () =>
-      PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it, PROJECTS[0].collage.scale) }] : [])),
-    page: () => PAGE_LOADERS.projects(),
-  },
-};
+/** What a route needs before it shows. */
+export interface RouteAssets {
+  /** Its images (sync for home, whose data is in the main chunk; a dynamic
+   *  import of the page's `*.preload.ts` for the others). */
+  preload?: () => RoutePreload | Promise<RoutePreload>;
+  /** The page's own chunk (home is in the main chunk). Station pages set
+   *  their body text in Nunito, which is fetched alongside. */
+  page?: () => Promise<unknown>;
+}
+
+let routes: Partial<Record<RoutePath, RouteAssets>> = {};
+
+/** main.tsx registers pages/routeAssets.ts before anything preloads. */
+export function registerRouteAssets(table: Partial<Record<RoutePath, RouteAssets>>): void {
+  routes = table;
+}
+
+const noop = () => undefined;
 
 const loads = new Map<Picture, Promise<void>>();
 
@@ -118,7 +77,7 @@ function load({ picture: pic, sizes }: RouteImage): Promise<void> {
 
 const urlLoads = new Map<string, Promise<void>>();
 
-/** Fetch and decode a plain image URL (home's tape, the Experience logos). */
+/** Fetch and decode a plain image URL (tape, the Experience logos). */
 function decodeUrl(src: string): Promise<void> {
   let p = urlLoads.get(src);
   if (!p) {
@@ -132,45 +91,22 @@ function decodeUrl(src: string): Promise<void> {
   return p;
 }
 
-/** Home's skyline markup (home-skyline.svg), fetched once and inlined by
- *  Home.tsx so its paths can draw themselves. The same file an <img> would
- *  load, so its ~500 paths stay out of the JS bundle; fetched at boot when the
- *  visitor lands on home (preloadRoute), so it isn't waiting on React. */
-let skylinePromise: Promise<string> | null = null;
-let skylineText: string | null = null;
-export function loadSkyline(): Promise<string> {
-  return (skylinePromise ??= fetch(skylineUrl)
-    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
-    .then((text) => (skylineText = text))
-    .catch((err: unknown) => {
-      skylinePromise = null; // retry on the next visit
-      throw err;
-    }));
+function loadAll(p: RoutePreload): Promise<unknown> {
+  return Promise.all([...(p.images ?? []).map(load), ...(p.urls ?? []).map(decodeUrl), p.extras?.()]);
 }
-
-/** The skyline markup if it has arrived (return visits inject it at once). */
-export const skylineMarkup = () => skylineText;
-
-/** Station pages' chunks (pages/Outlet.tsx renders them). Home is in the
- *  main chunk: it's what the site opens on. */
-export const PAGE_LOADERS = {
-  about: () => import("../pages/About"),
-  experience: () => import("../pages/Experience"),
-  projects: () => import("../pages/projects/Projects"),
-} as const;
 
 /** Fetch a route's code and decode its images. Never rejects. */
 export function preloadRoute(path: string): Promise<void> {
-  const a: RouteAssets = ROUTE_ASSETS[path as RoutePath] ?? {};
-  const code = a.page?.().then(() => undefined, () => undefined);
-  // Station pages set their body text in Nunito, which home never loads.
+  const a = routes[path as RoutePath] ?? {};
+  const code = a.page?.().then(noop, noop);
   const font = a.page ? loadTextFont() : undefined;
-  return Promise.all([...(a.images?.() ?? []).map(load), ...(a.urls?.() ?? []).map(decodeUrl), code, font, a.extras?.()]).then(() => undefined);
+  const images = a.preload ? Promise.resolve().then(a.preload).then(loadAll).then(noop, noop) : undefined;
+  return Promise.all([code, font, images]).then(noop);
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */
 export function prefetchPages(): void {
-  onBrowserIdle(() => Object.values(PAGE_LOADERS).forEach((load) => void load().catch(() => undefined)), {
+  onBrowserIdle(() => Object.values(routes).forEach((r) => void r.page?.().catch(noop)), {
     timeoutMs: PREFETCH.IDLE_TIMEOUT_MS,
     fallbackMs: PREFETCH.IDLE_FALLBACK_MS,
   });

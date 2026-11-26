@@ -1,0 +1,12 @@
+/*
+ * About and Experience, in the project pages' style (page.css: the shell,
+ * Helvetica Rounded Bold at --type-project-body, the 9-column grid). About
+ * is one composition placed from the window's centre; Experience lays out on
+ * the grid (tokens.css --grid-*): the index in 1–2, the jobs staggered.
+ */
+.station-page {
+  /* Figma px at a 16px body (1 at the usual size). */
+  --cp: calc(var(--type-project-body) / 16);
+  /* From one column's left edge to the next. */
+  --col-step: calc(var(--grid-col) + var(--grid-gutter));
+}

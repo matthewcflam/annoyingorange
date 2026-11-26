@@ -1,15 +1,16 @@
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
-import PaperSheet from "./paper/PaperSheet";
-import { placeAt } from "./paper/sheets";
-import StationLayout from "./StationLayout";
-import { mapRef } from "../lib/mapRef";
+import PaperSheet from "../../components/paper/PaperSheet";
+import { placeAt } from "../../components/paper/sheet";
+import StationLayout from "../../components/StationLayout";
+import { mapRef } from "../../lib/mapRef";
 import ExperienceList from "./ExperienceList";
-import { JOBS, type Job } from "../content/experience";
-import { JOB_PHOTOS } from "../content/experiencePhotos";
-import { revealOnScroll } from "../lib/scrollReveal";
-import { useScrollIndex } from "../lib/useScrollIndex";
-import { PROJECT } from "../config/timings";
-import "./station.css";
+import { JOBS, type Job } from "../../content/experience";
+import { JOB_PHOTOS } from "../../content/experiencePhotos";
+import { revealOnScroll } from "../../lib/scrollReveal";
+import { useScrollIndex } from "../../lib/useScrollIndex";
+import { PROJECT } from "../../config/timings";
+import "../../components/station.css";
+import "./experience.css";
 
 const IDS = JOBS.map((j) => j.id);
 

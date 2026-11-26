@@ -1,0 +1,111 @@
+/* ---- The collage (Collage.tsx): columns 6–8 (3–5 when mirrored), the
+   project's pieces as taped prints (components/paper/) placed by hand,
+   overlapping and a little crooked (user request: no board behind them).
+   Every length is % of the collage's width (content/projects.ts), in
+   cqw, so it scales with the columns; --collage-h (collageGeometry.ts) is the foot of
+   the lowest print. ---- */
+.collage {
+  --ps-u: var(--pp);
+  /* The collage's share of columns 6–8 (user request: smaller photos); the
+     prints, tape and marks all scale with it. Keep COLLAGE_SCALE in
+     lib/assets.ts in step. Compact resets the width to the column. */
+  --collage-scale: 0.75;
+  /* Air between the prints and their text (user request: the gutter alone
+     looked unnatural), as a share of the three columns: off-grid on purpose,
+     but the collage still ends inside them (scale + gap < 100%). */
+  --collage-gap: 8%;
+  width: calc(var(--collage-scale) * 100%);
+  margin-inline: var(--collage-gap) 0;
+  grid-column: 6 / span 3;
+  grid-row: 1;
+  position: relative;
+  /* Its own cqw would resolve against an ancestor, so the height is a ratio. */
+  aspect-ratio: 100 / var(--collage-h);
+  container-type: inline-size;
+}
+
+/* One print: width and top-left corner in the collage; later prints lie on top. */
+.collage__piece {
+  position: absolute;
+  left: calc(var(--x) * 1cqw);
+  top: calc(var(--y) * 1cqw);
+  width: calc(var(--w) * 1cqw);
+}
+
+/* The tilt, inside the piece (the piece is the layout box). */
+.collage__tilt {
+  position: relative;
+  rotate: var(--r);
+}
+
+/* A <button>: global.css already resets its padding, border, background and font. */
+.collage__item {
+  position: relative;
+  display: block;
+  width: 100%;
+  color: var(--color-home-text);
+}
+
+.collage__item > .paper {
+  inset: 0;
+}
+
+/* A placeholder: a plain grey sheet. */
+.collage__blank {
+  background: var(--color-media);
+}
+
+/* The strip over the print's top edge, centred --tx% across. */
+.collage__tape {
+  left: calc(var(--tx) * 1%);
+  top: 0;
+  z-index: 1;
+  width: 22cqw;
+  aspect-ratio: 76 / 30;
+  translate: -50% -50%;
+  rotate: var(--tr);
+}
+
+.collage__tape--long {
+  width: 32cqw;
+  aspect-ratio: 135 / 31;
+}
+
+/* Expanded: the lightbox's copy stands in for the print and its tape. */
+.collage__piece[data-open] {
+  visibility: hidden;
+}
+
+/* Words on a placeholder (% of the sheet). */
+.collage__caption {
+  position: absolute;
+  left: calc(var(--cx) * 1%);
+  top: calc(var(--cy) * 1%);
+  font-size: max(12px, 3cqw);
+  line-height: 1.2;
+  letter-spacing: var(--tracking);
+  text-align: left;
+  color: var(--color-text);
+  text-box: trim-both cap alphabetic;
+}
+
+.collage__caption span {
+  display: block;
+}
+
+/* The hand-drawn marks (the smiley, the heart), drawn on a print. */
+.collage__mark {
+  position: absolute;
+  left: calc(var(--mx) * 1cqw);
+  top: calc(var(--my) * 1cqw);
+  z-index: 2;
+  width: calc(var(--mw) * 1cqw);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.collage__item:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}

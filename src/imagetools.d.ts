@@ -1,6 +1,6 @@
 /** vite-imagetools presets (vite.config.ts). */
 declare module "*?collage" {
-  const picture: import("./lib/assets").Picture;
+  const picture: import("./lib/picture").Picture;
   export default picture;
 }
 declare module "*?logo" {
@@ -15,7 +15,7 @@ declare module "*?poster" {
 }
 /** Home's paper (vite.config.ts; the texture is baked in by scripts/paperBake.ts). */
 declare module "*?print" {
-  const picture: import("./lib/assets").Picture;
+  const picture: import("./lib/picture").Picture;
   export default picture;
 }
 /** Tape: `?w=…&paperFibre=…&tape` (the preset name last). A WebP URL. */

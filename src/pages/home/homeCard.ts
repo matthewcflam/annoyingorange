@@ -4,7 +4,7 @@
  * decision). A deep link opens it at once, so it's open when home first
  * mounts.
  */
-import { introPart } from "../lib/introPart";
+import { introPart } from "../../lib/introPart";
 
 const card = introPart();
 

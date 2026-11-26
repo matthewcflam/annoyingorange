@@ -10,10 +10,10 @@
  * not on the click's frame. The result is by path index, so it's computed
  * once per load.
  */
-import { gsap } from "../lib/gsap";
-import { SKYLINE } from "../config/timings";
-import { prefersReducedMotion } from "../lib/motion";
-import { onBrowserIdle } from "../lib/idle";
+import { gsap } from "../../lib/gsap";
+import { SKYLINE } from "../../config/timings";
+import { prefersReducedMotion } from "../../lib/motion";
+import { onBrowserIdle } from "../../lib/idle";
 
 /** One path's draw: which end it starts from, when, and for how long. */
 interface Step {

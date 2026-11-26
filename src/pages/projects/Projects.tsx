@@ -8,10 +8,10 @@ import { mapRef } from "../../lib/mapRef";
 import { PROJECT } from "../../config/timings";
 import { PROJECTS, type Project, type ProjectSlug } from "../../content/projects";
 import { PROJECT_LINK_CURSOR, PROJECT_LINK_LABEL } from "../../content/ui";
-import Icon from "../../chrome/Icon";
-import MediaCollage from "./Media";
+import Icon from "../../components/Icon";
+import Collage from "./Collage";
 import ProjectList from "./ProjectList";
-import StationLayout from "../StationLayout";
+import StationLayout from "../../components/StationLayout";
 import "./project.css";
 
 const SLUGS = PROJECTS.map((p) => p.slug);
@@ -60,6 +60,7 @@ export default function Projects() {
             key={p.slug}
             project={p}
             flip={i % 2 === 1}
+            eager={i === 0}
             ref={mapRef(blocks, p.slug)}
           />
         ))}
@@ -73,7 +74,7 @@ export default function Projects() {
  *  description, and its media collage. Every other block is mirrored
  *  (`flip`: the collage in columns 3–5, the text in 6–7), so the projects
  *  zigzag down the page (user request, like Experience's jobs). */
-function ProjectBlock({ project: p, flip, ref }: { project: Project; flip: boolean; ref: (el: HTMLElement | null) => void }) {
+function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip: boolean; eager: boolean; ref: (el: HTMLElement | null) => void }) {
   return (
     <section
       ref={ref}
@@ -132,7 +133,7 @@ function ProjectBlock({ project: p, flip, ref }: { project: Project; flip: boole
           </div>
         )}
       </div>
-      <MediaCollage project={p} />
+      <Collage project={p} eager={eager} />
     </section>
   );
 }

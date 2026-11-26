@@ -12,7 +12,8 @@ import { preloadSounds } from "./audio/engine";
 import { setTransitionRunner } from "./lib/router";
 import { pageTransition } from "./transition/pageTransition";
 import { initScroll } from "./lib/scroll";
-import { prefetchPages, prefetchRoute } from "./lib/assets";
+import { prefetchPages, prefetchRoute, registerRouteAssets } from "./lib/assets";
+import { ROUTE_ASSETS } from "./pages/routeAssets";
 import { registerRoundedFont } from "./lib/fonts";
 import { reloadOnce } from "./lib/reload";
 
@@ -33,6 +34,8 @@ initScroll();
 void preloadSounds();
 
 setTransitionRunner(pageTransition);
+
+registerRouteAssets(ROUTE_ASSETS);
 
 // A deep link's images (About photos, project heroes) start downloading at once.
 prefetchRoute(location.pathname);

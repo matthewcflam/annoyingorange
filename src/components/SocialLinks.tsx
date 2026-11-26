@@ -2,7 +2,7 @@ import { hoverSound } from "../audio/engine";
 import { useCopyEmail } from "./useCopyEmail";
 import { EMAIL, contactLink, type ContactId } from "../content/contact";
 import Icon from "./Icon";
-import "./chrome.css";
+import "./social-links.css";
 
 /** Home's row order (Figma "Home Page Final"), and the glyphs chrome.css nudges. */
 const ORDER: ContactId[] = ["github", "linkedin", "email", "devpost"];

@@ -1,8 +1,8 @@
 import "./footer.css";
 import { FOOTER_CHAT, FOOTER_CREDIT, LAST_UPDATED } from "../content/contact";
 import { SITE_NAME } from "../content/site";
-import DrawnCat from "../chrome/DrawnCat";
-import Connections from "../chrome/Connections";
+import DrawnCat from "./DrawnCat";
+import Connections from "./Connections";
 
 /**
  * The foot of every station page (About, Experience, the projects; Figma

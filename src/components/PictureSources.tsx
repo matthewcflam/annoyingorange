@@ -1,4 +1,4 @@
-import type { Picture } from "../lib/assets";
+import type { Picture } from "../lib/picture";
 
 /** An imagetools picture's <source>s (AVIF, WebP), best first; the <img>
  *  after them is the caller's. */

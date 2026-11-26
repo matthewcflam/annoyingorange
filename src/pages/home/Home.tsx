@@ -1,22 +1,22 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { SprayEngine, WHO_BOX } from "../spray/sprayEngine";
-import { attachWho, respray } from "../spray/who";
-import { SPRAY } from "../config/timings";
-import MapBox from "../keychain/MapBox";
-import SocialLinks from "../chrome/SocialLinks";
-import MuteToggle from "../chrome/MuteToggle";
+import { SprayEngine, WHO_BOX } from "../../spray/sprayEngine";
+import { attachWho, respray } from "../../spray/who";
+import { SPRAY } from "../../config/timings";
+import MapBox from "../../components/MapBox";
+import SocialLinks from "../../components/SocialLinks";
+import MuteToggle from "../../components/MuteToggle";
 import HomePhotos from "./HomePhotos";
-import { isHomeCardOpen, onHomeCardOpen } from "./homeIntro";
-import DrawnCat from "../chrome/DrawnCat";
+import { isHomeCardOpen, onHomeCardOpen } from "./homeCard";
+import DrawnCat from "../../components/DrawnCat";
 import { attachSkyline } from "./skylineDraw";
-import { loadSkyline, skylineMarkup } from "../lib/assets";
-import PaperSheet from "./paper/PaperSheet";
-import { SKY_SHEET, SKY_TAPE } from "./paper/sheets";
-import { navLinkProps } from "../lib/navLink";
-import { PATHS } from "../config/routes";
-import { SITE_NAME } from "../content/site";
-import { GLASS_LINES, TECH_PAPERS } from "../content/home";
-import { CURSOR_LABEL } from "../content/ui";
+import { loadSkyline, skylineMarkup } from "./skyline";
+import PaperSheet from "../../components/paper/PaperSheet";
+import { SKY_SHEET, SKY_TAPE } from "./homeSheets";
+import { navLinkProps } from "../../lib/navLink";
+import { PATHS } from "../../config/routes";
+import { SITE_NAME } from "../../content/site";
+import { GLASS_LINES, TECH_PAPERS } from "../../content/home";
+import { CURSOR_LABEL } from "../../content/ui";
 
 /** The glass card's WebGL (its own chunk, keeping main under budget):
  *  fetched as soon as this module runs, alongside the fonts the first render
@@ -27,7 +27,7 @@ import "./home.css";
 /** Dev only: /?spray-debug shows the sprayPace tuning overlay (never shipped). */
 const SprayDebug =
   import.meta.env.DEV && new URLSearchParams(location.search).has("spray-debug")
-    ? lazy(() => import("../spray/SprayDebug"))
+    ? lazy(() => import("../../spray/SprayDebug"))
     : null;
 
 

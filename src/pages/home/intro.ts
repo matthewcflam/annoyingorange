@@ -10,10 +10,10 @@
  * are there finished from the first frame (user request: only the cat
  * animates on load; a click replays either, see Home.tsx). Every later visit shows all of it finished.
  */
-import { gsap } from "../lib/gsap";
-import { INTRO } from "../config/timings";
-import { openHomeCard } from "../pages/homeIntro";
-import { markPageShown } from "../lib/pageReveal";
+import { gsap } from "../../lib/gsap";
+import { INTRO } from "../../config/timings";
+import { openHomeCard } from "./homeCard";
+import { markPageShown } from "../../lib/pageReveal";
 
 interface Options {
   /** App root; everything is selected inside it. */
