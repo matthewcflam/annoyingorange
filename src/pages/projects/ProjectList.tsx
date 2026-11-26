@@ -9,6 +9,7 @@ import { hoverSound } from "../../audio/engine";
 import { isPlainClick } from "../../lib/router";
 import { MAP_BOX as M, PROJECT_POSTER as P } from "../../config/timings";
 import { PROJECTS, type ProjectSlug } from "../../content/projects";
+import { projectPath } from "../../config/routes";
 
 /**
  * The project list (fixed in columns 1–2), an index of the page: the row of
@@ -156,7 +157,7 @@ export default function ProjectList({ active, onSelect }: { active: ProjectSlug;
             <li key={p.slug} data-peek={p.slug === peek || undefined}>
               <a
                 // A real link (old per-project URL) for a new tab; a plain click scrolls.
-                href={`/projects/${p.slug}`}
+                href={projectPath(p.slug)}
                 className="project-list__link"
                 data-active={p.slug === active || undefined}
                 onClick={(e) => {

@@ -30,6 +30,7 @@ export const INTRO = {
   /** The social glyphs fade up. */
   ICONS_IN: 1.0,
   FADE_DURATION: 0.6,
+  FADE_EASE: "power1.out",
   /** The cat draws itself (like the footer's). */
   CAT_IN: 0.9,
   CAT_DRAW: 1.6,
@@ -154,6 +155,10 @@ export const TRANSITION = {
   EDGE_SMOOTH: 1.0,
   /** Bayer dither cell, device px. The cover canvas renders one pixel per cell. */
   DITHER_PX: 3,
+  /** No WebGL (or the context was lost): the cover fades in over SHOW × this
+   *  and out over HIDE × FALLBACK_HIDE_SHARE instead of dithering. */
+  FALLBACK_SHOW_SHARE: 0.3,
+  FALLBACK_HIDE_SHARE: 0.15,
   /** Optional chunky pixelation of the whole field, CSS px (0 = off). */
   PIXEL_SIZE: 0,
   MAX_DPR: 2,
@@ -166,6 +171,13 @@ export const TRANSITION = {
   TITLE_CYCLES: 3,
   /** Fraction of the type-in spent scrambling (the rest is staggered starts). */
   TITLE_CYCLE_LENGTH: 0.5,
+  /** Each character adds this fraction to the type-in's length (2xa's). */
+  TITLE_STRETCH_PER_CHAR: 0.01,
+  /** Characters start along this CSS cubic-bezier (2xa's), snapped to
+   *  START_SNAP; each one's progress per frame snaps to PROGRESS_SNAP. */
+  TITLE_START_CURVE: [0, 0.75, 0.75, 0] as const,
+  TITLE_START_SNAP: 0.05,
+  TITLE_PROGRESS_SNAP: 0.1,
 
   /** Reduced motion: the cover just fades in and out. */
   REDUCED_FADE: 0.2,
@@ -291,6 +303,8 @@ export const AUDIO = {
   GAIN_VARIATION: 0.1,
   DEFAULT_VOICE_LIMIT: 4,
   VOICE_STEAL_FADE: 0.01,
+  /** A stopped source runs this long past its fade, so it ends at silence. */
+  STOP_TAIL: 0.005,
   MUTE_RAMP: 0.05,
   LIMITER: { threshold: -6, ratio: 20, attack: 0.003, release: 0.1 },
 } as const;
@@ -300,6 +314,8 @@ export const SCROLL = {
   /** Fraction of the remaining distance covered per frame: lower = floatier. */
   LERP: 0.2,
   WHEEL_MULTIPLIER: 1,
+  /** Lenis stops ticking this many frames after its glide ends. */
+  IDLE_FRAMES: 2,
 } as const;
 
 /** The cursor (chrome/Cursor.tsx): a dot that opens into a ring over
@@ -335,7 +351,9 @@ export const SCROLLBAR = {
   MIN_THUMB_PX: 40,
   OPACITY: 0.5,
   FADE_IN: 0.15,
+  FADE_IN_EASE: "power2.out",
   FADE_OUT: 0.4,
+  FADE_OUT_EASE: "power2.in",
   /** Seconds after the last scroll frame before it fades out. */
   IDLE: 0.8,
 } as const;

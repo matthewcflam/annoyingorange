@@ -5,6 +5,7 @@ import { APP } from "./config/timings";
 import { introTimeline } from "./chrome/intro";
 import Outlet from "./pages/Outlet";
 import { useRoute } from "./lib/router";
+import { PATHS } from "./config/routes";
 import { prefersReducedMotion } from "./lib/motion";
 import TransitionLayer from "./transition/TransitionLayer";
 import StationChrome from "./chrome/StationChrome";
@@ -28,7 +29,7 @@ export default function App() {
   const [fontsReady, setFontsReady] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const route = useRoute();
-  const home = route === "/";
+  const home = route === PATHS.home;
   useEffect(() => {
     let cancelled = false;
     // Fonts for the route the visitor landed on (home skips the body font).

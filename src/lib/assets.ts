@@ -8,9 +8,10 @@ import { ABOUT_PICTURES } from "../content/aboutPhotos";
 import { LOGO_URLS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS } from "../pages/paper/sheets";
 import { loadTextFont } from "./fonts";
-import { compactSizes } from "./frame";
+import { compactSizes, gridSpan, PROJECT_FRAME_W } from "./frame";
 import { onBrowserIdle } from "./idle";
 import { PREFETCH } from "../config/timings";
+import { PATHS, type RoutePath } from "../config/routes";
 import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
 /** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
@@ -24,17 +25,17 @@ export interface Picture {
  *  they cover to stay crisp. */
 const COLLAGE_OVERSAMPLE = 1.5;
 
-/** The collage's width on the full layout in the 1640 frame: columns 6–8,
+/** The collage's width on the full layout in the project frame: columns 6–8,
  *  3 columns + 2 gutters (project.css). */
 const COLLAGE_SCALE = 0.75; // --collage-scale in project.css
-const COLLAGE_COLUMNS_W = (3 * (1640 - 2 * 15 - 8 * 15)) / 9 + 2 * 15;
+const COLLAGE_COLUMNS_W = gridSpan(3);
 
 /** The collage piece `it`'s `sizes`: its print is `it.w`% of the collage,
- *  which is `scale` of columns 6–8 (COLLAGE_COLUMNS_W of the 1640 frame) on the full
+ *  which is `scale` of columns 6–8 (COLLAGE_COLUMNS_W of the project frame) on the full
  *  layout and about the window's width on compact (project.css). */
 export function collageSizes(it: CollageItem, scale = COLLAGE_SCALE): string {
   const share = (it.w / 100) * COLLAGE_OVERSAMPLE * coverZoom(it);
-  return compactSizes(`${(share * 100).toFixed(1)}vw`, `${(((share * COLLAGE_COLUMNS_W * scale) / 1640) * 100).toFixed(1)}vw`);
+  return compactSizes(`${(share * 100).toFixed(1)}vw`, `${(((share * COLLAGE_COLUMNS_W * scale) / PROJECT_FRAME_W) * 100).toFixed(1)}vw`);
 }
 
 /** How much wider than its print a cropped photo is drawn (object-fit: cover). */
@@ -48,16 +49,46 @@ interface RouteImage {
   sizes: string;
 }
 
-/** Images per route that must be decoded before it shows (above the fold). */
-function routeImages(path: string): RouteImage[] {
-  // Home: the prints.
-  if (path === "/") return HOME_PICTURES;
-  if (path === "/about") return ABOUT_PICTURES;
-  // Projects: the first project's collage, on screen as the page shows.
-  if (path === "/projects")
-    return PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it, PROJECTS[0].collage.scale) }] : []));
-  return [];
+/** What each route needs before it shows (above the fold). */
+interface RouteAssets {
+  /** Pictures to decode. */
+  images?: () => RouteImage[];
+  /** Plain image URLs to decode (home's tape, the Experience logos). */
+  urls?: () => string[];
+  /** The page's own chunk (home is in the main chunk). */
+  page?: () => Promise<unknown>;
+  /** Anything else: home's skyline markup, images in a page's own chunk. */
+  extras?: () => Promise<unknown>;
 }
+
+const ROUTE_ASSETS: Record<RoutePath, RouteAssets> = {
+  [PATHS.home]: {
+    images: () => HOME_PICTURES,
+    urls: () => HOME_URLS,
+    extras: () => loadSkyline().catch(() => undefined),
+  },
+  [PATHS.about]: {
+    images: () => ABOUT_PICTURES,
+    page: () => PAGE_LOADERS.about(),
+  },
+  [PATHS.experience]: {
+    urls: () => LOGO_URLS,
+    page: () => PAGE_LOADERS.experience(),
+    // Experience's first photos and tape live in its own chunk: fetched
+    // through a dynamic import so the main chunk doesn't carry them.
+    extras: () =>
+      import("../content/experiencePhotos").then(
+        (m) => Promise.all([...m.PRELOAD_PICTURES.map(load), decodeUrl(m.TAPE_URL)]),
+        () => undefined,
+      ),
+  },
+  [PATHS.projects]: {
+    // The first project's collage, on screen as the page shows.
+    images: () =>
+      PROJECTS[0].collage.items.flatMap((it) => (it.media.kind === "image" ? [{ picture: it.media.picture, sizes: collageSizes(it, PROJECTS[0].collage.scale) }] : [])),
+    page: () => PAGE_LOADERS.projects(),
+  },
+};
 
 const loads = new Map<Picture, Promise<void>>();
 
@@ -101,13 +132,6 @@ function decodeUrl(src: string): Promise<void> {
   return p;
 }
 
-/** Plain image URLs per route (decoded alongside its pictures). */
-function routeUrls(path: string): string[] {
-  if (path === "/") return HOME_URLS;
-  if (path === "/experience") return LOGO_URLS;
-  return [];
-}
-
 /** Home's skyline markup (home-skyline.svg), fetched once and inlined by
  *  Home.tsx so its paths can draw themselves. The same file an <img> would
  *  load, so its ~500 paths stay out of the JS bundle; fetched at boot when the
@@ -135,29 +159,13 @@ export const PAGE_LOADERS = {
   projects: () => import("../pages/projects/Projects"),
 } as const;
 
-function pageLoader(path: string) {
-  if (path === "/about") return PAGE_LOADERS.about;
-  if (path === "/experience") return PAGE_LOADERS.experience;
-  return path === "/projects" ? PAGE_LOADERS.projects : null;
-}
-
 /** Fetch a route's code and decode its images. Never rejects. */
 export function preloadRoute(path: string): Promise<void> {
-  const code = pageLoader(path)?.().then(() => undefined, () => undefined);
-  const skyline = path === "/" ? loadSkyline().catch(() => undefined) : undefined;
+  const a: RouteAssets = ROUTE_ASSETS[path as RoutePath] ?? {};
+  const code = a.page?.().then(() => undefined, () => undefined);
   // Station pages set their body text in Nunito, which home never loads.
-  const font = pageLoader(path) ? loadTextFont() : undefined;
-  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline, font, routeExtras(path)]).then(() => undefined);
-}
-
-/** Images that live in a page's own chunk, fetched through a dynamic import
- *  so the main chunk doesn't carry them: Experience's first photos and tape. */
-function routeExtras(path: string): Promise<unknown> | undefined {
-  if (path !== "/experience") return undefined;
-  return import("../content/experiencePhotos").then(
-    (m) => Promise.all([...m.PRELOAD_PICTURES.map(load), decodeUrl(m.TAPE_URL)]),
-    () => undefined,
-  );
+  const font = a.page ? loadTextFont() : undefined;
+  return Promise.all([...(a.images?.() ?? []).map(load), ...(a.urls?.() ?? []).map(decodeUrl), code, font, a.extras?.()]).then(() => undefined);
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */

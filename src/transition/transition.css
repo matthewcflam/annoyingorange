@@ -4,7 +4,7 @@
  * Every page is light, so the cover is always dark with light text.
  */
 .layer--transition {
-  z-index: 50;
+  z-index: var(--z-transition);
   pointer-events: none;
   /* The dither canvas overhangs the viewport by under one cell. */
   overflow: hidden;
@@ -49,8 +49,8 @@
   z-index: 2;
   font-family: var(--font-transition);
   font-size: var(--type-name);
-  font-weight: 700;
-  letter-spacing: -0.04em;
+  font-weight: var(--weight-rounded);
+  letter-spacing: var(--tracking);
   line-height: 1;
   color: var(--fg);
 }

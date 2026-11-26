@@ -50,7 +50,7 @@
   font: inherit;
   letter-spacing: inherit;
   text-decoration: none;
-  transition: color 0.15s ease-out;
+  transition: color var(--hover-fade) ease-out;
 }
 
 .connections__icon {

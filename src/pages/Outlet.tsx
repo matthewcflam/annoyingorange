@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ComponentType } from "react";
 import { useRoute } from "../lib/router";
 import { PAGE_LOADERS } from "../lib/assets";
+import { PATHS, type RoutePath } from "../config/routes";
 import Home from "./Home";
 
 type PageModule = { default: ComponentType };
@@ -30,11 +31,11 @@ const Experience = chunked(PAGE_LOADERS.experience);
 const Projects = chunked(PAGE_LOADERS.projects);
 
 /** Canonical path → page (paths from config/routes.ts). */
-const PAGES: Record<string, ComponentType> = {
-  "/": Home,
-  "/about": About,
-  "/experience": Experience,
-  "/projects": Projects,
+const PAGES: Record<RoutePath, ComponentType> = {
+  [PATHS.home]: Home,
+  [PATHS.about]: About,
+  [PATHS.experience]: Experience,
+  [PATHS.projects]: Projects,
 };
 
 /** Renders the committed route's page, keyed so pages remount fresh. */

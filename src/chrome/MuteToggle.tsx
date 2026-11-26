@@ -2,6 +2,7 @@ import { play, setMuted, getContext, isUnlocked, unlock } from "../audio/engine"
 import { useMuted } from "../audio/useSound";
 import { AUDIO } from "../config/timings";
 import { useShortcut } from "../lib/useShortcut";
+import { CURSOR_LABEL } from "../content/ui";
 
 /** Runs inside a click or keydown, so the first toggle-on can create the AudioContext. */
 function toggle(muted: boolean) {
@@ -34,7 +35,7 @@ export default function MuteToggle() {
       className="social-links__icon social-links__icon--sound interactive"
       aria-label="Sound"
       aria-pressed={!muted}
-      data-cursor={muted ? "Sound On" : "Sound Off"}
+      data-cursor={muted ? CURSOR_LABEL.soundOn : CURSOR_LABEL.soundOff}
       aria-keyshortcuts="M"
       title={`Sound ${muted ? "off" : "on"} (M). The iPhone silent switch mutes sound.`}
       onClick={() => toggle(muted)}

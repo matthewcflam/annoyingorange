@@ -4,7 +4,7 @@
  * is safe before the first gesture. Live-synthesized sounds (the spray hiss)
  * build their node graphs on top of these buffers.
  */
-import type { Placeholder } from "../config/sounds";
+import { PLACEHOLDER_SYNTH as S, type Placeholder } from "../config/sounds";
 
 export const SAMPLE_RATE = 48000;
 
@@ -17,7 +17,7 @@ function makeBuffer(seconds: number): AudioBuffer {
 }
 
 /** Short fade in/out so buffers never click at their edges. */
-function edgeFade(data: Float32Array, fadeSeconds = 0.004) {
+function edgeFade(data: Float32Array, fadeSeconds = S.EDGE_FADE) {
   const n = Math.min(Math.round(fadeSeconds * SAMPLE_RATE), data.length >> 1);
   for (let i = 0; i < n; i++) {
     const g = i / n;
@@ -44,26 +44,26 @@ export function synthPlaceholder(p: Placeholder, variant = 0): AudioBuffer {
   const d = buf.getChannelData(0);
 
   if (p.type === "tone") {
-    const freq = p.freq * (1 + 0.06 * variant);
-    const decay = 5 / p.dur;
+    const freq = p.freq * (1 + S.TONE_DETUNE * variant);
+    const decay = S.TONE_DECAY / p.dur;
     for (let i = 0; i < d.length; i++) {
       const t = i / SAMPLE_RATE;
       const phase = (t * freq) % 1;
       const osc =
         p.wave === "sine" ? Math.sin(2 * Math.PI * phase)
         : p.wave === "triangle" ? 1 - 4 * Math.abs(phase - 0.5)
-        : phase < 0.5 ? 0.5 : -0.5;
-      d[i] = osc * Math.exp(-decay * t) * 0.8;
+        : phase < 0.5 ? S.SQUARE_PEAK : -S.SQUARE_PEAK;
+      d[i] = osc * Math.exp(-decay * t) * S.TONE_AMP;
     }
   } else {
     // One-pole lowpass over white noise, shaped as a swell then decay.
-    const cutoff = p.cutoff * (1 + 0.15 * variant);
+    const cutoff = p.cutoff * (1 + S.NOISE_CUTOFF_STEP * variant);
     const a = Math.exp((-2 * Math.PI * cutoff) / SAMPLE_RATE);
     let y = 0;
     for (let i = 0; i < d.length; i++) {
       y = (1 - a) * (Math.random() * 2 - 1) + a * y;
       const x = i / d.length;
-      d[i] = y * Math.sin(Math.PI * Math.sqrt(x)) * 2.5;
+      d[i] = y * Math.sin(Math.PI * Math.sqrt(x)) * S.NOISE_AMP;
     }
   }
 

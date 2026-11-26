@@ -3,7 +3,8 @@ import { gsap } from "../lib/gsap";
 import { prefersReducedMotion } from "../lib/motion";
 import { useRoute } from "../lib/router";
 import { navLinkProps } from "../lib/navLink";
-import { routeFor, STATIONS } from "../config/routes";
+import { PATHS, routeFor, STATIONS, type RoutePath } from "../config/routes";
+import { HOME_LABEL } from "../content/site";
 import { MAP_BOX as M } from "../config/timings";
 import { emptyShape, flowShape, runFlow, shapePath, snapShape } from "../lib/waterFlow";
 import { useTimer } from "../lib/useTimer";
@@ -11,7 +12,7 @@ import "./mapbox.css";
 
 /** The rows: Home, then the stations in line order. */
 const ROWS = [
-  { id: "home", label: "Home", path: "/" },
+  { id: "home", label: HOME_LABEL, path: PATHS.home as RoutePath },
   ...STATIONS.map((s) => ({ id: s.id as string, label: s.label, path: s.path })),
 ];
 

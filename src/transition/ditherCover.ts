@@ -154,7 +154,8 @@ class DitherCover {
   private tween: gsap.core.Tween | null = null;
   /** How the current transition covers the screen. */
   private mode: "dither" | "fade" = "dither";
-  private color: [number, number, number] = [0.06, 0.06, 0.06];
+  /** --color-cover-dark, read in show() before every draw. */
+  private color: [number, number, number] = [0, 0, 0];
 
   constructor() {
     this.canvas.className = "transition__canvas";
@@ -191,7 +192,7 @@ class DitherCover {
     const [r, g, b] = parseColor(readToken("--color-cover-dark"));
     this.color = [r, g, b];
     this.mode = reduced || !this.gl ? "fade" : "dither";
-    if (this.mode === "fade") return this.fadeTo(1, reduced ? T.REDUCED_FADE : T.SHOW * 0.3, 0);
+    if (this.mode === "fade") return this.fadeTo(1, reduced ? T.REDUCED_FADE : T.SHOW * T.FALLBACK_SHOW_SHARE, 0);
     this.direction = 1;
     this.offset = [gsap.utils.random(0, 100), gsap.utils.random(0, 100)];
     this.progress = 0;
@@ -217,7 +218,7 @@ class DitherCover {
       this.progress = 0;
       this.clear();
       this.setVisible(false);
-      return this.fadeTo(0, reduced ? T.REDUCED_FADE : T.HIDE * 0.15, delay, onClearStart).then(() => onUnlock?.());
+      return this.fadeTo(0, reduced ? T.REDUCED_FADE : T.HIDE * T.FALLBACK_HIDE_SHARE, delay, onClearStart).then(() => onUnlock?.());
     }
     this.direction = 0;
     this.offset = [gsap.utils.random(0, 100), gsap.utils.random(0, 100)];

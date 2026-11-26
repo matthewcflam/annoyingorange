@@ -18,7 +18,8 @@ import remindDemoAv1 from "../../assets-src/videos/remind-demo.webm";
 import remindDemoH264 from "../../assets-src/videos/remind-demo.mp4";
 import remindDemoPoster from "../../assets-src/images/remind-demo-poster.png?poster";
 
-export type ProjectSlug = "remind" | "mango" | "oyster-news" | "portfolio";
+import type { ProjectSlug } from "../config/routes";
+export type { ProjectSlug };
 
 /**
  * One item of a project's media (pages/projects/Media.tsx), as the expanded
@@ -275,9 +276,3 @@ export function lightboxMedia(p: Project): Media[] {
   return [...p.collage.items.map((i) => i.media), ...(p.extraMedia ?? [])];
 }
 
-/** The project a `/projects/<slug>` path names, if any (old per-project
- *  links: they open /projects scrolled to it). */
-export function projectSlugFromPath(path: string): ProjectSlug | null {
-  const m = /^\/projects\/([^/]+)\/?$/.exec(path);
-  return (m && PROJECTS.find((p) => p.slug === m[1])?.slug) || null;
-}

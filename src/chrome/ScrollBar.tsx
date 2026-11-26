@@ -33,7 +33,7 @@ export default function ScrollBar() {
       gsap.to(el, {
         opacity: on ? SCROLLBAR.OPACITY : 0,
         duration: reduced ? 0 : on ? SCROLLBAR.FADE_IN : SCROLLBAR.FADE_OUT,
-        ease: on ? "power2.out" : "power2.in",
+        ease: on ? SCROLLBAR.FADE_IN_EASE : SCROLLBAR.FADE_OUT_EASE,
         overwrite: true,
       });
     };

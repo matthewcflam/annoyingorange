@@ -8,9 +8,8 @@
  */
 import { useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-import { documentTitle, resolvePath, routeFor } from "../config/routes";
+import { documentTitle, projectSlugFromPath, resolvePath, routeFor, type ProjectSlug, type RoutePath } from "../config/routes";
 import { lockScroll, resetScroll, unlockScroll } from "./scroll";
-import { projectSlugFromPath, type ProjectSlug } from "../content/projects";
 
 /**
  * Runs the visual transition to `to`. Must call `commit()` exactly once, when
@@ -24,7 +23,7 @@ let projectFocus: ProjectSlug | null = projectSlugFromPath(location.pathname);
 
 let current = resolvePath(location.pathname);
 let transitioning = false;
-let queued: string | null = null;
+let queued: RoutePath | null = null;
 let runner: TransitionRunner = async (_to, commit) => commit();
 const listeners = new Set<() => void>();
 let idleWaiters: (() => void)[] = [];
@@ -58,7 +57,7 @@ export function whenIdle(): Promise<void> {
 }
 
 /** Current canonical path; re-renders on commit. */
-export function useRoute(): string {
+export function useRoute(): RoutePath {
   return useSyncExternalStore(subscribe, getRoute);
 }
 
@@ -69,7 +68,7 @@ export function setTransitionRunner(fn: TransitionRunner): void {
 
 /** Swap the page. Called by the transition at black; never touches history.
  *  Flushed synchronously so the new page is in the DOM when this returns. */
-function commitRoute(to: string) {
+function commitRoute(to: RoutePath) {
   if (to === current) return;
   current = to;
   document.title = documentTitle(routeFor(to));
@@ -77,7 +76,7 @@ function commitRoute(to: string) {
   flushSync(emit);
 }
 
-async function run(to: string) {
+async function run(to: RoutePath) {
   transitioning = true;
   lockScroll(); // no wheel glide under the cover or into the new page
   try {

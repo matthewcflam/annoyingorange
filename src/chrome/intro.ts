@@ -47,7 +47,7 @@ export function introTimeline({ root, home, reduced }: Options): gsap.core.Timel
 
   tl.to(name, { autoAlpha: 1, duration: INTRO.NAME_IN_DURATION, ease: INTRO.NAME_IN_EASE }, INTRO.NAME_IN)
     .call(openHomeCard, undefined, INTRO.CARD_OPEN)
-    .to(icons, { autoAlpha: 1, duration: INTRO.FADE_DURATION }, INTRO.ICONS_IN);
+    .to(icons, { autoAlpha: 1, duration: INTRO.FADE_DURATION, ease: INTRO.FADE_EASE }, INTRO.ICONS_IN);
 
   if (!reduced) {
     gsap.set(catPaths, { drawSVG: "0%" });

@@ -1,4 +1,5 @@
 import { FONTS } from "../config/timings";
+import { PATHS } from "../config/routes";
 
 /**
  * Font family names as Fontsource registers them (spec §5.1). The variable
@@ -64,7 +65,7 @@ export async function waitForFonts(route: string, timeoutMs = FONTS.TIMEOUT_MS):
     Promise.all([
       document.fonts.load(fontString(400, 16, FAMILY.body)),
       document.fonts.load(fontString(700, 16, FAMILY.body)),
-      route === "/" ? null : loadTextFont(),
+      route === PATHS.home ? null : loadTextFont(),
       roundedRegistered ? document.fonts.load(fontString(700, 16, ROUNDED)) : null,
     ]),
     new Promise((resolve) => setTimeout(resolve, timeoutMs)),

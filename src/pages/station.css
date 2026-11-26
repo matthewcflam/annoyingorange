@@ -84,7 +84,7 @@
 
 .page .about__hello {
   font-size: var(--type-project-title);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   line-height: 1.175;
 }
 
@@ -156,7 +156,7 @@
   color: var(--color-grey);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.15s;
+  transition: color var(--hover-fade);
 }
 
 .experience-list__link[data-active] {
@@ -302,10 +302,10 @@
 
 .page .experience-job__company {
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: var(--type-project-heading);
   line-height: 1.05;
-  letter-spacing: -0.08em;
+  letter-spacing: var(--tracking-name);
   text-box: trim-both cap alphabetic;
 }
 
@@ -314,10 +314,10 @@
 .page .experience-job__role {
   margin-top: calc(12 * var(--cp));
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: calc(14 * var(--cp));
   line-height: calc(18 * var(--cp));
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   color: var(--color-grey);
   text-box: trim-both cap alphabetic;
 }

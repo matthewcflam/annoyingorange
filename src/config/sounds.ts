@@ -14,6 +14,23 @@ export type Placeholder =
   /** Filtered white-noise burst. `cutoff` is a one-pole lowpass in Hz. */
   | { type: "noise"; cutoff: number; dur: number };
 
+/** How audio/procedural.ts voices the placeholders (the user keeps them as
+ *  the real sounds: CLAUDE.md #10, so don't retune them unasked). */
+export const PLACEHOLDER_SYNTH = {
+  /** Each round-robin variant is detuned by this fraction per step. */
+  TONE_DETUNE: 0.06,
+  /** A tone decays by e^-TONE_DECAY over its length. */
+  TONE_DECAY: 5,
+  TONE_AMP: 0.8,
+  /** The square wave's peak (the others peak at 1). */
+  SQUARE_PEAK: 0.5,
+  /** Each noise variant's cutoff rises by this fraction per step. */
+  NOISE_CUTOFF_STEP: 0.15,
+  NOISE_AMP: 2.5,
+  /** Every buffer fades in and out over this long, so it never clicks. */
+  EDGE_FADE: 0.004,
+} as const;
+
 export interface SoundDef {
   bus: Bus;
   /** Round-robin variants, played as <id>.1 … <id>.n. Omit for a single file. */

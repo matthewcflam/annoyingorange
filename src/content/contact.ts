@@ -31,3 +31,7 @@ export const contactLink = (id: ContactId): ContactLink => CONTACT_LINKS.find((l
 
 /** The footer's "LAST UPDATED" line (Figma). TODO(last-updated): hand-written; could be stamped at build time. */
 export const LAST_UPDATED = "November 25th 2026";
+
+/** The footer's lines beside the card and under the cat. */
+export const FOOTER_CHAT = "Let’s chat!";
+export const FOOTER_CREDIT = "Designed and Built by";

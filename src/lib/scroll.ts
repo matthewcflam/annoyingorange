@@ -30,7 +30,7 @@ export function initScroll(): void {
   const tick = (time: number) => {
     l.raf(time * 1000);
     if (l.isScrolling === "smooth") still = 0;
-    else if (++still > 2) {
+    else if (++still > SCROLL.IDLE_FRAMES) {
       gsap.ticker.remove(tick);
       ticking = false;
     }

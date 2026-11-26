@@ -4,6 +4,7 @@ import { prefersReducedMotion } from "../lib/motion";
 import { observeOnceShown } from "../lib/pageReveal";
 import { CAT } from "../config/timings";
 import catSvg from "../../assets-src/svg/chat-cat.svg?raw";
+import { CURSOR_LABEL } from "../content/ui";
 
 /**
  * The orange cat (chat-cat.svg), on home and in every station page's footer.
@@ -45,5 +46,5 @@ export default function DrawnCat({ className, drawOnView = false }: { className:
     };
   }, [drawOnView]);
 
-  return <div ref={ref} className={className} data-clickable data-cursor="Redraw" aria-hidden="true" dangerouslySetInnerHTML={{ __html: catSvg }} />;
+  return <div ref={ref} className={className} data-clickable data-cursor={CURSOR_LABEL.redraw} aria-hidden="true" dangerouslySetInnerHTML={{ __html: catSvg }} />;
 }

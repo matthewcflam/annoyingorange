@@ -6,7 +6,8 @@ import { useScrollIndex } from "../../lib/useScrollIndex";
 import { hoverSound } from "../../audio/engine";
 import { mapRef } from "../../lib/mapRef";
 import { PROJECT } from "../../config/timings";
-import { PROJECTS, type Project, type ProjectLink, type ProjectSlug } from "../../content/projects";
+import { PROJECTS, type Project, type ProjectSlug } from "../../content/projects";
+import { PROJECT_LINK_CURSOR, PROJECT_LINK_LABEL } from "../../content/ui";
 import Icon from "../../chrome/Icon";
 import MediaCollage from "./Media";
 import ProjectList from "./ProjectList";
@@ -67,9 +68,6 @@ export default function Projects() {
   );
 }
 
-const LINK_LABEL: Record<ProjectLink["kind"], string> = { github: "GitHub", devpost: "Devpost", site: "Website" };
-/** What the cursor says over each link (chrome/Cursor.tsx). */
-const LINK_CURSOR: Record<ProjectLink["kind"], string> = { github: "View GitHub", devpost: "View Devpost", site: "Visit Site" };
 
 /** One project: TOOLS, its name, tagline, awards and links, then its
  *  description, and its media collage. Every other block is mirrored
@@ -113,8 +111,8 @@ function ProjectBlock({ project: p, flip, ref }: { project: Project; flip: boole
               <li key={link.kind}>
                 <a
                   href={link.href}
-                  aria-label={`${p.name} on ${LINK_LABEL[link.kind]}`}
-                  data-cursor={LINK_CURSOR[link.kind]}
+                  aria-label={`${p.name} on ${PROJECT_LINK_LABEL[link.kind]}`}
+                  data-cursor={PROJECT_LINK_CURSOR[link.kind]}
                   {...(link.href.startsWith("/")
                     ? { onClick: (e: React.MouseEvent) => onNavClick(e, link.href) }
                     : { target: "_blank", rel: "noreferrer" })}

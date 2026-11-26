@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
 import { navLinkProps } from "../lib/navLink";
+import { PATHS } from "../config/routes";
+import { SITE_NAME } from "../content/site";
+import { CURSOR_LABEL } from "../content/ui";
 import SiteFooter from "./SiteFooter";
 import "./page.css";
 
@@ -31,8 +34,8 @@ export default function StationLayout({
     <div ref={rootRef} className={`page${className ? ` ${className}` : ""}`} style={style}>
       <header className="page__head">
         <h1 className="page__name">
-          <a className="page__home" aria-label="Matthew Lam, home" data-cursor="Go Home" {...navLinkProps("/")}>
-            Matthew Lam
+          <a className="page__home" aria-label={`${SITE_NAME}, home`} data-cursor={CURSOR_LABEL.home} {...navLinkProps(PATHS.home)}>
+            {SITE_NAME}
           </a>
         </h1>
         {nav}

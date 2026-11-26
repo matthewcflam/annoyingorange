@@ -89,7 +89,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  letter-spacing: -0.04em; /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */
+  letter-spacing: var(--tracking); /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -170,12 +170,12 @@ canvas {
 .layer--page {
   position: relative;
   inset: auto;
-  z-index: 0;
+  z-index: var(--z-page);
   min-height: 100vh;
 }
 
 .layer--chrome {
-  z-index: 10;
+  z-index: var(--z-chrome);
   pointer-events: none;
 }
 

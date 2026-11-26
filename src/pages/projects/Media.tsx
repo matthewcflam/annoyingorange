@@ -12,6 +12,7 @@ import ResponsivePicture from "../ResponsivePicture";
 import PaperSheet from "../paper/PaperSheet";
 import type { Sheet } from "../paper/sheets";
 import { TAPE_LONG, TAPE_SHORT } from "../paper/tapes";
+import { CURSOR_LABEL } from "../../content/ui";
 
 type VideoRef = (el: HTMLVideoElement | null) => void | (() => void);
 
@@ -127,7 +128,7 @@ export default function MediaCollage({ project }: { project: Project }) {
               aria-haspopup="dialog"
               aria-label={`Expand: ${it.media.label}`}
               data-kind={it.media.kind}
-              data-cursor={it.media.kind === "image" ? "View Photo" : it.media.kind === "video" ? "Play Video" : "Expand"}
+              data-cursor={it.media.kind === "image" ? CURSOR_LABEL.viewPhoto : it.media.kind === "video" ? CURSOR_LABEL.playVideo : CURSOR_LABEL.expand}
               onClick={() => {
                 play("project.select");
                 setOpen(i);
@@ -390,17 +391,17 @@ function Lightbox({
 
   return createPortal(
     <div className="lightbox" role="dialog" aria-modal="true" aria-label={items[current.index].label} style={{ "--project-color": color } as CSSProperties}>
-      <div ref={backdropRef} className="lightbox__backdrop" data-clickable data-cursor="Close" onClick={close} />
-      <div ref={frameRef} className="lightbox__frame" data-cursor="Close" onClick={close}>
+      <div ref={backdropRef} className="lightbox__backdrop" data-clickable data-cursor={CURSOR_LABEL.close} onClick={close} />
+      <div ref={frameRef} className="lightbox__frame" data-cursor={CURSOR_LABEL.close} onClick={close}>
         {leaving.map(renderSlide)}
         {renderSlide(current)}
       </div>
-      <button ref={closeRef} type="button" className="lightbox__close" data-cursor="Close" onClick={close}>
+      <button ref={closeRef} type="button" className="lightbox__close" data-cursor={CURSOR_LABEL.close} onClick={close}>
         <span>Close</span>
       </button>
       {n > 1 && (
         <div ref={navRef} className="lightbox__nav">
-          <button type="button" className="lightbox__arrow lightbox__arrow--prev" aria-label="Previous" data-cursor="Previous" onPointerEnter={hoverSound} onClick={() => step(-1)}>
+          <button type="button" className="lightbox__arrow lightbox__arrow--prev" aria-label={CURSOR_LABEL.previous} data-cursor={CURSOR_LABEL.previous} onPointerEnter={hoverSound} onClick={() => step(-1)}>
             <Arrow />
           </button>
           <span className="lightbox__count" aria-live="polite">
@@ -408,7 +409,7 @@ function Lightbox({
               {current.index + 1} / {n}
             </span>
           </span>
-          <button type="button" className="lightbox__arrow lightbox__arrow--next" aria-label="Next" data-cursor="Next" onPointerEnter={hoverSound} onClick={() => step(1)}>
+          <button type="button" className="lightbox__arrow lightbox__arrow--next" aria-label={CURSOR_LABEL.next} data-cursor={CURSOR_LABEL.next} onPointerEnter={hoverSound} onClick={() => step(1)}>
             <Arrow />
           </button>
         </div>

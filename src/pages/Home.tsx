@@ -13,6 +13,10 @@ import { loadSkyline, skylineMarkup } from "../lib/assets";
 import PaperSheet from "./paper/PaperSheet";
 import { SKY_SHEET, SKY_TAPE } from "./paper/sheets";
 import { navLinkProps } from "../lib/navLink";
+import { PATHS } from "../config/routes";
+import { SITE_NAME } from "../content/site";
+import { GLASS_LINES, TECH_PAPERS } from "../content/home";
+import { CURSOR_LABEL } from "../content/ui";
 
 /** The glass card's WebGL (its own chunk, keeping main under budget):
  *  fetched as soon as this module runs, alongside the fonts the first render
@@ -26,18 +30,6 @@ const SprayDebug =
     ? lazy(() => import("../spray/SprayDebug"))
     : null;
 
-/** The tech papers' lists, back to front (Figma "Group 123", "Group 124"). */
-const TECH_PAPERS = [
-  ["Python", "TypeScript", "C#", "SQL"],
-  ["React", "Node.js", ".NET"],
-];
-
-/** The glass card's lines, in groups a blank line apart (Figma 517:34). */
-const GLASS_LINES = [
-  ["Computer Engineering @ UBC"],
-  ["UBC Sailbot", "UBC Third Quadrant Design", "prev. @ EnerSys"],
-  ["Open to summer/fall 2027 opportunities :)"],
-];
 
 /**
  * Home (Figma "Home Page Final", 1767×1024): "Matthew Lam" over the centre
@@ -132,7 +124,7 @@ export default function Home() {
         </div>
       ))}
 
-      <h1 className="home__name">Matthew Lam</h1>
+      <h1 className="home__name">{SITE_NAME}</h1>
       <div className="home__card">
         <MapBox variant="home" open={cardOpen} />
       </div>
@@ -140,7 +132,7 @@ export default function Home() {
       <HomePhotos />
 
       {/* A click sprays it again (spray/who.ts, user request). */}
-      <div className="home__who" data-clickable data-cursor="Spray" onClick={respray}>
+      <div className="home__who" data-clickable data-cursor={CURSOR_LABEL.spray} onClick={respray}>
         <canvas
           ref={canvasRef}
           className="home__who-canvas"
@@ -165,8 +157,8 @@ export default function Home() {
       <a
         ref={glassRef}
         className="home__glass"
-        data-cursor="Read More"
-        {...navLinkProps("/experience")}
+        data-cursor={CURSOR_LABEL.readMore}
+        {...navLinkProps(PATHS.experience)}
       >
         <canvas ref={glassCanvasRef} className="home__glass-canvas" aria-hidden="true" />
         {GLASS_LINES.map((group, i) => (
@@ -187,7 +179,7 @@ export default function Home() {
       <div className="home__sky">
         <PaperSheet sheet={SKY_SHEET} placed />
         {/* A click draws it again (skylineDraw.ts). */}
-        <div ref={skylineRef} className="home__skyline" data-clickable data-cursor="Draw" aria-hidden="true" />
+        <div ref={skylineRef} className="home__skyline" data-clickable data-cursor={CURSOR_LABEL.draw} aria-hidden="true" />
         <PaperSheet sheet={SKY_TAPE} placed />
       </div>
     </div>

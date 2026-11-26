@@ -261,7 +261,7 @@ export function play(id: SoundId, opts: PlayOptions = {}): void {
       gain.gain.cancelScheduledValues(t);
       gain.gain.setValueAtTime(gain.gain.value, t);
       gain.gain.linearRampToValueAtTime(0, t + fade);
-      src.stop(t + fade + 0.005);
+      src.stop(t + fade + AUDIO.STOP_TAIL);
     },
   };
   list.push(voice);

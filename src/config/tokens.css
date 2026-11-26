@@ -32,11 +32,26 @@
      always scale together and share its floor. */
   --iu:           calc(var(--type-small) / 20);
 
+  /* ---- Stacking: the site's top-level layers, bottom to top ---- */
+  --z-page:       0;
+  --z-chrome:     10;
+  --z-grid:       44;   /* Shift+G overlay */
+  --z-scrollbar:  45;
+  --z-lightbox:   48;   /* project media, expanded */
+  --z-transition: 50;   /* the page-change cover */
+  --z-cursor:     60;   /* above the cover */
+
+  /* ---- Hover colour fades (links, Map rows, Connections) ---- */
+  --hover-fade: 0.15s;
+
   /* ---- Base: --color-bg / --color-text (global.css) ---- */
   --color-home-bg:      #FFFFF8;  /* home */
   --color-home-text:    #000000;
   --color-station-bg:   #212121;  /* the dark cover (every page is light now) */
   --color-station-text: #FFFFFF;
+  /* The cursor and scroll thumb: white under difference blending, so they
+     invert whatever is below them. */
+  --color-cursor:       #FFFFFF;
 
   /* ---- Brand ---- */
   --color-orange: #FF7700;          /* "who?", scribbles, Portfolio hero */
@@ -114,12 +129,18 @@
      when the file exists). Until then "Rounded Fallback" (global.css: a local
      copy, else Arial Rounded), then Inter. */
   --font-rounded: "Helvetica Rounded", "Rounded Fallback", "Inter Variable", system-ui, sans-serif;
+  --weight-rounded: 700;
+  /* Site-wide tracking (user request): -4% everywhere, only "Matthew Lam"
+     (home and the page header) at -8%. */
+  --tracking:      -0.04em;
+  --tracking-name: -0.08em;
   /* Project scale (user request): the project pages and the Map box were
      judged at 67% browser zoom, so every fixed size on them is × --ps (the
      compact layout keeps 1). --pp is one project px. Tune --ps here. */
   --ps: 0.6667;
   --pp: calc(var(--ps) * 1px);
-  /* The layout grid (Figma: 9 stretched columns, 15 margin, 15 gutter). The
+  /* The layout grid (Figma: 9 stretched columns, 15 margin, 15 gutter; GRID in
+     lib/frame.ts mirrors these for image sizes). The
      project page lays out on it and chrome/GridOverlay.tsx draws it (Shift+G). */
   --grid-cols:   9;
   --grid-margin: calc(15 * var(--pp));

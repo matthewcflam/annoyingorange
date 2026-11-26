@@ -11,6 +11,7 @@
 import { play } from "../audio/engine";
 import { TRANSITION } from "../config/timings";
 import { routeFor, STATIONS } from "../config/routes";
+import { ARRIVING_LEAD, HOME_LABEL } from "../content/site";
 import type { TransitionRunner } from "../lib/router";
 import { preloadRoute } from "../lib/assets";
 import { markPageHidden, markPageShown } from "../lib/pageReveal";
@@ -22,7 +23,7 @@ import { title } from "./scrambleTitle";
 function titleFor(path: string): string[] {
   const route = routeFor(path);
   const station = STATIONS.find((s) => s.id === route.station);
-  return ["Now arriving at:", station ? station.label : "Home"];
+  return [ARRIVING_LEAD, station ? station.label : HOME_LABEL];
 }
 
 /** The next page's images, or give up after PRELOAD_MAX_MS. */

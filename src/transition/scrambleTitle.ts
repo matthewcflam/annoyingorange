@@ -107,7 +107,7 @@ class ScrambleTitle {
     this.chars = [];
     const length = groups.join("").replace(/\s/g, "").length;
     const divisor = length > 1 ? length - 1 : 1;
-    this.frames = length ? Math.round(T.TITLE_FPS * T.TITLE_SECONDS * (1 + length * 0.01)) : 0;
+    this.frames = length ? Math.round(T.TITLE_FPS * T.TITLE_SECONDS * (1 + length * T.TITLE_STRETCH_PER_CHAR)) : 0;
     this.denominator = this.frames - this.frames * T.TITLE_CYCLE_LENGTH || 1;
     let i = 0;
     groups.forEach((text, g) => {
@@ -124,7 +124,7 @@ class ScrambleTitle {
           const el = document.createElement("span");
           el.className = "char charInit";
           el.textContent = ch;
-          const cp = snap(cubicBezierAt(i / divisor, 0, 0.75, 0.75, 0), 0.05);
+          const cp = snap(cubicBezierAt(i / divisor, ...T.TITLE_START_CURVE), T.TITLE_START_SNAP);
           this.chars.push({ el, cp, cls: el.className });
           word.append(el);
           i += 1;
@@ -149,7 +149,7 @@ class ScrambleTitle {
     const out = frame > this.frames;
     const h = (out ? frame - this.frames : frame) / this.denominator;
     for (const c of this.chars) {
-      const e = clamp(snap(h - c.cp, 0.1), 0, 1);
+      const e = clamp(snap(h - c.cp, T.TITLE_PROGRESS_SNAP), 0, 1);
       let variant = "charInit";
       if (e > 0) variant = this.variations[Math.round(mapRange(e, 0, 1, 0, T.TITLE_CYCLES)) % this.variations.length];
       if (e >= 1) variant = "";

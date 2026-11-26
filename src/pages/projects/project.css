@@ -71,7 +71,7 @@
   color: var(--color-grey);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.15s;
+  transition: color var(--hover-fade);
 }
 
 .project-list__link span {
@@ -193,7 +193,7 @@
 .page .project-block__tools h3 {
   color: var(--project-color);
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
 }
 
 .project-block__tools li[data-dim] {
@@ -236,7 +236,7 @@
 
 .page .project-block h2 {
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: var(--type-project-heading);
   line-height: 1;
   text-box: trim-both cap alphabetic;
@@ -267,7 +267,7 @@
   width: calc(1.75 * var(--type-project-body));
   height: calc(1.75 * var(--type-project-body));
   color: var(--color-text);
-  transition: color 0.15s;
+  transition: color var(--hover-fade);
 }
 
 .project-block__links svg {
@@ -372,7 +372,7 @@
   top: calc(var(--cy) * 1%);
   font-size: max(12px, 3cqw);
   line-height: 1.2;
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   text-align: left;
   color: var(--color-text);
   text-box: trim-both cap alphabetic;
@@ -403,7 +403,7 @@
 
 .media__label {
   font-size: var(--type-project-name);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   line-height: 1;
 }
 
@@ -426,9 +426,9 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 48;
+  z-index: var(--z-lightbox);
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   color: var(--color-home-text);
 }
 
@@ -471,7 +471,7 @@
   background: var(--color-map-box);
   color: var(--color-map-box-text);
   font-size: var(--type-project-card);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   line-height: 1;
 }
 
@@ -500,7 +500,7 @@
   background: var(--color-map-box);
   color: var(--color-map-box-text);
   font-size: var(--type-project-card);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   line-height: 1;
 }
 

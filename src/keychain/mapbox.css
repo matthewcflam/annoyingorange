@@ -13,9 +13,9 @@
   width: var(--map-w);
   height: var(--map-h);
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: var(--type-project-card);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   line-height: 1;
   color: var(--color-map-box-text);
 }
@@ -82,7 +82,7 @@
   padding: 0 calc(9 * var(--map-k)) 0 calc(11 * var(--map-k));
   color: inherit;
   text-decoration: none;
-  transition: color 0.15s ease-out;
+  transition: color var(--hover-fade) ease-out;
 }
 
 .map-box__row:focus-visible {
@@ -96,7 +96,7 @@
   height: calc(21 * var(--map-k));
   border-radius: 50%;
   background: var(--color-map-dot);
-  transition: background-color 0.15s ease-out;
+  transition: background-color var(--hover-fade) ease-out;
 }
 
 .map-box__dot[data-here] {

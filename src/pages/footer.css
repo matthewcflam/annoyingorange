@@ -65,7 +65,7 @@
   top: calc(var(--footer-gap) + (1549 - 1422) * var(--ft));
   transform: translateY(-50%);
   font-size: calc(24 * var(--ft));
-  letter-spacing: -0.08em;
+  letter-spacing: var(--tracking-name);
   line-height: 1;
   white-space: nowrap;
   text-box: trim-both cap alphabetic;
@@ -81,7 +81,7 @@
   font-weight: var(--weight-text);
   font-size: calc(16 * var(--ft));
   line-height: calc(18 * var(--ft));
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   color: var(--color-text);
   text-align: left;
   white-space: nowrap;

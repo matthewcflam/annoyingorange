@@ -11,13 +11,13 @@ html.has-cursor * {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 60; /* above the transition cover (50) */
+  z-index: var(--z-cursor);
   width: calc(var(--cursor-ring) * 1px);
   height: calc(var(--cursor-ring) * 1px);
   margin: calc(var(--cursor-ring) * -0.5px) 0 0 calc(var(--cursor-ring) * -0.5px);
-  border: calc(var(--cursor-stroke) * 1px) solid #fff;
+  border: calc(var(--cursor-stroke) * 1px) solid var(--color-cursor);
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-cursor);
   mix-blend-mode: difference;
   pointer-events: none;
   visibility: hidden;
@@ -31,15 +31,15 @@ html.has-cursor * {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 60;
+  z-index: var(--z-cursor);
   padding: var(--cursor-label-pad);
   background: var(--cursor-label-bg);
   color: var(--cursor-label-color);
   font-family: var(--cursor-label-font);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: var(--cursor-label-size);
   line-height: 1.2;
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
   white-space: nowrap;
   transform-origin: 0 0;
   pointer-events: none;

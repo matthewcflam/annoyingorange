@@ -1,5 +1,6 @@
 import "./footer.css";
-import { LAST_UPDATED } from "../content/contact";
+import { FOOTER_CHAT, FOOTER_CREDIT, LAST_UPDATED } from "../content/contact";
+import { SITE_NAME } from "../content/site";
 import DrawnCat from "../chrome/DrawnCat";
 import Connections from "../chrome/Connections";
 
@@ -14,13 +15,13 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <DrawnCat className="site-footer__cat" drawOnView />
       <p className="site-footer__chat" data-reveal>
-        Let’s chat!
+        {FOOTER_CHAT}
       </p>
       <Connections titleId="connections-title" reveal />
       <p className="site-footer__credits" data-reveal>
         Last Updated {LAST_UPDATED}
         <br />
-        Designed and Built by Matthew Lam
+        {FOOTER_CREDIT} {SITE_NAME}
       </p>
     </footer>
   );

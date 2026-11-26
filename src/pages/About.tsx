@@ -4,15 +4,24 @@ import { placeAt } from "./paper/sheets";
 import Connections from "../chrome/Connections";
 import { ABOUT_CARD, ABOUT_SHEETS } from "../content/aboutPhotos";
 import { navLinkProps } from "../lib/navLink";
+import { PATHS, type StationId } from "../config/routes";
+import { ABOUT_COPY, ABOUT_HELLO, type AboutSpan } from "../content/about";
+import { CURSOR_LABEL } from "../content/ui";
 import "./station.css";
 
 /** An orange word that goes to another station (Experience, Projects). */
-function StationLink({ to, children }: { to: string; children: string }) {
+function StationLink({ to, children }: { to: StationId; children: string }) {
   return (
-    <a className="about__link" data-cursor={`View ${children[0].toUpperCase()}${children.slice(1)}`} {...navLinkProps(to)}>
+    <a className="about__link" data-cursor={CURSOR_LABEL.view(`${children[0].toUpperCase()}${children.slice(1)}`)} {...navLinkProps(PATHS[to])}>
       {children}
     </a>
   );
+}
+
+function Span({ span }: { span: AboutSpan }) {
+  if (typeof span === "string") return span;
+  if ("accent" in span) return <span className="about__accent">{span.accent}</span>;
+  return <StationLink to={span.link}>{span.text}</StationLink>;
 }
 
 /**
@@ -34,21 +43,18 @@ export default function About() {
         </div>
         <div className="about__text">
           <h2 className="about__hello">
-            Nice to meet you!
+            {ABOUT_HELLO[0]}
             <br />
-            I’m Matthew
+            {ABOUT_HELLO[1]}
           </h2>
           <div className="about__copy">
-            <p>
-              I’m a curious, user-focused developer that loves to understand problems and use technology to solve them. I’m
-              currently pursuing a degree in Computer Engineering at the{" "}
-              <span className="about__accent">University of British Columbia</span>.
-            </p>
-            <p>I’m based in Vancouver, and open to summer / fall 2027 opportunities!</p>
-            <p>
-              Check out my <StationLink to="/experience">experience</StationLink> and{" "}
-              <StationLink to="/projects">projects</StationLink> :)
-            </p>
+            {ABOUT_COPY.map((spans, i) => (
+              <p key={i}>
+                {spans.map((s, j) => (
+                  <Span key={j} span={s} />
+                ))}
+              </p>
+            ))}
           </div>
         </div>
       </div>

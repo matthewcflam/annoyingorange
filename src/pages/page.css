@@ -22,10 +22,10 @@
   position: relative;
   min-height: 100svh;
   font-family: var(--font-rounded);
-  font-weight: 700;
+  font-weight: var(--weight-rounded);
   font-size: var(--type-project-body);
   line-height: var(--project-lh);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking);
 }
 
 .page h1,
@@ -57,7 +57,7 @@
 .page .page__name {
   margin-top: calc(20 * var(--pp));
   font-size: var(--type-project-title);
-  letter-spacing: -0.08em;
+  letter-spacing: var(--tracking-name);
   line-height: 1;
   white-space: nowrap;
   text-box: trim-both cap alphabetic;
