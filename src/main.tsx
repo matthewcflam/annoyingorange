@@ -15,8 +15,15 @@ import { GATE } from "./config/timings";
 import { initScroll } from "./lib/scroll";
 import { prefetchPages, prefetchRoute } from "./lib/assets";
 import { registerRoundedFont } from "./lib/fonts";
+import { reloadOnce } from "./lib/reload";
 
 registerRoundedFont();
+
+// A page chunk from an older deploy is gone after a new one: reload (once)
+// to pick up the new build instead of failing (Vite's preload error event).
+window.addEventListener("vite:preloadError", (e) => {
+  if (reloadOnce()) e.preventDefault();
+});
 
 // Page theme changes fade (only visible on a deep link's intro; elsewhere
 // they happen under the transition cover).

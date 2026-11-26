@@ -88,8 +88,10 @@ export default function ProjectList({ active, onSelect }: { active: ProjectSlug;
           drawFront();
         },
       });
-      tl.current = gsap.timeline().add(t);
-      return;
+      const drain = gsap.timeline().add(t);
+      tl.current = drain;
+      // An unmount mid-drain must not draw into a path that's gone.
+      return () => void drain.kill();
     }
 
     if (isCompact()) return;

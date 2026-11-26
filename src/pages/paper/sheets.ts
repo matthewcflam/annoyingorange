@@ -3,7 +3,7 @@ import tapeLong from "../../../assets-src/images/tape-long.png?w=270&paperFibre=
 import tapeShort from "../../../assets-src/images/tape-short.png?w=152&paperFibre=76&tape";
 import tapeSkyline from "../../../assets-src/images/tape-skyline.png?w=252&paperFibre=126&tape";
 import sheetPaper from "../../../assets-src/images/paper-sheet.png?sheet";
-import { frameSizes } from "../../lib/frame";
+import { compactSizes, frameSizes } from "../../lib/frame";
 import type { Picture } from "../../lib/assets";
 
 /**
@@ -39,7 +39,7 @@ const PHOTO_CROP = { x: -0.3058, y: -0.0952, w: 1.5207, h: 1.0952 };
 /** The prints' image is 213.82 × 1.5207 ≈ 325 mockup px wide (the big ones;
  *  all three share one `sizes`, so they share one download). Compact: ~310px.
  */
-export const PRINT_SIZES = `(max-width: 760px) 310px, (max-aspect-ratio: 1/1) 310px, (max-height: 500px) 310px, ${frameSizes(325)}`;
+export const PRINT_SIZES = compactSizes("310px", frameSizes(325));
 
 /** The three prints, back to front, and their tape. */
 export const PHOTO_SHEETS: Sheet[] = [

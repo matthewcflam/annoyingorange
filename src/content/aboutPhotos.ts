@@ -9,9 +9,10 @@
  */
 import meFinal from "../../assets-src/images/me-final.png?print";
 import type { Sheet } from "../pages/paper/sheets";
+import { compactSizes } from "../lib/frame";
 
 /** The prints are 204–492 CSS px wide at the usual size (the wide one sets it). */
-const ABOUT_SIZES = "(max-width: 760px) 100vw, (max-aspect-ratio: 1/1) 100vw, (max-height: 500px) 100vw, 500px";
+const ABOUT_SIZES = compactSizes("100vw", "500px");
 
 const print = (id: string, cx: number, cy: number, w: number, h: number, rotate: number, crop?: Sheet["crop"]): Sheet => ({
   id, kind: "photo", cx, cy, w, h, rotate, picture: meFinal, sizes: ABOUT_SIZES, crop,

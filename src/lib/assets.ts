@@ -8,6 +8,7 @@ import { ABOUT_PICTURES } from "../content/aboutPhotos";
 import { LOGO_URLS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS } from "../pages/paper/sheets";
 import { loadTextFont } from "./fonts";
+import { compactSizes } from "./frame";
 import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
 /** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
@@ -34,7 +35,7 @@ const COLLAGE_COLUMNS_W = (3 * (1640 - 2 * 15 - 8 * 15)) / 9 + 2 * 15;
  *  layout and about the window's width on compact (project.css). */
 export function collageSizes(it: CollageItem, scale = COLLAGE_SCALE): string {
   const share = (it.w / 100) * COLLAGE_OVERSAMPLE * coverZoom(it);
-  return `(max-width: 760px) ${(share * 100).toFixed(1)}vw, ${(((share * COLLAGE_COLUMNS_W * scale) / 1640) * 100).toFixed(1)}vw`;
+  return compactSizes(`${(share * 100).toFixed(1)}vw`, `${(((share * COLLAGE_COLUMNS_W * scale) / 1640) * 100).toFixed(1)}vw`);
 }
 
 /** How much wider than its print a cropped photo is drawn (object-fit: cover). */
@@ -147,7 +148,17 @@ export function preloadRoute(path: string): Promise<void> {
   const skyline = path === "/" ? loadSkyline().catch(() => undefined) : undefined;
   // Station pages set their body text in Nunito, which home never loads.
   const font = pageLoader(path) ? loadTextFont() : undefined;
-  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline, font]).then(() => undefined);
+  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code, skyline, font, routeExtras(path)]).then(() => undefined);
+}
+
+/** Images that live in a page's own chunk, fetched through a dynamic import
+ *  so the main chunk doesn't carry them: Experience's first photos and tape. */
+function routeExtras(path: string): Promise<unknown> | undefined {
+  if (path !== "/experience") return undefined;
+  return import("../content/experiencePhotos").then(
+    (m) => Promise.all([...m.PRELOAD_PICTURES.map(load), decodeUrl(m.TAPE_URL)]),
+    () => undefined,
+  );
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */

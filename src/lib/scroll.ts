@@ -79,9 +79,19 @@ export function scrollToY(
   });
 }
 
-/** Stops any glide and swallows wheel input until unlockScroll(). */
-export const lockScroll = () => lenis?.stop();
-export const unlockScroll = () => lenis?.start();
+/** Holders of the scroll lock (the router during a transition, an open
+ *  lightbox). Counted, so one holder letting go can't unlock it for another. */
+let locks = 0;
+
+/** Stops any glide and swallows wheel input until every lockScroll() has
+ *  been matched by an unlockScroll(). */
+export function lockScroll(): void {
+  if (locks++ === 0) lenis?.stop();
+}
+export function unlockScroll(): void {
+  if (locks === 0) return;
+  if (--locks === 0) lenis?.start();
+}
 
 /** Scroll position and how far the page can scroll (0 = it doesn't). */
 export type ScrollState = { scroll: number; limit: number };

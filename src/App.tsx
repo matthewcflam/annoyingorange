@@ -11,6 +11,7 @@ import StationChrome from "./chrome/StationChrome";
 import Cursor from "./chrome/Cursor";
 import ScrollBar from "./chrome/ScrollBar";
 import GridOverlay from "./chrome/GridOverlay";
+import PageErrorBoundary from "./chrome/PageErrorBoundary";
 import { routeFor } from "./config/routes";
 
 /**
@@ -71,7 +72,10 @@ export default function App() {
       {fontsReady && (
         <>
           <main className="layer--page">
-            <Outlet />
+            {/* Keyed so a failed page doesn't stay failed on the next route. */}
+            <PageErrorBoundary key={route}>
+              <Outlet />
+            </PageErrorBoundary>
           </main>
 
           <div className="layer layer--chrome">{!home && <StationChrome />}</div>

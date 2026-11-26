@@ -20,6 +20,7 @@ import sailbotTeam from "../../assets-src/images/sailbot2.png?print";
 import tqdTeam from "../../assets-src/images/tqd-team.jpg?print";
 import tape from "../../assets-src/images/tape-short.png?w=176&paperFibre=88&tape";
 import type { Sheet } from "../pages/paper/sheets";
+import { compactSizes } from "../lib/frame";
 
 export interface PhotoCluster {
   col: number;
@@ -32,7 +33,7 @@ export interface PhotoCluster {
 }
 
 /** The photos are shown ~215–350 CSS px wide at the usual size. */
-const PHOTO_SIZES = "(max-width: 760px) 350px, (max-aspect-ratio: 1/1) 350px, (max-height: 500px) 350px, 360px";
+const PHOTO_SIZES = compactSizes("350px", "360px");
 
 const photo = (id: string, picture: Sheet["picture"], cx: number, cy: number, w: number, h: number, rotate: number): Sheet => ({
   id, kind: "photo", cx, cy, w, h, rotate, picture, sizes: PHOTO_SIZES,

@@ -179,10 +179,10 @@ export class DitherCover {
       }
     });
     this.canvas.addEventListener("webglcontextrestored", () => {
-      this.init();
+      this.safeInit();
       this.draw();
     });
-    this.init();
+    this.safeInit();
     window.addEventListener("resize", this.onResize);
   }
 
@@ -284,6 +284,17 @@ export class DitherCover {
     });
   }
 
+  /** WebGL set up, or left null (every transition then uses the CSS fade).
+   *  This runs at import, so a failure here must never stop the app booting. */
+  private safeInit() {
+    try {
+      this.init();
+    } catch (err) {
+      this.gl = null;
+      if (import.meta.env.DEV) console.warn("Dither cover: WebGL setup failed; using the fade.", err);
+    }
+  }
+
   private init() {
     const gl = this.canvas.getContext("webgl", { alpha: true, antialias: false, premultipliedAlpha: false });
     if (!gl) return;
@@ -298,6 +309,7 @@ export class DitherCover {
     gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
     gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
     gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? "link");
     gl.useProgram(prog);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "../lib/gsap";
 import { HOME } from "../config/timings";
 
@@ -11,6 +11,9 @@ export function useToast<T extends Element = HTMLParagraphElement>() {
   const toastRef = useRef<T>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
   const [shown, setShown] = useState(false);
+
+  // An unmount mid-toast stops it (its onComplete would set state).
+  useEffect(() => () => void tl.current?.kill(), []);
 
   const show = () => {
     setShown(true);

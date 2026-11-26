@@ -88,7 +88,7 @@ async function run(to: string) {
     transitioning = false;
     const next = queued;
     queued = null;
-    if (next && next !== current) void run(next);
+    if (next && next !== current) run(next).catch(reportError);
     if (!transitioning) {
       unlockScroll();
       const waiters = idleWaiters;
@@ -111,7 +111,7 @@ function go(path: string, { push }: { push: boolean }) {
   if (to === current) return;
   projectFocus = projectSlugFromPath(path);
   if (push) history.pushState(null, "", to);
-  void run(to);
+  run(to).catch(reportError);
 }
 
 /** Station, link or mini-map click. */

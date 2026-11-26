@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { loadFlag, saveFlag } from "../lib/prefs";
 import "./grid.css";
@@ -16,14 +16,17 @@ const typing = (t: EventTarget | null) =>
  */
 export default function GridOverlay() {
   const [on, setOn] = useState(() => loadFlag(KEY));
+  // The latest value, so the save stays out of a state updater (StrictMode
+  // runs those twice).
+  const onRef = useRef(on);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== "KeyG" || !e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.repeat || typing(e.target)) return;
-      setOn((v) => {
-        saveFlag(KEY, !v);
-        return !v;
-      });
+      const next = !onRef.current;
+      onRef.current = next;
+      saveFlag(KEY, next);
+      setOn(next);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
