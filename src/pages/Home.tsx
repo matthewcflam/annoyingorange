@@ -12,9 +12,7 @@ import { attachSkyline } from "./skylineDraw";
 import { loadSkyline, skylineMarkup } from "../lib/assets";
 import PaperSheet from "./paper/PaperSheet";
 import { SKY_SHEET, SKY_TAPE } from "./paper/sheets";
-import { onNavClick } from "../lib/router";
-import { prefetchRoute } from "../lib/assets";
-import { play } from "../audio/engine";
+import { navLinkProps } from "../lib/navLink";
 
 /** The glass card's WebGL (its own chunk, keeping main under budget):
  *  fetched as soon as this module runs, alongside the fonts the first render
@@ -167,15 +165,8 @@ export default function Home() {
       <a
         ref={glassRef}
         className="home__glass"
-        href="/experience"
         data-cursor="Read More"
-        onClick={(e) => onNavClick(e, "/experience")}
-        onPointerEnter={(e) => {
-          if (e.pointerType === "touch") return;
-          play("link.hover");
-          prefetchRoute("/experience");
-        }}
-        onFocus={() => prefetchRoute("/experience")}
+        {...navLinkProps("/experience")}
       >
         <canvas ref={glassCanvasRef} className="home__glass-canvas" aria-hidden="true" />
         {GLASS_LINES.map((group, i) => (

@@ -1,32 +1,15 @@
-import type { CSSProperties } from "react";
 import StationLayout from "./StationLayout";
 import PaperSheet from "./paper/PaperSheet";
+import { placeAt } from "./paper/sheets";
 import Connections from "../chrome/Connections";
 import { ABOUT_CARD, ABOUT_SHEETS } from "../content/aboutPhotos";
-import { onNavClick } from "../lib/router";
-import { prefetchRoute } from "../lib/assets";
-import { play } from "../audio/engine";
+import { navLinkProps } from "../lib/navLink";
 import "./station.css";
-
-/** A collage piece's box (Figma px) as the vars station.css places it by. */
-const placeAt = (b: { cx: number; cy: number; w: number; h: number; rotate: number }) =>
-  ({ "--cx": b.cx, "--cy": b.cy, "--w": b.w, "--h": b.h, "--r": `${b.rotate}deg` }) as CSSProperties;
 
 /** An orange word that goes to another station (Experience, Projects). */
 function StationLink({ to, children }: { to: string; children: string }) {
   return (
-    <a
-      className="about__link"
-      href={to}
-      data-cursor={`View ${children[0].toUpperCase()}${children.slice(1)}`}
-      onClick={(e) => onNavClick(e, to)}
-      onPointerEnter={(e) => {
-        if (e.pointerType === "touch") return;
-        play("link.hover");
-        prefetchRoute(to);
-      }}
-      onFocus={() => prefetchRoute(to)}
-    >
+    <a className="about__link" data-cursor={`View ${children[0].toUpperCase()}${children.slice(1)}`} {...navLinkProps(to)}>
       {children}
     </a>
   );

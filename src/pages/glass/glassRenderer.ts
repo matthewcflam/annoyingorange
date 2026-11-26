@@ -1,6 +1,7 @@
 import { gsap } from "../../lib/gsap";
 import { GLASS } from "../../config/timings";
 import { readToken } from "../../lib/tokens";
+import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../../lib/webgl";
 import type { SprayEngine } from "../../spray/sprayEngine";
 
 /**
@@ -147,8 +148,6 @@ const GLASS_UNIFORMS = [
 ] as const;
 const BLUR_UNIFORMS = ["uTex", "uSize", "uDir", "uSigma"] as const;
 
-type Loc<U extends readonly string[]> = Record<U[number], WebGLUniformLocation | null>;
-
 interface Target {
   tex: WebGLTexture;
   fb: WebGLFramebuffer;
@@ -159,8 +158,8 @@ export class GlassRenderer {
   private gl: WebGLRenderingContext | null = null;
   private glassProg: WebGLProgram | null = null;
   private blurProg: WebGLProgram | null = null;
-  private glassLoc = {} as Loc<typeof GLASS_UNIFORMS>;
-  private blurLoc = {} as Loc<typeof BLUR_UNIFORMS>;
+  private glassLoc = {} as Uniforms<typeof GLASS_UNIFORMS>;
+  private blurLoc = {} as Uniforms<typeof BLUR_UNIFORMS>;
   private srcTex: WebGLTexture | null = null;
   private targets: Target[] = [];
   private targetSize: [number, number] = [0, 0];
@@ -203,7 +202,7 @@ export class GlassRenderer {
   measure = (): void => {
     const a = this.canvas.getBoundingClientRect();
     const b = this.source.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, this.params.MAX_DPR);
+    const dpr = cappedDpr(this.params.MAX_DPR);
     this.geo = { w: a.width, h: a.height, sx: b.left - a.left, sy: b.top - a.top, sw: b.width, sh: b.height, dpr };
     const cw = Math.max(1, Math.round(a.width * dpr));
     const ch = Math.max(1, Math.round(a.height * dpr));
@@ -261,46 +260,27 @@ export class GlassRenderer {
   };
 
   private init() {
-    const gl = this.canvas.getContext("webgl", { alpha: true, antialias: false, premultipliedAlpha: false });
+    const gl = createGL(this.canvas);
     if (!gl) return;
-    const compile = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? "shader");
-      return s;
-    };
-    const program = (frag: string) => {
-      const p = gl.createProgram()!;
-      gl.attachShader(p, compile(gl.VERTEX_SHADER, VERT));
-      gl.attachShader(p, compile(gl.FRAGMENT_SHADER, frag));
-      gl.bindAttribLocation(p, 0, "aPos");
-      gl.linkProgram(p);
-      return p;
-    };
     try {
-      this.blurProg = program(BLUR_FRAG);
-      this.glassProg = program(GLASS_FRAG);
-    } catch {
+      this.blurProg = linkProgram(gl, VERT, BLUR_FRAG);
+      this.glassProg = linkProgram(gl, VERT, GLASS_FRAG);
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn("Glass: WebGL setup failed; using the CSS blur.", err);
       return;
     }
-    for (const u of BLUR_UNIFORMS) this.blurLoc[u] = gl.getUniformLocation(this.blurProg, u);
-    for (const u of GLASS_UNIFORMS) this.glassLoc[u] = gl.getUniformLocation(this.glassProg, u);
+    this.blurLoc = uniforms(gl, this.blurProg, BLUR_UNIFORMS);
+    this.glassLoc = uniforms(gl, this.glassProg, GLASS_UNIFORMS);
+    bindQuad(gl);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-
-    this.srcTex = this.texture();
+    this.srcTex = this.texture(gl);
     // The 2D canvas is premultiplied inside; keep it so, so the blur doesn't
     // darken the paint's soft edges.
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
     this.gl = gl;
   }
 
-  private texture(): WebGLTexture {
-    const gl = this.canvas.getContext("webgl")!;
+  private texture(gl: WebGLRenderingContext): WebGLTexture {
     const tex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -319,7 +299,7 @@ export class GlassRenderer {
       gl.deleteFramebuffer(t.fb);
     }
     this.targets = [0, 1].map(() => {
-      const tex = this.texture();
+      const tex = this.texture(gl);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       const fb = gl.createFramebuffer()!;
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
@@ -394,30 +374,24 @@ export class GlassRenderer {
   }
 }
 
-/** "#RRGGBB" or "rgb(r g b / a)" / "rgba(r, g, b, a)" → [r, g, b, a] in 0–1. */
-export function parseColor(css: string): [number, number, number, number] {
-  const s = css.trim();
-  if (s.startsWith("#")) {
-    const hex = s.length === 4 ? [...s.slice(1)].map((c) => c + c).join("") : s.slice(1, 7);
-    const n = parseInt(hex, 16);
-    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1];
-  }
-  const nums = s.match(/[\d.]+%?/g)?.map((v) => (v.endsWith("%") ? parseFloat(v) / 100 : parseFloat(v))) ?? [];
-  const [r = 0, g = 0, b = 0, al = 1] = nums;
-  return [r / 255, g / 255, b / 255, al];
-}
-
-/** Home's card (Figma "Rectangle 157", 456 wide, radius 50) over the "who?"
- *  spray: draws the glass on `canvas` from the spray's canvas, redrawing as it
- *  paints. Sets data-glass="gl" on the card while WebGL is up (home.css drops
- *  the CSS blur then). Returns the teardown. */
-export function attachHomeGlass(card: HTMLElement, canvas: HTMLCanvasElement, engine: SprayEngine): () => void {
+/** Home's card (Figma "Rectangle 157": 456 wide, radius 50) over the page
+ *  colour, with the --glass-fill tint. The lab (glassLab.ts) uses it too. */
+export function homeGlassOptions(): GlassOptions {
   const bg = parseColor(readToken("--color-home-bg"));
-  const glass = new GlassRenderer(canvas, engine.canvas, {
+  return {
     designWidth: 456,
     radius: 50,
     background: [bg[0], bg[1], bg[2]],
     fill: parseColor(readToken("--glass-fill")),
+  };
+}
+
+/** Home's card over the "who?" spray: draws the glass on `canvas` from the
+ *  spray's canvas, redrawing as it paints. Sets data-glass="gl" on the card
+ *  while WebGL is up (home.css drops the CSS blur then). Returns the teardown. */
+export function attachHomeGlass(card: HTMLElement, canvas: HTMLCanvasElement, engine: SprayEngine): () => void {
+  const glass = new GlassRenderer(canvas, engine.canvas, {
+    ...homeGlassOptions(),
     onLost: () => delete card.dataset.glass,
   });
   if (glass.ok) card.dataset.glass = "gl";

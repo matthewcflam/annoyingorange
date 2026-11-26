@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "../../lib/gsap";
-import { play } from "../../audio/engine";
+import { hoverSound, play } from "../../audio/engine";
 import { prefersReducedMotion } from "../../lib/motion";
 import { lockScroll, unlockScroll } from "../../lib/scroll";
 import { projectScale } from "../../lib/tokens";
@@ -11,9 +11,7 @@ import { lightboxMedia, type CollageItem, type Media, type Project } from "../..
 import ResponsivePicture from "../ResponsivePicture";
 import PaperSheet from "../paper/PaperSheet";
 import type { Sheet } from "../paper/sheets";
-// The same files as Experience's and home's strips (same imports, one download).
-import tapeShort from "../../../assets-src/images/tape-short.png?w=176&paperFibre=88&tape";
-import tapeLong from "../../../assets-src/images/tape-long.png?w=270&paperFibre=135&tape";
+import { TAPE_LONG, TAPE_SHORT } from "../paper/tapes";
 
 type VideoRef = (el: HTMLVideoElement | null) => void | (() => void);
 
@@ -85,7 +83,7 @@ function printSheet(it: CollageItem, picture: Picture, i: number, scale?: number
 
 /** Its strip of tape. */
 function tapeSheet(it: CollageItem, i: number): Sheet {
-  return { id: `tape-${i}`, kind: "tape", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, src: it.tape.long ? tapeLong : tapeShort };
+  return { id: `tape-${i}`, kind: "tape", cx: 0, cy: 0, w: 0, h: 0, rotate: 0, src: it.tape.long ? TAPE_LONG : TAPE_SHORT };
 }
 
 /**
@@ -376,7 +374,6 @@ function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const hoverSound = (e: { pointerType: string }) => e.pointerType !== "touch" && play("link.hover");
 
   const renderSlide = (s: Slide) => (
     <LightboxSlide

@@ -11,14 +11,6 @@
   --col-step: calc(var(--grid-col) + var(--grid-gutter));
 }
 
-/* A full-width row on the grid, between the margins. */
-.station-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-  column-gap: var(--grid-gutter);
-  padding: 0 var(--grid-margin);
-}
-
 /* ---- About (Figma "ABOUT FINAL", a 1600×998 frame drawn at the site's
    real size): one screen, no footer. The collage of prints on the left
    (content/aboutPhotos.ts, home's paper styling) is Figma px × --au from the
@@ -41,14 +33,19 @@
   pointer-events: none;
 }
 
-/* A print: placed by its centre, at its unrotated size, then rotated. */
-.about__collage .paper {
-  --ps-u: var(--au);
+/* A collage piece (the prints, the Connections card): placed by its centre,
+   at its unrotated size, then rotated. */
+.about__collage .paper,
+.about__collage .about__connections {
   left: calc(50% + (var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
   top: calc(50% + (var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
   width: calc(var(--w) * var(--au));
   height: calc(var(--h) * var(--au));
   rotate: var(--r);
+}
+
+.about__collage .paper {
+  --ps-u: var(--au);
 }
 
 /* The Connections card (chrome/Connections.tsx, Figma "Group 122"): a
@@ -59,13 +56,8 @@
    title 8 / 7 in. It works as the footer's does (connections.css). */
 .about__collage .about__connections {
   --ft: var(--au);
-  left: calc(50% + (var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
-  top: calc(50% + (var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
-  width: calc(var(--w) * var(--au));
-  height: calc(var(--h) * var(--au));
   padding-top: calc(53.8 * var(--au));
   font-size: calc(21.33 * var(--au));
-  rotate: var(--r);
   opacity: var(--about-card-opacity);
   pointer-events: auto;
 }
@@ -103,10 +95,6 @@
   margin-top: calc(16 * var(--au));
 }
 
-.page .about__copy p + p {
-  margin-top: var(--line);
-}
-
 .about__accent,
 .about__link {
   color: var(--color-orange);
@@ -133,11 +121,6 @@
    in columns 1–2 (ExperienceList.tsx), and three jobs staggered across the
    grid, each three columns wide: company, role and date in grey, then the
    points. Figma's sizes are at a 16px body, so text-bound sizes are × --cp. ---- */
-.experience {
-  /* The company: 24 at a 16px body. */
-  --type-project-heading: calc(1.5 * var(--type-project-body));
-}
-
 /* The index: logo, name, dates (Figma px × --cp); rows 37 apart with a hairline between,
    like the Projects list. It lives in the fixed page header, under "Matthew Lam"
    (user request; Figma has it at 489), the same gap as the Projects list. */
@@ -174,11 +157,6 @@
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.15s;
-}
-
-.experience-list__link:focus-visible {
-  outline: 2px solid var(--color-route);
-  outline-offset: 4px;
 }
 
 .experience-list__link[data-active] {
@@ -258,7 +236,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  grid-template-columns: var(--grid-template);
   column-gap: var(--grid-gutter);
   align-items: start;
   padding: calc(143 * var(--cp)) var(--grid-margin) calc(54 * var(--cp));
@@ -356,20 +334,9 @@
   text-wrap: balance;
 }
 
-.page .experience-job__points p + p {
-  margin-top: var(--line);
-}
-
 /* ---- Compact layout (global.css): one column under the (scrolling)
    header. ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
-  .station-grid {
-    display: block;
-    width: var(--compact-w);
-    margin: 0 auto;
-    padding: 0;
-  }
-
   /* About: the collage across the column (x 124–788, y 156–844), then
      the text, scrolling. */
   .about__stage {
@@ -428,10 +395,6 @@
 
   /* Experience: the index under the name, scrolling with the page; each job
      stacks: company, role and date, then the points. */
-  .experience {
-    --type-project-heading: 24px;
-  }
-
   .experience-list {
     margin-top: 20px;
     --cp: 1px;

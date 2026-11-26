@@ -15,17 +15,9 @@
   --head-clear: var(--tools-stick);
   /* The first project's TOOLS heading + its lines, a body size between groups. */
   --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * var(--type-project-body));
-  /* A project's name: the Experience company size (station.css), 24 at a
-     16px body (user request; was 2.25 × body). */
-  --type-project-heading: calc(1.5 * var(--type-project-body));
   /* Cap top of the first project (its TOOLS and name). 731 in the frame; less on a shorter
      window, so the whole TOOLS list shows before any scrolling. */
   --content-top: clamp(var(--tools-stick) + 66 * var(--pp), 100svh - var(--tools-h) - 24 * var(--pp), 731 * var(--pp));
-}
-
-.project-list__link:focus-visible {
-  outline: 2px solid var(--color-route);
-  outline-offset: 4px;
 }
 
 /* Rows 32 apart (cap tops 66, 98, 130, 162), a hairline between them; three
@@ -179,7 +171,7 @@
    The gap to the next project is the block's own padding. */
 .project-block {
   display: grid;
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  grid-template-columns: var(--grid-template);
   column-gap: var(--grid-gutter);
   align-items: start;
   padding-bottom: calc(9 * var(--type-project-body));
@@ -261,10 +253,6 @@
 
 .project-block__awards span {
   display: block;
-}
-
-.page .project-block__desc p + p {
-  margin-top: var(--line);
 }
 
 /* The links: 28px glyphs at 16px body, 13 apart, a body size under the text. */
@@ -408,8 +396,7 @@
 
 .collage__item:focus-visible,
 .lightbox__close:focus-visible,
-.lightbox__arrow:focus-visible,
-.connections__row:focus-visible {
+.lightbox__arrow:focus-visible {
   outline: 2px solid var(--color-orange);
   outline-offset: 3px;
 }
@@ -565,10 +552,6 @@ html.is-scroll-locked {
    with the page (page.css), each project stacks and its TOOLS no longer
    sticks (the header: page.css; the footer: footer.css). ---- */
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
-  .project {
-    --type-project-heading: 24px;
-  }
-
   .project-list {
     margin-top: 20px;
   }

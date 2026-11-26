@@ -1,6 +1,6 @@
 import whoUrl from "../../../design/figma-glass/who-4x.png";
 import figmaUrl from "../../../design/figma-glass/glass-4x.png";
-import { GlassRenderer, parseColor, type GlassParams } from "./glassRenderer";
+import { GlassRenderer, homeGlassOptions, type GlassParams } from "./glassRenderer";
 import { readToken } from "../../lib/tokens";
 
 /**
@@ -38,13 +38,7 @@ export function mountGlassLab(): () => void {
   root.append(src, card, figma);
   document.body.append(root);
 
-  const bg = parseColor(readToken("--color-home-bg"));
-  const glass = new GlassRenderer(card, src, {
-    designWidth: 456,
-    radius: 50,
-    background: [bg[0], bg[1], bg[2]],
-    fill: parseColor(readToken("--glass-fill")),
-  });
+  const glass = new GlassRenderer(card, src, homeGlassOptions());
 
   const img = new Image();
   img.onload = () => {

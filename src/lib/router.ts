@@ -118,9 +118,16 @@ export function navigate(path: string): void {
   go(path, { push: true });
 }
 
+/** A plain left click: no modifier (new tab, new window, download), not
+ *  already handled. Links handle those clicks themselves; the rest go to the
+ *  browser. */
+export function isPlainClick(e: React.MouseEvent): boolean {
+  return !e.defaultPrevented && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+}
+
 /** onClick for real <a href> links: lets modified clicks (new tab etc.) through. */
 export function onNavClick(e: React.MouseEvent, path: string): void {
-  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (!isPlainClick(e)) return;
   e.preventDefault();
   navigate(path);
 }

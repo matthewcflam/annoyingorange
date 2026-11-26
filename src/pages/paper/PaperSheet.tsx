@@ -1,4 +1,5 @@
-import type { Sheet } from "./sheets";
+import { placeAt, type Sheet } from "./sheets";
+import PictureSources from "../PictureSources";
 import "./paper.css";
 
 /**
@@ -28,18 +29,14 @@ export default function PaperSheet({
   style?: React.CSSProperties;
   children?: React.ReactNode;
 }) {
-  const style = placed
-    ? ({ "--cx": sheet.cx, "--cy": sheet.cy, "--w": sheet.w, "--h": sheet.h, "--r": `${sheet.rotate}deg` } as React.CSSProperties)
-    : ownStyle;
+  const style = placed ? placeAt(sheet) : ownStyle;
   const c = sheet.crop;
   const crop = c ? { left: `${c.x * 100}%`, top: `${c.y * 100}%`, width: `${c.w * 100}%`, height: `${c.h * 100}%` } : undefined;
   return (
     <div className={`paper ${placed ? "home-paper" : ""} ${className}`} data-kind={sheet.kind} style={style} aria-hidden="true">
       {sheet.picture ? (
         <picture>
-          {Object.entries(sheet.picture.sources).map(([format, srcset]) => (
-            <source key={format} type={`image/${format}`} srcSet={srcset} sizes={sheet.sizes} />
-          ))}
+          <PictureSources picture={sheet.picture} sizes={sheet.sizes} />
           <img
             className="paper__img"
             src={sheet.picture.img.src}

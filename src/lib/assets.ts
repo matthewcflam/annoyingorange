@@ -9,6 +9,8 @@ import { LOGO_URLS } from "../content/experience";
 import { HOME_PICTURES, HOME_URLS } from "../pages/paper/sheets";
 import { loadTextFont } from "./fonts";
 import { compactSizes } from "./frame";
+import { onBrowserIdle } from "./idle";
+import { PREFETCH } from "../config/timings";
 import skylineUrl from "../../assets-src/svg/home-skyline.svg";
 
 /** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
@@ -160,9 +162,10 @@ function routeExtras(path: string): Promise<unknown> | undefined {
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */
 export function prefetchPages(): void {
-  const run = () => Object.values(PAGE_LOADERS).forEach((load) => void load().catch(() => undefined));
-  if ("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 3000 });
-  else setTimeout(run, 1000);
+  onBrowserIdle(() => Object.values(PAGE_LOADERS).forEach((load) => void load().catch(() => undefined)), {
+    timeoutMs: PREFETCH.IDLE_TIMEOUT_MS,
+    fallbackMs: PREFETCH.IDLE_FALLBACK_MS,
+  });
 }
 
 /** Start fetching a route's images. Cheap to call repeatedly (hover). */

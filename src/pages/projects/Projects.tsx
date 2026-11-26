@@ -3,7 +3,8 @@ import { gsap } from "../../lib/gsap";
 import { onNavClick, takeProjectFocus } from "../../lib/router";
 import { revealOnScroll } from "../../lib/scrollReveal";
 import { useScrollIndex } from "../../lib/useScrollIndex";
-import { play } from "../../audio/engine";
+import { hoverSound } from "../../audio/engine";
+import { mapRef } from "../../lib/mapRef";
 import { PROJECT } from "../../config/timings";
 import { PROJECTS, type Project, type ProjectLink, type ProjectSlug } from "../../content/projects";
 import Icon from "../../chrome/Icon";
@@ -58,10 +59,7 @@ export default function Projects() {
             key={p.slug}
             project={p}
             flip={i % 2 === 1}
-            ref={(el) => {
-              if (el) blocks.current.set(p.slug, el);
-              else blocks.current.delete(p.slug);
-            }}
+            ref={mapRef(blocks, p.slug)}
           />
         ))}
       </div>
@@ -120,7 +118,7 @@ function ProjectBlock({ project: p, flip, ref }: { project: Project; flip: boole
                   {...(link.href.startsWith("/")
                     ? { onClick: (e: React.MouseEvent) => onNavClick(e, link.href) }
                     : { target: "_blank", rel: "noreferrer" })}
-                  onPointerEnter={(e) => e.pointerType !== "touch" && play("link.hover")}
+                  onPointerEnter={hoverSound}
                 >
                   {link.kind === "site" ? <Globe /> : <Icon name={link.kind} />}
                 </a>

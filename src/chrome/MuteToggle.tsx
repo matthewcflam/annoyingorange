@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { play, setMuted, getContext, isUnlocked, unlock } from "../audio/engine";
 import { useMuted } from "../audio/useSound";
 import { AUDIO } from "../config/timings";
+import { useShortcut } from "../lib/useShortcut";
 
 /** Runs inside a click or keydown, so the first toggle-on can create the AudioContext. */
 function toggle(muted: boolean) {
@@ -23,17 +23,10 @@ function toggle(muted: boolean) {
 export default function MuteToggle() {
   const muted = useMuted();
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "m" && e.key !== "M") return;
-      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
-      toggle(muted);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [muted]);
+  useShortcut(
+    (e) => (e.key === "m" || e.key === "M") && !e.metaKey && !e.ctrlKey && !e.altKey,
+    () => toggle(muted),
+  );
 
   return (
     <button

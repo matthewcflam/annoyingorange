@@ -18,7 +18,7 @@ import enersysSelfie from "../../assets-src/images/enersys1.png?print";
 import enersysDemo from "../../assets-src/images/enersys2.png?print";
 import sailbotTeam from "../../assets-src/images/sailbot2.png?print";
 import tqdTeam from "../../assets-src/images/tqd-team.jpg?print";
-import tape from "../../assets-src/images/tape-short.png?w=176&paperFibre=88&tape";
+import { TAPE_SHORT as tape } from "../pages/paper/tapes";
 import type { Sheet } from "../pages/paper/sheets";
 import { compactSizes } from "../lib/frame";
 

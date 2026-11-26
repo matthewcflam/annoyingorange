@@ -13,6 +13,7 @@
 import { gsap } from "../lib/gsap";
 import { SKYLINE } from "../config/timings";
 import { prefersReducedMotion } from "../lib/motion";
+import { onBrowserIdle } from "../lib/idle";
 
 /** One path's draw: which end it starts from, when, and for how long. */
 interface Step {
@@ -31,7 +32,7 @@ const parts = (el: SVGSVGElement) => [
 /** Home injected the SVG. replay() draws it again; detach() on unmount. */
 export function attachSkyline(el: SVGSVGElement): { replay: () => void; detach: () => void } {
   let tl: gsap.core.Timeline | null = null;
-  const idle = plan ? 0 : whenIdle(() => (plan ??= makePlan(el)));
+  const cancelPlan = plan ? () => {} : onBrowserIdle(() => (plan ??= makePlan(el)), { timeoutMs: SKYLINE.PLAN_IDLE_TIMEOUT_MS, fallbackMs: SKYLINE.PLAN_IDLE_FALLBACK_MS });
   const paths = parts(el);
 
   const replay = () => {
@@ -56,7 +57,7 @@ export function attachSkyline(el: SVGSVGElement): { replay: () => void; detach: 
   };
 
   const detach = () => {
-    cancelIdle(idle);
+    cancelPlan();
     tl?.kill();
     tl = null;
     gsap.set(paths, { clearProps: "strokeDasharray,strokeDashoffset" });
@@ -65,14 +66,6 @@ export function attachSkyline(el: SVGSVGElement): { replay: () => void; detach: 
   return { replay, detach };
 }
 
-// Safari before 18 has no requestIdleCallback.
-const hasIdle = typeof requestIdleCallback === "function";
-const whenIdle = (fn: () => void): number => (hasIdle ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
-const cancelIdle = (id: number) => {
-  if (!id) return;
-  if (hasIdle) cancelIdleCallback(id);
-  else clearTimeout(id);
-};
 
 type Pt = { x: number; y: number };
 

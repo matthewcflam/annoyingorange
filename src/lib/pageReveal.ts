@@ -22,3 +22,32 @@ export function markPageShown(): void {
 export function whenPageShown(): Promise<void> {
   return shown ? Promise.resolve() : new Promise((resolve) => waiters.push(resolve));
 }
+
+/**
+ * Once the page shows, watch `els` and call `onEnter` with each batch that
+ * scrolls into view (at least `threshold` of it visible); each element fires
+ * once. Lenis drives the native window scroll, so the observer sees it.
+ * Returns a stop (also safe before the page has shown).
+ */
+export function observeOnceShown(els: Element[], threshold: number, onEnter: (entering: Element[]) => void): () => void {
+  let stopped = false;
+  let io: IntersectionObserver | null = null;
+  void whenPageShown().then(() => {
+    if (stopped) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entering = entries.filter((e) => e.isIntersecting).map((e) => e.target);
+        if (entering.length === 0) return;
+        for (const el of entering) observer.unobserve(el);
+        onEnter(entering);
+      },
+      { threshold },
+    );
+    for (const el of els) observer.observe(el);
+    io = observer;
+  });
+  return () => {
+    stopped = true;
+    io?.disconnect();
+  };
+}

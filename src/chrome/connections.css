@@ -68,6 +68,8 @@
    label turn orange. */
 .connections__row:focus-visible {
   color: var(--color-orange);
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
 }
 
 @media (hover: hover) {

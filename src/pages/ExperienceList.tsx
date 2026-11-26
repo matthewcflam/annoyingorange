@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { play } from "../audio/engine";
+import { hoverSound } from "../audio/engine";
+import { isPlainClick } from "../lib/router";
 import type { IndexRow } from "../content/experience";
 
 /**
@@ -29,11 +30,11 @@ export default function ExperienceList({
               className="experience-list__link"
               data-active={row.id === active || undefined}
               onClick={(e) => {
-                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                if (!isPlainClick(e)) return;
                 e.preventDefault();
                 onSelect(row.id);
               }}
-              onPointerEnter={(e) => e.pointerType !== "touch" && play("link.hover")}
+              onPointerEnter={hoverSound}
             >
               <RowInner row={row} />
             </a>

@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { onNavClick } from "../lib/router";
-import { play } from "../audio/engine";
+import { navLinkProps } from "../lib/navLink";
 import SiteFooter from "./SiteFooter";
 import "./page.css";
 
@@ -32,14 +31,7 @@ export default function StationLayout({
     <div ref={rootRef} className={`page${className ? ` ${className}` : ""}`} style={style}>
       <header className="page__head">
         <h1 className="page__name">
-          <a
-            href="/"
-            className="page__home"
-            aria-label="Matthew Lam, home"
-            data-cursor="Go Home"
-            onPointerEnter={(e) => e.pointerType !== "touch" && play("link.hover")}
-            onClick={(e) => onNavClick(e, "/")}
-          >
+          <a className="page__home" aria-label="Matthew Lam, home" data-cursor="Go Home" {...navLinkProps("/")}>
             Matthew Lam
           </a>
         </h1>

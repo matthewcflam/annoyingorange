@@ -11,12 +11,12 @@
  */
 import { gsap } from "../lib/gsap";
 import { TRANSITION } from "../config/timings";
+import { clamp } from "../lib/math";
 
 const T = TRANSITION;
 
 const VARIATIONS = ["charFill", "charInverse", "charAccent", "charAccentInverse", "charAccentFill", "charBorder"];
 
-const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 const snap = (v: number, step: number) => Math.round(v / step) * step;
 const mapRange = (v: number, inMin: number, inMax: number, outMin: number, outMax: number) =>
   ((v - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;

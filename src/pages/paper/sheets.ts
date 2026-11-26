@@ -1,6 +1,5 @@
 import photo from "../../../assets-src/images/home-photo.png?print";
-import tapeLong from "../../../assets-src/images/tape-long.png?w=270&paperFibre=135&tape";
-import tapeShort from "../../../assets-src/images/tape-short.png?w=152&paperFibre=76&tape";
+import { TAPE_LONG, TAPE_SHORT } from "./tapes";
 import tapeSkyline from "../../../assets-src/images/tape-skyline.png?w=252&paperFibre=126&tape";
 import sheetPaper from "../../../assets-src/images/paper-sheet.png?sheet";
 import { compactSizes, frameSizes } from "../../lib/frame";
@@ -49,8 +48,8 @@ export const PHOTO_SHEETS: Sheet[] = [
 ];
 
 export const PHOTO_TAPES: Sheet[] = [
-  { id: "tape-long", kind: "tape", cx: 1420.9, cy: 79.8, w: 135, h: 31, rotate: -7.2, src: tapeLong },
-  { id: "tape-short", kind: "tape", cx: 1375, cy: 263, w: 76, h: 30, rotate: 0, src: tapeShort },
+  { id: "tape-long", kind: "tape", cx: 1420.9, cy: 79.8, w: 135, h: 31, rotate: -7.2, src: TAPE_LONG },
+  { id: "tape-short", kind: "tape", cx: 1375, cy: 263, w: 76, h: 30, rotate: 0, src: TAPE_SHORT },
 ];
 
 /** The skyline's sheet (Figma "Rectangle 154": a blank paper sheet, the
@@ -70,4 +69,11 @@ export const SKY_TAPE: Sheet = {
 export const HOME_PICTURES = [
   { picture: photo, sizes: PRINT_SIZES },
 ];
-export const HOME_URLS = [tapeLong, tapeShort, tapeSkyline, sheetPaper];
+export const HOME_URLS = [TAPE_LONG, TAPE_SHORT, tapeSkyline, sheetPaper];
+
+type Box = { cx: number; cy: number; w: number; h: number; rotate: number };
+
+/** A box (centre, unrotated size, rotation) as the custom properties the
+ *  paper CSS places it by (home.css, station.css). */
+export const placeAt = (b: Box) =>
+  ({ "--cx": b.cx, "--cy": b.cy, "--w": b.w, "--h": b.h, "--r": `${b.rotate}deg` }) as React.CSSProperties;

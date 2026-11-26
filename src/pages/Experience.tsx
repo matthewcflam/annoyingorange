@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import PaperSheet from "./paper/PaperSheet";
+import { placeAt } from "./paper/sheets";
 import StationLayout from "./StationLayout";
+import { mapRef } from "../lib/mapRef";
 import ExperienceList from "./ExperienceList";
 import { JOBS, type Job } from "../content/experience";
 import { JOB_PHOTOS } from "../content/experiencePhotos";
@@ -26,10 +28,7 @@ function JobPhotos({ job }: { job: Job }) {
         <PaperSheet
           key={s.id}
           sheet={s}
-          style={{
-            "--cx": s.cx, "--cy": s.cy, "--w": s.w, "--h": s.h, "--r": `${s.rotate}deg`,
-            "--shift": shifted.includes(s.id) ? 1 : 0,
-          } as CSSProperties}
+          style={{ ...placeAt(s), "--shift": shifted.includes(s.id) ? 1 : 0 } as CSSProperties}
         />
       ))}
     </div>
@@ -102,10 +101,7 @@ export default function Experience() {
           <JobSection
             key={job.id}
             job={job}
-            ref={(el) => {
-              if (el) blocks.current.set(job.id, el);
-              else blocks.current.delete(job.id);
-            }}
+            ref={mapRef(blocks, job.id)}
           />
         ))}
       </div>

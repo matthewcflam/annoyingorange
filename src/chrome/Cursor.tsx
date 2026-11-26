@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "../lib/gsap";
 import { CURSOR } from "../config/timings";
-import { prefersReducedMotion } from "../lib/motion";
+import { hasFinePointer, prefersReducedMotion } from "../lib/motion";
 import { useRoute } from "../lib/router";
 import { whenPageShown } from "../lib/pageReveal";
 import "./cursor.css";
@@ -37,7 +37,7 @@ export default function Cursor() {
   useEffect(() => {
     const dot = dotRef.current;
     const label = labelRef.current;
-    if (!dot || !label || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!dot || !label || !hasFinePointer()) return;
 
     const dotScale = CURSOR.DOT_PX / CURSOR.RING_PX;
     gsap.set(dot, { scale: dotScale });

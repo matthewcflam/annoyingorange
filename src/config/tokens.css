@@ -124,6 +124,8 @@
   --grid-cols:   9;
   --grid-margin: calc(15 * var(--pp));
   --grid-gutter: calc(15 * var(--pp));
+  /* The 9 stretched columns as a grid template (Experience's jobs, each project). */
+  --grid-template: repeat(var(--grid-cols), minmax(0, 1fr));
   --grid-col:    calc((100vw - 2 * var(--grid-margin) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
   --grid-span2:  calc(2 * var(--grid-col) + var(--grid-gutter));
   --color-grid:  rgba(200, 75, 33, 0.1);

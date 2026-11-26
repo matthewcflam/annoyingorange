@@ -2,16 +2,7 @@ import type { CSSProperties } from "react";
 import "./connections.css";
 import { useCopyEmail } from "./useCopyEmail";
 import Icon from "./Icon";
-import type { ICONS } from "./icons";
-import { DEVPOST, EMAIL, GITHUB, LINKEDIN } from "../content/contact";
-
-/** The Connections rows, top to bottom (Figma). Email copies the address. */
-const LINKS: { label: string; icon: keyof typeof ICONS; href: string | null }[] = [
-  { label: "Email", icon: "mail", href: null },
-  { label: "LinkedIn", icon: "linkedin", href: LINKEDIN },
-  { label: "GitHub", icon: "github", href: GITHUB },
-  { label: "Devpost", icon: "devpost", href: DEVPOST },
-];
+import { CONTACT_LINKS, EMAIL } from "../content/contact";
 
 /**
  * The blue Connections card: each connection's logo on the left (where Figma
@@ -43,7 +34,7 @@ export default function Connections({
         {copied ? "email copied!" : ""}
       </p>
       <ul>
-        {LINKS.map(({ label, icon, href }) => {
+        {CONTACT_LINKS.map(({ label, icon, href }) => {
           const inner = (
             <>
               <span className="connections__icon">

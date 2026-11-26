@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "../lib/gsap";
 import { prefersReducedMotion } from "../lib/motion";
-import { onNavClick, useRoute } from "../lib/router";
-import { prefetchRoute } from "../lib/assets";
+import { useRoute } from "../lib/router";
+import { navLinkProps } from "../lib/navLink";
 import { routeFor, STATIONS } from "../config/routes";
 import { MAP_BOX as M } from "../config/timings";
-import { flowShape, shapePath, type Shape } from "../lib/waterFlow";
+import { emptyShape, flowShape, runFlow, shapePath, snapShape } from "../lib/waterFlow";
+import { useTimer } from "../lib/useTimer";
 import "./mapbox.css";
 
 /** The rows: Home, then the stations in line order. */
@@ -50,7 +51,7 @@ export default function MapBox({
   const panelRef = useRef<HTMLElement>(null);
   const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const shape = useRef<Shape>({ w: 0, h: 0, bl: 0, bb: 0, r: 0 });
+  const shape = useRef(emptyShape());
   const tl = useRef<gsap.core.Timeline | null>(null);
   const first = useRef(true);
 
@@ -70,27 +71,18 @@ export default function MapBox({
     tl.current?.kill();
     if (first.current || prefersReducedMotion()) {
       first.current = false;
-      Object.assign(s, target, { bl: 0, bb: 0, r: 0 });
+      snapShape(s, target);
       draw();
       setRows(open);
       return;
     }
     const duration = open ? M.OPEN : M.CLOSE;
     const flow = flowShape(s, target, gsap.parseEase(open ? M.OPEN_EASE : M.CLOSE_EASE));
-    const drive = { p: 0 };
     const t = gsap.timeline();
     tl.current = t;
     // The text cuts out on close; on open it waits for the water.
     setRows(false);
-    t.to(drive, {
-      p: 1,
-      duration,
-      ease: "none",
-      onUpdate: () => {
-        flow(drive.p);
-        draw();
-      },
-    }, 0);
+    t.add(runFlow(flow, duration, draw), 0);
     if (open) {
       // Each row starts as the front reaches it: the label (right, by the
       // corner) when the height passes the row's middle, the dot (left) once
@@ -116,7 +108,7 @@ export default function MapBox({
   useEffect(() => {
     const fit = () => {
       tl.current?.progress(1);
-      Object.assign(shape.current, open ? openSize() : closedSize());
+      snapShape(shape.current, open ? openSize() : closedSize());
       draw();
     };
     window.addEventListener("resize", fit);
@@ -136,19 +128,15 @@ export default function MapBox({
   // Mouse hover opens and closes it, each after a short delay (MAP_BOX.HOVER_*):
   // the open card covers the closed box, so the pointer can run straight from
   // "Map" down to a row without leaving it.
-  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const hoverTo = (v: boolean) => {
-    clearTimeout(hoverTimer.current);
-    hoverTimer.current = setTimeout(() => setOpen(v), (v ? M.HOVER_OPEN_DELAY : M.HOVER_CLOSE_DELAY) * 1000);
-  };
-  useEffect(() => () => clearTimeout(hoverTimer.current), []);
+  const hoverTimer = useTimer();
+  const hoverTo = (v: boolean) => hoverTimer.set(() => setOpen(v), v ? M.HOVER_OPEN_DELAY : M.HOVER_CLOSE_DELAY);
 
   // Escape or a press outside closes it.
   useEffect(() => {
     if (!open || pinned) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      clearTimeout(hoverTimer.current);
+      hoverTimer.clear();
       setOpen(false);
       toggleRef.current?.focus();
     };
@@ -200,7 +188,7 @@ export default function MapBox({
           aria-controls="map-box-nav"
           onPointerDown={(e) => (pressType.current = e.pointerType)}
           onClick={(e) => {
-            clearTimeout(hoverTimer.current);
+            hoverTimer.clear();
             setOpen(e.detail > 0 && pressType.current === "mouse" ? true : !open);
           }}
         >
@@ -216,17 +204,15 @@ export default function MapBox({
       >
         {ROWS.map((row, i) => {
           const isCurrent = row.id === current;
-          const enter = () => !isCurrent && prefetchRoute(row.path);
+          // The current station's row goes nowhere; the others are silent page links.
+          const link = isCurrent ? { href: row.path, onClick: (e: { preventDefault(): void }) => e.preventDefault() } : navLinkProps(row.path, { sound: false });
           return (
             <a
               key={row.id}
-              href={row.path}
               className="map-box__row"
               aria-current={isCurrent ? "page" : undefined}
               aria-label={row.label}
-              onClick={(e) => (isCurrent ? e.preventDefault() : onNavClick(e, row.path))}
-              onPointerEnter={(e) => e.pointerType !== "touch" && enter()}
-              onFocus={enter}
+              {...link}
             >
               <span
                 ref={(el) => {

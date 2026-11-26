@@ -275,3 +275,9 @@ export function play(id: SoundId, opts: PlayOptions = {}): void {
 
   src.start(Math.max(opts.when ?? 0, context.currentTime));
 }
+
+/** The link.hover tick for a pointer entering a link or button; touch has no
+ *  hover, so it stays silent there. */
+export function hoverSound(e: { pointerType: string }): void {
+  if (e.pointerType !== "touch") play("link.hover");
+}

@@ -56,6 +56,16 @@ export const SKYLINE = {
   SEG_MIN: 0.15,
   SEG_MAX: 0.7,
   SEG_EASE: "power1.inOut",
+  /** The redraw plan is measured in idle time (at most this late, ms). */
+  PLAN_IDLE_TIMEOUT_MS: 500,
+  PLAN_IDLE_FALLBACK_MS: 50,
+} as const;
+
+/** The other pages' code is fetched once the browser is idle after load
+ *  (lib/assets.ts prefetchPages), at most this late (ms). */
+export const PREFETCH = {
+  IDLE_TIMEOUT_MS: 3000,
+  IDLE_FALLBACK_MS: 1000,
 } as const;
 
 /** "who?" spray engine (§7.2). Distances are mockup px (the 1767×1024 frame),
@@ -245,6 +255,8 @@ export const PROJECT = {
 export const CAT = {
   DRAW: 2.2,
   DRAW_EASE: "power2.inOut",
+  /** Draws once this fraction of it is in the window. */
+  VIEW_THRESHOLD: 0.3,
 } as const;
 
 /** Project media (pages/projects/Media.tsx): a collage piece expands to a

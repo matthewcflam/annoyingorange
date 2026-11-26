@@ -17,6 +17,7 @@
  */
 import whoSvg from "../../assets-src/svg/who-spray.svg?raw";
 import { gsap } from "../lib/gsap";
+import { clamp, clamp01 } from "../lib/math";
 import { readToken } from "../lib/tokens";
 import { SPRAY } from "../config/timings";
 import { SPRAY_PACE } from "../config/sprayPace";
@@ -69,7 +70,7 @@ export function strokeTimes(i: number): Float32Array {
 
 /** Point at distance `along` on a guide (linear between samples). */
 function pointAt(g: Guide, along: number): [number, number] {
-  const f = g.length > 0 ? Math.min(Math.max(along / g.length, 0), 1) * g.segments : 0;
+  const f = g.length > 0 ? clamp01(along / g.length) * g.segments : 0;
   const i = Math.min(Math.floor(f), g.segments - 1);
   const t = f - i;
   const p = g.pts;
@@ -338,7 +339,7 @@ export class SprayEngine {
     // A stamp at least every STEP_PX, and enough stamps to lay down all the
     // paint: a dwelling nozzle (the ?-dot) piles many stamps onto one spot.
     const stamps = Math.max(1, Math.ceil(dist / SPRAY.STEP_PX), Math.ceil(dots / SPRAY.DOTS_MAX));
-    const perStamp = Math.round(Math.min(Math.max(dots / stamps, SPRAY.DOTS_MIN), SPRAY.DOTS_MAX));
+    const perStamp = Math.round(clamp(dots / stamps, SPRAY.DOTS_MIN, SPRAY.DOTS_MAX));
     for (let s = 1; s <= stamps; s++) {
       const [x, y] = pointAt(guide, from + (dist * s) / stamps);
       this.stamps.push(x, y, perStamp);

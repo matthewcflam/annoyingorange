@@ -4,6 +4,8 @@
  */
 import { MAP_BOX as M } from "../config/timings";
 import { projectScale } from "./tokens";
+import { gsap } from "./gsap";
+import { clamp01 } from "./math";
 
 /** The blue shape, drawn from its top-right corner (the origin; x runs left,
  *  so it is negative). `bl` / `bb` bow the left and bottom edges outward,
@@ -25,7 +27,6 @@ export function shapePath({ w, h, bl, bb, r }: Shape): string {
   );
 }
 
-const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 /**
  * A rush of water from the shape `s` to the box `to`, as a function of one
@@ -67,4 +68,28 @@ export function flowShape(s: Shape, to: { w: number; h: number }, ease: (p: numb
     return 1;
   };
   return flow;
+}
+
+/** No shape at all (the poster before its first hover). A fresh copy each call. */
+export const emptyShape = (): Shape => ({ w: 0, h: 0, bl: 0, bb: 0, r: 0 });
+
+/** Jump `s` to a square box of `size` (reduced motion, first paint, resize). */
+export function snapShape(s: Shape, size: { w: number; h: number }): void {
+  Object.assign(s, size, { bl: 0, bb: 0, r: 0 });
+}
+
+/** Run `flow` (flowShape) from 0 to 1 over `duration` seconds, calling `draw`
+ *  every frame. The tween is linear: the flow carries its own ease. */
+export function runFlow(flow: (p: number) => void, duration: number, draw: () => void, onComplete?: () => void): gsap.core.Tween {
+  const drive = { p: 0 };
+  return gsap.to(drive, {
+    p: 1,
+    duration,
+    ease: "none",
+    onUpdate: () => {
+      flow(drive.p);
+      draw();
+    },
+    onComplete,
+  });
 }

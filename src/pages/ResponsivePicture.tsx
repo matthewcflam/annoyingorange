@@ -1,4 +1,5 @@
 import type { Picture } from "../lib/assets";
+import PictureSources from "./PictureSources";
 
 /** An imagetools picture (an `as: 'picture'` preset, vite.config.ts): AVIF/WebP
  *  sources with an <img> fallback. */
@@ -17,9 +18,7 @@ export default function ResponsivePicture({
 }) {
   return (
     <picture className={className}>
-      {Object.entries(picture.sources).map(([format, srcset]) => (
-        <source key={format} type={`image/${format}`} srcSet={srcset} sizes={sizes} />
-      ))}
+      <PictureSources picture={picture} sizes={sizes} />
       <img
         src={picture.img.src}
         width={picture.img.w}

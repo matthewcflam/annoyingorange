@@ -12,6 +12,9 @@
 .page {
   /* One line of body text: 19px at 16. */
   --line: calc(var(--type-project-body) * var(--project-lh));
+  /* Headings in the page: a project's name, an Experience company. 24 at a
+     16px body (user request; was 2.25 × body). */
+  --type-project-heading: calc(1.5 * var(--type-project-body));
   /* How far below the top the footer's cat must stay, clear of the fixed
      header (footer.css). The project pages raise it to clear their list. */
   --head-clear: var(--station-head-h);
@@ -65,14 +68,13 @@
   text-decoration: none;
 }
 
-.page__home:focus-visible {
+/* Keyboard focus on the header's links (the name, the Experience and Projects
+   indexes). */
+.page__home:focus-visible,
+.experience-list__link:focus-visible,
+.project-list__link:focus-visible {
   outline: 2px solid var(--color-route);
   outline-offset: 4px;
-}
-
-/* Section headings (TOOLS) are orange. */
-.page-heading {
-  color: var(--color-orange);
 }
 
 /* Body text in Nunito Light (tokens.css --font-text): the About and
@@ -84,11 +86,6 @@
 .page .project__body {
   font-family: var(--font-text);
   font-weight: var(--weight-text);
-}
-
-.page .page-heading {
-  font-family: var(--font-rounded);
-  font-weight: 700;
 }
 
 /* ---- Compact layout (global.css): the header scrolls with the page (the
@@ -103,8 +100,20 @@
     padding-top: 1px;
   }
 
+  .page {
+    --type-project-heading: 24px;
+  }
+
   .page .page__name {
     margin-top: calc(var(--station-row-mid) - 13px);
     font-size: min(var(--type-project-title), (100vw - 2 * var(--grid-margin) - var(--map-w) - 16px) / 5.9);
   }
+}
+
+/* A blank line between paragraphs (About's copy, Experience's points, a
+   project's description). */
+.page .about__copy p + p,
+.page .experience-job__points p + p,
+.page .project-block__desc p + p {
+  margin-top: var(--line);
 }

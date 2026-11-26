@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "../lib/gsap";
 import { prefersReducedMotion } from "../lib/motion";
-import { whenPageShown } from "../lib/pageReveal";
+import { observeOnceShown } from "../lib/pageReveal";
 import { CAT } from "../config/timings";
 import catSvg from "../../assets-src/svg/chat-cat.svg?raw";
 
@@ -19,9 +19,8 @@ export default function DrawnCat({ className, drawOnView = false }: { className:
   useEffect(() => {
     const cat = ref.current!;
     const paths = cat.querySelectorAll("path");
-    let alive = true;
     let tween: gsap.core.Tween | null = null;
-    let io: IntersectionObserver | null = null;
+    let stopWatching = () => {};
 
     const draw = () => {
       if (prefersReducedMotion()) return;
@@ -31,28 +30,16 @@ export default function DrawnCat({ className, drawOnView = false }: { className:
 
     if (drawOnView && !prefersReducedMotion()) {
       gsap.set(paths, { drawSVG: "0%" });
-      void whenPageShown().then(() => {
-        if (!alive) return;
-        io = new IntersectionObserver(
-          ([entry]) => {
-            if (!entry.isIntersecting) return;
-            io!.disconnect();
-            draw();
-          },
-          { threshold: 0.3 },
-        );
-        io.observe(cat);
-      });
+      stopWatching = observeOnceShown([cat], CAT.VIEW_THRESHOLD, draw);
     }
 
     const replay = () => {
-      io?.disconnect();
+      stopWatching();
       draw();
     };
     cat.addEventListener("click", replay);
     return () => {
-      alive = false;
-      io?.disconnect();
+      stopWatching();
       tween?.kill();
       cat.removeEventListener("click", replay);
     };
