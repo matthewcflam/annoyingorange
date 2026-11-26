@@ -62,7 +62,9 @@ type Seg = [Pt, Pt] | [Pt, Pt, Pt, Pt];
 
 /** Absolute M / L / C only (who-spray.svg uses nothing else). */
 export function parsePath(d: string): Seg[] {
-  const tokens = d.match(/[MLC]|-?\d*\.?\d+(?:e-?\d+)?/gi) ?? [];
+  // Every command letter is a token, so an unsupported one throws below
+  // instead of its numbers being read as more of the previous command.
+  const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+(?:e-?\d+)?/g) ?? [];
   const segs: Seg[] = [];
   let cmd = "";
   let cur: Pt = [0, 0];
