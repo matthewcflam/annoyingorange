@@ -17,7 +17,7 @@ export default function SiteFooter() {
       <p className="site-footer__chat" data-reveal>
         {FOOTER_CHAT}
       </p>
-      <Connections reveal />
+      <Connections reveal source="Footer" />
       <p className="site-footer__credits" data-reveal>
         Last Updated {LAST_UPDATED}
         <br />
