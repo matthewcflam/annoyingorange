@@ -157,7 +157,7 @@
      tubes + edge falloff (multiply, under the text: the dim gaps between
      tubes), diffuser grain (overlay), glass sheen (screen). They replace the
      shader's FALLOFF and SHEEN. */
-  --lb-tube-strength: .1;   /* the dip between tubes */
+  --lb-tube-strength: .07;  /* the dip between tubes */
   --lb-tube-period:   25%;  /* 25% = 4 tubes across */
   --lb-falloff:       .08;
   --lb-falloff-blur:  66;   /* card design px (≈50px at 12px text) */
