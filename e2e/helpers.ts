@@ -14,6 +14,11 @@ export const TITLE = {
  * document.title change, one per page commit (window.__titles).
  */
 export async function instrument(page: Page): Promise<void> {
+  // Vercel serves /_vercel/insights/* (Web Analytics) on the platform only;
+  // the local preview server 404s it. Answer with an empty script instead.
+  await page.route('**/_vercel/**', (r) =>
+    r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
+  )
   await page.addInitScript(() => {
     let a = 0x9e3779b9
     Math.random = () => {
