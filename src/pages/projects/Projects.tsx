@@ -81,7 +81,6 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
       id={p.slug}
       className="project-block"
       data-flip={flip || undefined}
-      data-center-text={p.centerText || undefined}
       aria-labelledby={`project-${p.slug}`}
       style={{ "--project-color": `var(${p.poster.color})` }}
     >

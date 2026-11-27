@@ -132,9 +132,6 @@ export interface Project {
   extraMedia?: Media[];
   /** Paragraphs under the links (no heading); empty for none. */
   description: string[];
-  /** Centre the text block on the collage's centre line instead of its top
-   *  (This Portfolio; user request). Full layout only. */
-  centerText?: boolean;
 }
 
 /** A photo; its lightbox aspect is the picture's own. */
@@ -255,7 +252,6 @@ export const PROJECTS: readonly Project[] = [
     category: "Project",
     year: "2026",
     name: "This Portfolio",
-    centerText: true,
     awards: ["#1 in never actually being finished"],
     links: [
       { kind: "github", href: "https://github.com/matthewcflam/annoyingorange" },

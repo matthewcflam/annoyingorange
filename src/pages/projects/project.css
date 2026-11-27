@@ -107,9 +107,11 @@
   margin-inline: 0 var(--collage-gap);
 }
 
-/* content/projects.ts `centerText` (This Portfolio; user request): the text
-   sits on the centre line of the collage beside it, not at its top. */
-.project-block[data-center-text] .project-block__text {
+/* All project text (user request) sits on the centre line of the collage
+   beside it, not at its top or foot: TOOLS and the text column are centred
+   in the row (the row is as tall as the collage). */
+.project-block__text,
+.project-block__tools {
   align-self: center;
 }
 
@@ -223,6 +225,7 @@
   .project-block__tools {
     order: 4;
     position: static;
+    align-self: stretch;
     margin-top: 28px;
   }
 }
