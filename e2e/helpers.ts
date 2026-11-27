@@ -36,10 +36,13 @@ export async function instrument(page: Page): Promise<void> {
 export const titles = (page: Page) => page.evaluate(() => (window as unknown as { __titles: string[] }).__titles)
 
 /** Load `path` and wait until the page has faded in (App's root is visible
- *  once fonts are ready). */
+ *  once fonts are ready) and the page itself has mounted: each page is a
+ *  lazy chunk behind `<Suspense fallback={null}>` (pages/Outlet.tsx), so
+ *  `<main>` can be visible but still empty. */
 export async function open(page: Page, path: string): Promise<void> {
   await page.goto(path)
   await expect(page.locator('main')).toBeVisible()
+  await expect(page.locator('main > *').first()).toBeVisible()
   await page.waitForFunction(() => document.fonts.status === 'loaded')
 }
 
