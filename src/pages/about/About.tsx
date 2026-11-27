@@ -54,7 +54,7 @@ export default function About() {
           {ABOUT_SHEETS.map((s, i) => (
             <PaperSheet key={s.id} sheet={s} eager={i === ABOUT_SHEETS.length - 1} style={placeAt(s)} />
           ))}
-          <Connections className="about__connections" style={placeAt(ABOUT_CARD)} />
+          <Connections source="About" className="about__connections" style={placeAt(ABOUT_CARD)} />
           <p className="about__chat" style={{ "--cx": ABOUT_CHAT.right, "--cy": ABOUT_CHAT.midY }}>
             {FOOTER_CHAT}
           </p>

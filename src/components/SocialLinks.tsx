@@ -2,6 +2,7 @@ import { hoverSound } from "../audio/engine";
 import { useCopyEmail } from "./useCopyEmail";
 import { EMAIL, contactLink, type ContactId } from "../content/contact";
 import Icon from "./Icon";
+import { trackClick } from "../lib/track";
 import "./social-links.css";
 
 /** Home's row order (Figma "Home Page Final"), and the glyphs social-links.css nudges. */
@@ -21,13 +22,17 @@ export default function SocialLinks({ className, children }: { className?: strin
     <div className={`social-links${className ? ` ${className}` : ""}`}>
       {ORDER.map((id) => {
         const { label, icon, href, cursor } = contactLink(id);
+        const track = () => trackClick(`click/${href ? id : "email-copy"}`, "Home");
         const cls = `social-links__icon${MODIFIER[id] ? ` social-links__icon--${MODIFIER[id]}` : ""} interactive`;
         return href ? (
-          <a key={id} className={cls} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} data-cursor={cursor} onPointerEnter={hoverSound}>
+          <a key={id} className={cls} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} data-cursor={cursor} onPointerEnter={hoverSound} onClick={track} onAuxClick={track}>
             <Icon name={icon} tight />
           </a>
         ) : (
-          <button key={id} type="button" className={cls} aria-label={`Copy email address (${EMAIL})`} data-cursor={cursor} onPointerEnter={hoverSound} onClick={copyEmail}>
+          <button key={id} type="button" className={cls} aria-label={`Copy email address (${EMAIL})`} data-cursor={cursor} onPointerEnter={hoverSound} onClick={() => {
+              track();
+              copyEmail();
+            }}>
             <Icon name={icon} tight />
           </button>
         );

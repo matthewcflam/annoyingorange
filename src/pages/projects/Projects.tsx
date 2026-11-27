@@ -12,6 +12,7 @@ import Icon from "../../components/Icon";
 import Collage from "./Collage";
 import ProjectList from "./ProjectList";
 import StationLayout from "../../components/StationLayout";
+import { trackClick } from "../../lib/track";
 import "./project.css";
 
 const SLUGS = PROJECTS.map((p) => p.slug);
@@ -115,7 +116,12 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
                   aria-label={`${p.name} on ${PROJECT_LINK_LABEL[link.kind]}`}
                   {...(link.href.startsWith("/")
                     ? { onClick: (e: React.MouseEvent) => onNavClick(e, link.href) }
-                    : { target: "_blank", rel: "noreferrer" })}
+                    : {
+                        target: "_blank",
+                        rel: "noreferrer",
+                        onClick: () => trackClick(`click/${p.slug}/${link.kind}`, "Projects"),
+                        onAuxClick: () => trackClick(`click/${p.slug}/${link.kind}`, "Projects"),
+                      })}
                   onPointerEnter={hoverSound}
                 >
                   {link.kind === "site" ? <Globe /> : <Icon name={link.kind} />}
