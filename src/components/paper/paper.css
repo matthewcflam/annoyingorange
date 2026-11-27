@@ -21,17 +21,10 @@
   user-select: none;
 }
 
-/* The photos: cropped by the box, see-through, warmed by --photo-tint. */
+/* The photos: cropped by the box, see-through, untinted (user request). */
 .paper[data-kind="photo"] {
   overflow: hidden;
   box-shadow: var(--paper-shadow);
-}
-
-.paper[data-kind="photo"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--photo-tint);
 }
 
 .paper[data-kind="photo"] .paper__img {

@@ -1,43 +1,51 @@
 /**
- * About's collage (Figma "ABOUT FINAL", node 501:94): eight prints of
- * me-final.png, styled like home's (components/paper/: 80% opacity, the orange
- * tint, the shadow), no tape. Back to front. Each sheet is its centre in the
- * 1600×998 frame, its unrotated size and its CSS rotation, all Figma px
- * (× --au in about.css). Every print is object-fit: cover of the same
- * image, so they share one download. Figma's ninth print (501:111) sits off
- * the frame and is left out.
+ * About's collage (Figma "ABOUT FINAL", node 501:94, revised), back to front:
+ * a grey sketch card with an orange bird drawn on it, the seawall print
+ * (me-final.png, Figma's crop of the same photo), the café print, the
+ * Connections card, and "Let's chat!" beside it. Boxes are the centre in the
+ * 1600×998 frame, the unrotated size and the CSS rotation, all Figma px
+ * (× --au in about.css). Both prints use home's paper styling
+ * (components/paper/: 80% opacity, the shadow; user decision), no tape.
  */
 import meFinal from "../../assets-src/images/me-final.png?print";
+import meCafe from "../../assets-src/images/me-cafe.jpg?printLarge";
+import birdSvg from "../../assets-src/svg/about-bird.svg";
 import type { Sheet } from "../components/paper/sheet";
 import { compactSizes } from "../lib/frame";
 
-/** The prints are 204–492 CSS px wide at the usual size (the wide one sets it). */
-const ABOUT_SIZES = compactSizes("100vw", "500px");
+/** The prints are 214–366 CSS px wide at the usual size. */
+const ABOUT_SIZES = compactSizes("100vw", "400px");
 
-const print = (id: string, cx: number, cy: number, w: number, h: number, rotate: number, crop?: Sheet["crop"]): Sheet => ({
-  id, kind: "photo", cx, cy, w, h, rotate, picture: meFinal, sizes: ABOUT_SIZES, crop,
+const print = (id: string, picture: Sheet["picture"], cx: number, cy: number, w: number, h: number, rotate: number): Sheet => ({
+  id, kind: "photo", cx, cy, w, h, rotate, picture, sizes: ABOUT_SIZES,
 });
 
 export const ABOUT_SHEETS: Sheet[] = [
-  print("about-a", 661.5, 524, 253, 264, 0),
-  print("about-b", 377.6, 536.57, 491.75, 272.1, -3.44),
-  // Figma nests this one in the wide print, which clips its bottom 35px:
-  // the visible top 177 of a 279×212 print, its image still sized for 212.
-  print("about-c", 363.05, 584.9, 279.38, 177.31, -3.03, { x: 0, y: 0, w: 1, h: 212 / 177.31 }),
-  print("about-d", 318.26, 323.75, 264.51, 275.5, 0),
-  print("about-e", 606.94, 719.5, 185.06, 209.5, -3.03),
-  print("about-f", 451, 314, 304, 316, 0),
-  print("about-g", 602.47, 297.25, 204, 212, -3.03),
-  print("about-h", 412.47, 670.25, 204, 212, -3.03),
-  print("about-i", 265.47, 731.25, 204, 212, -3.03),
+  print("about-seawall", meFinal, 639.9, 285.96, 213.82, 222.66, 4.85),
+  print("about-cafe", meCafe, 481.76, 469.2, 366.35, 274.76, 1.52),
 ];
 
 /**
- * The Connections card on the collage (Figma "Group 122", node 507:219):
- * 308×168, tilted -4.18°, its centre from the bounding box (469–788.4,
- * 654–844). It lies in front of every print.
+ * The sketch card (Figma "Group 121"): a flat grey card, 328×114 at
+ * (130, 298), no shadow, with the bird (Group 100, about-bird.svg) drawn on
+ * it; `bird` is the SVG's box from the card's top-left. Both are 70% (tokens).
  */
-export const ABOUT_CARD = { cx: 628.7, cy: 749, w: 308, h: 168, rotate: -4.18 };
+export const ABOUT_SKETCH = {
+  cx: 294, cy: 355, w: 328, h: 114, rotate: 0,
+  bird: { src: birdSvg, x: 15, y: 5.62, w: 300.84, h: 100.43 },
+};
 
-/** What preloadRoute("/about") decodes (one picture, shared by every print). */
-export const ABOUT_PICTURES = [{ picture: meFinal, sizes: ABOUT_SIZES }];
+/**
+ * The Connections card on the collage (Figma "Group 122", node 507:219):
+ * 308×168, tilted -4.18°, its centre from the bounding box (482–801.4,
+ * 557–747). It lies in front of both prints.
+ */
+export const ABOUT_CARD = { cx: 641.7, cy: 652, w: 308, h: 168, rotate: -4.18 };
+
+/** "Let's chat!" (Figma 512:745), left of the card: its right edge and the
+ *  middle of its line. It is set at the card's text size (user request;
+ *  Figma has 16), so it grows left and evenly up and down from Figma's box. */
+export const ABOUT_CHAT = { right: 458.6, midY: 670.5 };
+
+/** What preloadRoute("/about") decodes. */
+export const ABOUT_PICTURES = [meFinal, meCafe].map((picture) => ({ picture, sizes: ABOUT_SIZES }));

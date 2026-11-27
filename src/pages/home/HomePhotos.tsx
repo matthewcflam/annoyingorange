@@ -1,18 +1,18 @@
 import PaperSheet from "../../components/paper/PaperSheet";
-import { PHOTO_SHEETS, PHOTO_TAPES } from "./homeSheets";
+import { PHOTO_SHEETS } from "./homeSheets";
 
 /**
- * The taped photos top-right on home (Figma "Home Page Final"): three prints
- * of one photo, each cropped the same way, rotated and overlapping, held by
- * two strips of masking tape. Placed by their centres in mockup px (home.css);
- * flat paper (paper/PaperSheet.tsx): clean prints, textured tape, one small
- * drop shadow. Back to front, then the tape.
+ * The two prints top-right on home (Figma "Home Page Final"): the group photo
+ * behind, running off the top edge, and the photo by the water in front,
+ * each slightly turned, no tape. Placed by their centres in mockup px
+ * (home.css); flat paper (paper/PaperSheet.tsx): clean prints, one small drop
+ * shadow, each print's opacity from Figma (home.css `.home-photo--*`).
  */
 export default function HomePhotos() {
   return (
-    <div className="home-photos" aria-hidden="true">
-      {[...PHOTO_SHEETS, ...PHOTO_TAPES].map((s) => (
-        <PaperSheet key={s.id} sheet={s} placed eager={s.id === "photo-2"} />
+    <div className="home-photos wall-solid" aria-hidden="true">
+      {PHOTO_SHEETS.map((s) => (
+        <PaperSheet key={s.id} sheet={s} className={`home-photo--${s.id}`} placed eager={s.id === "photo-me"} />
       ))}
     </div>
   );

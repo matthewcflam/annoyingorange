@@ -21,7 +21,7 @@ function JobPhotos({ job }: { job: Job }) {
   const shifted = Array.isArray(p.fit) ? p.fit : [];
   return (
     <div
-      className="experience-photos"
+      className="experience-photos wall-solid"
       aria-hidden="true"
       style={{ "--pfit": p.fit === "cluster" ? 1 : 0, "--dy": p.dy, "--w": p.w, "--h": p.h }}
     >

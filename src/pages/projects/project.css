@@ -31,7 +31,8 @@
   z-index: 2;
   width: calc(var(--grid-margin) + var(--grid-span2) + var(--grid-gutter) / 2);
   height: calc(var(--tools-stick) - 20 * var(--pp));
-  background: var(--color-bg);
+  /* The wall grain too, or the band would show as a flat stripe on it. */
+  background: var(--tex-wall-grain) repeat, var(--color-bg);
   pointer-events: none;
 }
 
@@ -106,6 +107,12 @@
   margin-inline: 0 var(--collage-gap);
 }
 
+/* content/projects.ts `centerText` (This Portfolio; user request): the text
+   sits on the centre line of the collage beside it, not at its top. */
+.project-block[data-center-text] .project-block__text {
+  align-self: center;
+}
+
 .project-block__intro,
 .project-block__desc {
   text-box: trim-both cap alphabetic;
@@ -126,6 +133,11 @@
 
 .page .project-block__awards {
   margin-top: var(--line);
+}
+
+/* No tagline (This Portfolio): the awards take its place. */
+.page .project-block h2 + .project-block__awards {
+  margin-top: var(--type-project-body);
 }
 
 .project-block__awards span {

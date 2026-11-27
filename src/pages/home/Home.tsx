@@ -15,7 +15,8 @@ import { SKY_SHEET, SKY_TAPE } from "./homeSheets";
 import { navLinkProps } from "../../lib/navLink";
 import { PATHS } from "../../config/routes";
 import { SITE_NAME } from "../../content/site";
-import { GLASS_LINES, TECH_PAPERS } from "../../content/home";
+import { GLASS_LINES, NEXT_STOP, TECH_PAPERS } from "../../content/home";
+import { attachNextStop } from "./nextStop";
 import { CURSOR_LABEL } from "../../content/ui";
 
 /** The glass card's WebGL (its own chunk, keeping main under budget):
@@ -49,7 +50,16 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glassRef = useRef<HTMLAnchorElement>(null);
   const glassCanvasRef = useRef<HTMLCanvasElement>(null);
+  const glassBaseRef = useRef<HTMLCanvasElement>(null);
   const skylineRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const stripPathRef = useRef<SVGPathElement>(null);
+
+  // The lightbox's "next stop" strip fills and drains on a loop (nextStop.ts).
+  useEffect(() => {
+    const strip = stripRef.current!;
+    return attachNextStop(glassRef.current!, strip, stripPathRef.current!, [...strip.querySelectorAll<HTMLElement>(".home__strip-text span")]);
+  }, []);
   const cardOpen = useHomeCardOpen();
 
   // Dev only: /?glass-lab, the glass card's calibration bench (glass/glassLab.ts).
@@ -74,7 +84,7 @@ export default function Home() {
     let alive = true;
     let teardown = () => {};
     glassModule.then((m) => {
-      if (alive) teardown = m.attachHomeGlass(card, glassCanvasRef.current!, engine);
+      if (alive) teardown = m.attachHomeGlass(card, glassCanvasRef.current!, glassBaseRef.current!, engine);
     }, () => undefined);
     const detach = attachWho(engine);
     return () => {
@@ -113,15 +123,17 @@ export default function Home() {
   return (
     <div className="home">
       {/* The tech papers (Figma "Group 123/124"), bleeding off the top edge. */}
-      {TECH_PAPERS.map((lines, i) => (
-        <div key={i} className={`home__tech home__tech--${i}`}>
-          <ul className="home__tech-list">
-            {lines.map((l) => (
-              <li key={l}>{l}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <div className="home__techs wall-solid">
+        {TECH_PAPERS.map((lines, i) => (
+          <div key={i} className={`home__tech home__tech--${i}`}>
+            <ul className="home__tech-list">
+              {lines.map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
 
       <h1 className="home__name">{SITE_NAME}</h1>
       <div className="home__card">
@@ -133,7 +145,7 @@ export default function Home() {
       {/* A click sprays it again (spray/who.ts, user request): a mouse-only
           flourish, so it has no key handler or role. */}
       {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div ref={SprayDebug ? setWhoBox : undefined} className="home__who" data-clickable data-cursor={CURSOR_LABEL.spray} onClick={respray}>
+      <div ref={SprayDebug ? setWhoBox : undefined} className="home__who wall-solid" data-clickable data-cursor={CURSOR_LABEL.spray} onClick={respray}>
         <canvas
           ref={canvasRef}
           className="home__who-canvas"
@@ -161,7 +173,10 @@ export default function Home() {
         data-cursor={CURSOR_LABEL.readMore}
         {...navLinkProps(PATHS.experience)}
       >
-        <canvas ref={glassCanvasRef} className="home__glass-canvas" aria-hidden="true" />
+        <canvas ref={glassBaseRef} className="home__glass-base" aria-hidden="true" />
+        {/* The tubes behind the diffuser: on the face under the text (opaque
+            ink blocks the backlight) and under the blue film. */}
+        <span className="home__lb home__lb-tubes" aria-hidden="true" />
         {GLASS_LINES.map((group, i) => (
           <p key={i}>
             {group.map((l, j) => (
@@ -169,6 +184,23 @@ export default function Home() {
             ))}
           </p>
         ))}
+        {/* The blue "next stop" strip: film over the face, its letters cut out. */}
+        <div ref={stripRef} className="home__strip">
+          <svg className="home__strip-shape" viewBox="0 0 1 1" aria-hidden="true">
+            <path ref={stripPathRef} />
+          </svg>
+          <div className="home__strip-text">
+            <span className="home__strip-label">{NEXT_STOP.label}</span>
+            <span className="home__strip-name">{NEXT_STOP.name}</span>
+            <span className="home__strip-place">{NEXT_STOP.place}</span>
+          </div>
+        </div>
+        {/* Backlit acrylic over the face (user request): diffuser grain and
+            glass sheen over the text and strip, under the paint. */}
+        <span className="home__lb home__lb-grain" aria-hidden="true" />
+        <span className="home__lb home__lb-sheen" aria-hidden="true" />
+        {/* "who?" sprayed over the card, text and edge (user request). */}
+        <canvas ref={glassCanvasRef} className="home__glass-canvas" aria-hidden="true" />
       </a>
 
       {/* The intro draws it the first time (intro.ts); a click redraws it. */}
@@ -181,7 +213,7 @@ export default function Home() {
         <PaperSheet sheet={SKY_SHEET} placed />
         {/* A click draws it again (skylineDraw.ts). */}
         <div ref={skylineRef} className="home__skyline" data-clickable data-cursor={CURSOR_LABEL.draw} aria-hidden="true" />
-        <PaperSheet sheet={SKY_TAPE} placed />
+        <PaperSheet sheet={SKY_TAPE} className="wall-solid" placed />
       </div>
     </div>
   );

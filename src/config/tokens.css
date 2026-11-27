@@ -93,8 +93,8 @@
   --color-poster-text:        #FFFFFF;
 
   /* ---- Home's paper (Figma "Home Page Final"; components/paper/): the prints
-     are see-through like the reference (opacity), warmed by Figma's 10%
-     orange. The tape is a little more orange than Figma's (user request:
+     are see-through like the reference (opacity), with no tint (user
+     request: Figma's 10% orange overlay was removed). The tape is a little more orange than Figma's (user request:
      realistic masking tape), and the photo under it shows through. The
      skyline's sheet is plain paper, a hair darker than the page.
      --paper-sheet and --tape-tint are baked into the images at build time
@@ -103,8 +103,12 @@
      straight down (Figma's 0/4/4), lighter under the thin tape. --ps-u is the sheet's unit (home.css). */
   --paper-sheet:   #FBFAF3;
   --photo-opacity: 0.8;
+  --about-photo-opacity: 0.95; /* About's two prints (user request) */
   --about-card-opacity: 0.7; /* About's Connections card on the collage (Figma 70%) */
-  --photo-tint:    rgba(255, 119, 0, 0.1);
+  /* About's sketch card (Figma "Group 121"): a flat grey card and the orange
+     bird drawn on it, each at 70%. */
+  --about-sketch-bg:      #D9D9D9;
+  --about-sketch-opacity: 0.7;
   --tape-opacity:  0.9;
   --tape-tint:     rgba(255, 140, 30, 0.14);
   --paper-shadow:        0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.18);
@@ -114,13 +118,52 @@
   --home-tech-opacity: 0.7;
   --home-tech-ink:     #C4C4C0;
   --home-tech-shadow:  0 calc(4 * var(--px)) calc(4 * var(--px)) rgb(0 0 0 / 0.25);
-  /* Home's glass card over "who?" (Figma "Rectangle 157"; user request: a
-     glass effect, unlike the matte paper). --glass-blur is frame px. */
+  /* ---- Background textures (user request, texture plan): static SVG noise,
+     felt more than seen. Each strength is the `opacity` (or stroke alpha)
+     baked into its file in assets-src/textures/, since CSS can't set opacity
+     per background layer. Wall grain: every page (global.css). Tile grout:
+     home only, under the grain (home.css); its size is the SVG's own
+     width/height (96×48, user request: larger than the plan's 72×36; keep 2:1
+     and the 1px strokes). The textures show only on
+     the bare wall (user request): see-through pieces sit on .wall-solid
+     (global.css). Paper stock (.paper-stock, global.css) is defined but
+     unused for now (user request: no grain on the pieces). ---- */
+  --tex-wall-grain:   url("../../assets-src/textures/grain-wall.svg");
+  --tex-paper-grain:  url("../../assets-src/textures/grain-paper.svg");
+  --tex-paper-mottle: url("../../assets-src/textures/paper-mottle.svg");
+  --tex-tile:         url("../../assets-src/textures/tile-grout.svg");
+
+  /* Home's card over "who?" (Figma "Rectangle 157"), drawn as a backlit
+     subway lightbox (user request; LIGHTBOX in timings.ts). --glass-fill is
+     the /?glass-lab's Figma glass only. */
   --glass-fill:   rgb(244 244 240 / 0.2);
-  --glass-border: #939393;
-  --glass-blur:   5;
-  --glass-rim:    inset 0 0 calc(10 * var(--hk, 1px)) rgb(255 255 255 / 0.7);
   --glass-ink:    rgb(0 0 0 / 0.8);
+  /* The diffuser face: a cool fluorescent white, which reads as electric
+     light against the warm wall (user choice). */
+  --lightbox-face:    #FAFDFF;
+  /* The snap frame: graphite anodised aluminium. Its width is card design px
+     (the shader reads it too). */
+  --lightbox-frame:   #2E3135;
+  --lightbox-frame-w: 5; /* was 9; thinner at the user request */
+  /* The light spill on the wall (stacked glows, home.css): a cool tint that
+     washes out the wall texture near the box. */
+  --lightbox-spill:   rgb(248 251 255);
+  /* The "next stop" strip (user request): translucent blue film over the
+     same face (multiplied, so the backlight shows through it), its letters
+     cut out of the film: the bare face colour. */
+  --lightbox-strip:     var(--color-route);
+  --lightbox-strip-ink: var(--lightbox-face);
+  /* Backlit acrylic overlays on the face (user request; home.css .home__lb-*):
+     tubes + edge falloff (multiply, under the text: the dim gaps between
+     tubes), diffuser grain (overlay), glass sheen (screen). They replace the
+     shader's FALLOFF and SHEEN. */
+  --lb-tube-strength: .1;   /* the dip between tubes */
+  --lb-tube-period:   25%;  /* 25% = 4 tubes across */
+  --lb-falloff:       .08;
+  --lb-falloff-blur:  66;   /* card design px (≈50px at 12px text) */
+  --lb-grain:         .55;
+  --lb-sheen:         .45;
+  /* Its shadow is the paper cards' --paper-shadow (user request). */
   --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
 
   /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */

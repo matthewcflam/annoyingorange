@@ -388,7 +388,9 @@ export const PAPER = {
  * 4x Figma render (design/figma-glass/, /?glass-lab, scripts/glassDiff.mjs).
  */
 export const GLASS = {
-  FROST: 4,
+  /** 0: no blur on "who?" through the card (user request; Figma has 4).
+   *  The refraction, dispersion and light are unchanged. */
+  FROST: 0,
   REFRACTION: 0.8,
   DEPTH: 20,
   LIGHT_ANGLE: -45,
@@ -409,6 +411,73 @@ export const GLASS = {
   SHADE_POWER: 1.36,
   GLOW_GAIN: 0.011,
   GLOW_POWER: 0.5,
+  /** Home's paint over the card (split mode only; the lab ignores these).
+   *  The rim's vertical pull × this (user request: more vertical distortion).
+   *  Past ~2 the shift's slope passes 1 at the edge and the image folds over. */
+  PAINT_STRETCH_Y: 2,
+  /** The card held off the wall (user request): the can sprays from below,
+   *  so paint on the card lands this much lower than on the wall (spray
+   *  parallax), and the card leaves a bare gap this tall on the wall above
+   *  its top edge. Card design px. */
+  STANDOFF_DROP: 7, // 10 until the user asked for a slightly smaller gap
+  /** That gap's soft edge, Gaussian σ in card design px (a mask lifted off
+   *  the surface leaves a softer edge). */
+  STANDOFF_SOFT: 3,
   /** Device pixel ratio cap for the card canvas. */
   MAX_DPR: 2,
+} as const;
+
+/**
+ * Home's card as a backlit subway lightbox (user request): a dark snap frame
+ * round an opaque, cool-white diffuser face, lit from behind. Only home uses
+ * these (the lab keeps the Figma glass above). The frame width and the colours
+ * are tokens.css (--lightbox-*); lengths here are card design px.
+ * Research notes: a direct-backlit face is even but not flat (~90% uniform,
+ * brightest mid-face), the bright face blooms over the frame's inner edge,
+ * thin paint lets the backlight through. Tune live with window.__glass.set().
+ */
+export const LIGHTBOX = {
+  /** The face light bleeding over the frame's inner edge (halation). */
+  FRAME_BLOOM: 1.5,
+  /** The frame's metal shading: edges facing the light (GLASS.LIGHT_ANGLE)
+   *  lighter, the others darker, by up to this. */
+  FRAME_SHADE: 0.1,
+  /** The face dims by this fraction toward the frame, over FALLOFF_DEPTH.
+   *  0: the CSS acrylic overlays own the falloff now (--lb-* in tokens.css,
+   *  user decision); the shader term stays for live tuning. Was 0.05. */
+  FALLOFF: 0,
+  FALLOFF_DEPTH: 70,
+  /** The front acrylic's sheen: a diagonal gradient, ± half this. 0: the
+   *  CSS sheen overlay owns it (--lb-sheen). Was 0.025. */
+  SHEEN: 0,
+  /** Thin paint glows in its own hue with the backlight (0: off). */
+  PAINT_BACKLIGHT: 0.12,
+} as const;
+
+/**
+ * The lightbox's blue "next stop" strip on home (pages/home/nextStop.ts; user
+ * request): the blue pours down from the top with the Map card's water feel
+ * (MAP_BOX.FRONT_BOW), the lines appearing as it passes them, holds, leaves
+ * from the bottom (the top edge falls away, user request), rests on the white
+ * face, and runs again, forever.
+ */
+export const NEXT_STOP = {
+  /** After home mounts, before the first fill (the card rushes open first). */
+  START: 1.2,
+  FILL: MAP_BOX.OPEN,
+  FILL_EASE: MAP_BOX.OPEN_EASE,
+  /** Each line fades in as the water reaches it, at least this far apart. */
+  LINE_STAGGER: MAP_BOX.ROW_STAGGER,
+  LINE_FADE: MAP_BOX.LABEL_FADE,
+  LINE_FADE_EASE: MAP_BOX.LABEL_FADE_EASE,
+  /** Full, with the text showing. */
+  HOLD: 4,
+  /** Each line fades out, done as the falling top edge reaches it. */
+  TEXT_OUT: 0.15,
+  /** The exit is the entry's flow (user request: the Map card's close,
+   *  power3.inOut, stalled then jumped here). */
+  DRAIN: MAP_BOX.OPEN,
+  DRAIN_EASE: MAP_BOX.OPEN_EASE,
+  /** White, before it fills again. */
+  REST: 1.5,
 } as const;

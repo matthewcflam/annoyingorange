@@ -12,6 +12,7 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `home-skyline.svg` | home | the orange Vancouver skyline line drawing; its lines draw themselves from the peak down during the intro | 664×143, 507 stroked paths (1px, `#FF7700`; stroke set on the root) in two groups: `[data-part=mountain]` (73 ridge lines, Figma Group 116) and `[data-part=city]` (434, Group 117). Exported from Figma "Home Page Final" (Group 118), background rects removed, coordinates rounded to 2 decimals. Fetched and inlined at runtime (not `?raw`, to keep it out of the JS bundle) |
 | `project-smiley.svg` | Projects (ReMind) | the orange hand-drawn smiley beside ReMind's photos, static | 64×72, 3 stroked paths, `#FF7700`, 10px stroke, combined from Figma "Project Final" Vectors 839–841 |
 | `project-heart.svg` | Projects (This Portfolio) | the orange heart scribble over the portfolio pieces, static | 145×122, 1 stroked path, `#FF7700`, 2px stroke, Figma "Project Final" Vector 300 |
+| `about-bird.svg` | About | the orange bird outline on the grey sketch card, static | 301×100, 3 filled outline paths, `#FF7700`, from Figma "ABOUT FINAL" (Group 100, node 507:212), coordinates rounded to 1 decimal |
 | `chat-cat.svg` | station pages (footer), home | the orange cat beside "Let's chat!"; draws itself in (DrawSVG) | 335×459, 3 stroked paths, `#FF7700`, 5px stroke. Exported from the Figma file (Group 100) |
 
 ## Images (`assets-src/images/`)
@@ -22,11 +23,14 @@ None of these SVGs has element IDs. Reference paths by document order.
 | `mango-1.png`, `mango-2.png`, `mango-3.png` | Projects (Mango collage) | the team with prizes; the pose tracking; the team selfie | 1280×853, 1054×607, 1215×911 (image 145, Mango 1, image 144). `?collage` |
 | `oyster-news-map.png` | Projects (Oyster News collage) | screenshot of oysternews.xyz: the world map with headline bubbles | 3824×1896 (1912×948 at 2x), taken 2026-11-25. `?collage` |
 | `portfolio-1.png` | Projects (This Portfolio collage) | the Figma board | 1395×899 (image 146). `?collage` |
-| `home-photo.png` | home | the three taped prints (one photo, cropped alike): thumbs up by the water | 2048×1536, from Figma "Home Page Final" (image 122). `?print` (AVIF/WebP 400/800/1200) |
-| `tape-long.png`, `tape-short.png` | home (`tape-short` also holds the Experience photos) | the two strips of masking tape over the prints | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
+| `portfolio-ref-skyline.png`, `portfolio-ref-2xa.png`, `portfolio-ref-bleibtgleich.png` | Projects (This Portfolio collage) | the three references: Burnaby under Mount Baker (user-supplied); screenshots of the 2xa.studio and bleibtgleich.dev home pages (those two prints link to the sites, cursor "Visit Site") | 1767×882; 1440×1000 each, taken 2026-11-26. `?collage`, all cropped to the grey boxes' 219:153 |
+| `home-photo.jpg` | home | the front print top right: thumbs up by the water | 2048×1536, the original photo (user-supplied; replaced the 5 MB PNG export of it). `?printLarge` (600/1000/1600, q72) |
+| `home-group.jpg` | home | the back print top right (Figma "IMG_7757-2 1"): the group photo, running off the top edge | 3841×2011, the Figma original. `?printLarge` (600/1000/1600, q72) |
+| `tape-long.png`, `tape-short.png` | Experience photos (no longer on home) | strips of masking tape | 540×123 and 304×120, cut from Figma's tape sheet (the bottom strip and the middle-left one) at the crops Figma uses. Fibre and `--tape-tint` are baked in at build time (`&tape` preset) |
 | `tape-skyline.png` | home | the strip holding the skyline's sheet (Figma "tape1", 452:4941) | 320 wide, cut from the same tape sheet at Figma's crop. Baked like the other tape |
 | `paper-sheet.png` | home | a stub (8×8 white) for the skyline's blank sheet: the `?sheet` preset fills it with `--paper-sheet` and bakes the fibre in (scripts/paperBake.ts) | not art; don't replace |
-| `me-final.png` | About | the photo: thumbs up on the seawall | 2134×2222. Box (941, 278) 447×465 in `About (6).png` |
+| `me-final.png` | About | the seawall print (thumbs up by the water; the same crop as Figma "ABOUT FINAL"'s image 123) | 2134×2222. `?print`, 214×223 at 4.85° |
+| `me-cafe.jpg` | About | the café print in front of it (Figma "ABOUT FINAL" IMG_1759) | 2048×1536, the original photo (user-supplied; replaced Figma's sharpened 4096 upscale). `?printLarge` (600/1000/1600, q72), 366×275 at 1.52° |
 | `enersys1.png` | Experience | taped photo beside EnerSys (Figma "Experience Final" 235×176; was a hover photo): selfie by the EnerSys logo | 2305×1728. Box (1288, header cap −45) 235×176 in `Experience (2).png` |
 | `enersys2.png` | Experience | taped photo beside EnerSys, over the selfie (229×173, turned 5.34°): meeting-room demo | 2736×2060. Box (1432, +55) 229×173 |
 | `sailbot2.png` | Experience | taped photo left of Sailbot (215×162, turned −3.14°): the team | 3044×2283. Box (1298, +42) 268×201 |
@@ -72,4 +76,3 @@ Empty for now. Files are discovered at build time (spec §9.5), so adding one ne
 |---|---|---|
 | Helvetica Rounded Bold (`assets-src/fonts/helvetica-rounded-bold.woff2`) | project pages, Map box | the Figma file's typeface |
 | The Oyster News screencast | Projects | the grey "future screencast of oyster news" box in "Project Final" |
-| Three references for This Portfolio | Projects | the grey boxes ("future references") in "Project Final" |

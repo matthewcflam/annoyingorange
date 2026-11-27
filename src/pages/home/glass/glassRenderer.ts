@@ -1,5 +1,5 @@
 import { gsap } from "../../../lib/gsap";
-import { GLASS } from "../../../config/timings";
+import { GLASS, LIGHTBOX } from "../../../config/timings";
 import { readToken } from "../../../lib/tokens";
 import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../../../lib/webgl";
 import type { SprayEngine } from "../../../spray/sprayEngine";
@@ -23,22 +23,43 @@ import type { SprayEngine } from "../../../spray/sprayEngine";
  *      darker and the opposite side a touch brighter (measured off Figma's
  *      render: it is a signed edge shade, not a white glow).
  *
+ * Home splits step 3 in two (`base` option, user request: "who?" looks
+ * sprayed on top of the card): the glass without its backdrop goes to a 2D
+ * canvas under the card's text, and the paint alone, untinted and unlit, to
+ * the WebGL canvas over it. The lab draws the combined glass.
+ *
+ * Home also turns the card into a backlit subway lightbox (`lightbox`
+ * option, user request): the base becomes a dark snap frame round a
+ * cool-white diffuser face (dimming a few % toward the frame, a faint acrylic
+ * sheen, the face blooming over the frame's inner edge), and the paint sits
+ * flat on the face (no refraction: a diffuser shows nothing through it),
+ * thin overspray glowing a touch with the backlight. LIGHTBOX in timings.ts.
+ *
  * The maths follows the figma_glass recreation (MIT; Figma's own shader is
  * closed), calibrated against a 4x Figma render (GLASS in timings.ts).
  * It draws only when asked (`invalidate()`: new paint, a resize), at most once
  * per frame; nothing runs while nothing changes.
  */
 
-export type GlassParams = { -readonly [K in keyof typeof GLASS]: number };
+export type GlassParams = { -readonly [K in keyof typeof GLASS | keyof typeof LIGHTBOX]: number };
 
 export interface GlassOptions {
   /** The glass's width in design px (its unit = CSS width / designWidth). */
   designWidth: number;
+  /** Re-read designWidth on every layout (home's card changes it on compact). */
+  readDesignWidth?: () => number;
   /** Corner radius, design px. */
   radius: number;
   /** Page colour under the glass, and the glass fill, as [r, g, b, a] 0–1. */
   background: [number, number, number];
   fill: [number, number, number, number];
+  /** Split mode (home): a 2D canvas under the card's text that gets the
+   *  glass without its backdrop; the WebGL canvas then draws only the
+   *  refracted paint, over the text. Without it, one combined draw (the lab). */
+  base?: HTMLCanvasElement;
+  /** Split mode only: draw the base as a backlit lightbox (home). Colours
+   *  [r, g, b] 0–1; frame width in design px. */
+  lightbox?: { face: [number, number, number]; frame: [number, number, number]; frameWidth: number };
   /** Called once if WebGL goes away; the page shows its CSS fallback. */
   onLost?: () => void;
   params?: Partial<GlassParams>;
@@ -90,6 +111,19 @@ uniform float uShade;        // SHADE_GAIN × LIGHT_INTENSITY
 uniform float uShadePow;
 uniform float uGlow;         // GLOW_GAIN × LIGHT_INTENSITY
 uniform float uGlowPow;
+uniform int uMode;           // 0 combined, 1 base (no backdrop), 2 paint only
+uniform float uStretchY;     // paint: vertical rim shift × this
+uniform float uDrop;         // paint: stand-off drop, device px
+uniform int uLightbox;       // 1: the base is a lightbox (frame + face)
+uniform vec3 uFace;
+uniform vec3 uFrame;
+uniform float uFrameW;       // device px
+uniform float uBloom;        // device px
+uniform float uFrameShade;
+uniform float uFalloff;
+uniform float uFalloffDepth; // device px
+uniform float uSheen;
+uniform float uBacklight;
 
 float sdRoundRect(vec2 p, vec2 h, float r) {
   vec2 q = abs(p) - h + r;
@@ -121,30 +155,73 @@ void main() {
   float lens = pow(t, mix(2.0, 1.0, uSplay));
   float shift = lens * uShift;
 
-  vec4 sr = backdrop(p - n * shift * (1.0 - uDisp));
-  vec4 sg = backdrop(p - n * shift);
-  vec4 sb = backdrop(p - n * shift * (1.0 + uDisp));
-  vec3 col = vec3(
-    sr.r + uBg.r * (1.0 - sr.a),
-    sg.g + uBg.g * (1.0 - sg.a),
-    sb.b + uBg.b * (1.0 - sb.a));
-
-  col = mix(col, uFill.rgb, uFill.a);
+  float aa = clamp(0.5 - d, 0.0, 1.0);
 
   // The light, over the bevel (t², as the refraction): the edge facing the
   // light shades, the one facing away brightens; side-on edges stay.
   float dt = dot(n, uLight);
-  float tt = t * t;
-  col += tt * (dt >= 0.0 ? -uShade * pow(dt, uShadePow) : uGlow * pow(-dt, uGlowPow));
+  float light = t * t * (dt >= 0.0 ? -uShade * pow(dt, uShadePow) : uGlow * pow(-dt, uGlowPow));
 
-  float aa = clamp(0.5 - d, 0.0, 1.0);
+  // Base: the glass with nothing behind it (page colour, fill, light).
+  if (uMode == 1 && uLightbox == 1) {
+    // The lightbox: inner < 0 on the face, 0 → uFrameW across the frame.
+    float inner = d + uFrameW;
+    float edge = smoothstep(0.0, max(uFalloffDepth, 1.0), -inner);
+    vec3 face = uFace * (1.0 - uFalloff * (1.0 - edge));
+    face += uSheen * 0.5 * dot(c / h, uLight) * 0.7071;
+    // The metal: edges facing the light lighter, the far ones darker.
+    vec3 frame = uFrame + uFrameShade * dot(n, uLight);
+    // Halation: the face light bleeds over the frame's inner edge.
+    frame = mix(frame, uFace, 0.4 * exp(-max(inner, 0.0) / max(uBloom, 0.5)));
+    float onFace = 1.0 - smoothstep(-0.5, 0.5, inner);
+    gl_FragColor = vec4(clamp(mix(frame, face, onFace), 0.0, 1.0), aa);
+    return;
+  }
+  if (uMode == 1) {
+    gl_FragColor = vec4(mix(uBg, uFill.rgb, uFill.a) + light, aa);
+    return;
+  }
+
+  // Paint (mode 2) sits on the card, held off the wall: the rim's vertical
+  // pull is stronger (uStretchY) and the strokes land uDrop lower than on the
+  // wall (spray parallax; GLASS.STANDOFF_DROP). Both are 1 / 0 in mode 0.
+  vec2 dir = vec2(n.x, n.y * uStretchY) * shift;
+  vec2 q = p - vec2(0.0, uDrop);
+  vec4 sr = backdrop(q - dir * (1.0 - uDisp));
+  vec4 sg = backdrop(q - dir);
+  vec4 sb = backdrop(q - dir * (1.0 + uDisp));
+
+  if (uMode == 2) {
+    // One alpha for three channels sampled at different shifts: a channel
+    // the paint misses there shows the glass, not black (the old grey and
+    // green streaks under the strokes). The source is premultiplied and
+    // this canvas is not.
+    vec3 gc = mix(uBg, uFill.rgb, uFill.a) + light;
+    float a = max(sg.a, max(sr.a, sb.a));
+    vec3 c = vec3(sr.r, sg.g, sb.b) + gc * (vec3(a) - vec3(sr.a, sg.a, sb.a));
+    c /= max(a, 1e-4);
+    // Thin paint on a backlit face lets the light through, in its own hue.
+    c += uBacklight * 4.0 * a * (1.0 - a) * c;
+    gl_FragColor = vec4(clamp(c, 0.0, 1.0), a * aa);
+    return;
+  }
+
+  // Combined (the lab): the glass over the refracted backdrop.
+  vec3 col = vec3(
+    sr.r + uBg.r * (1.0 - sr.a),
+    sg.g + uBg.g * (1.0 - sg.a),
+    sb.b + uBg.b * (1.0 - sb.a));
+  col = mix(col, uFill.rgb, uFill.a) + light;
+
   gl_FragColor = vec4(col, aa);
 }
 `;
 
 const GLASS_UNIFORMS = [
   "uTex", "uSize", "uSrcPos", "uSrcSize", "uRadius", "uDepth", "uShift", "uSplay", "uDisp",
-  "uBg", "uFill", "uLight", "uShade", "uShadePow", "uGlow", "uGlowPow",
+  "uBg", "uFill", "uLight", "uShade", "uShadePow", "uGlow", "uGlowPow", "uMode",
+  "uStretchY", "uDrop", "uLightbox", "uFace", "uFrame", "uFrameW", "uBloom", "uFrameShade",
+  "uFalloff", "uFalloffDepth", "uSheen", "uBacklight",
 ] as const;
 const BLUR_UNIFORMS = ["uTex", "uSize", "uDir", "uSigma"] as const;
 
@@ -165,6 +242,8 @@ export class GlassRenderer {
   private targetSize: [number, number] = [0, 0];
   private pending = false;
   private destroyed = false;
+  /** Split mode: the base canvas needs redrawing (layout changed). */
+  private baseDirty = true;
   /** Layout, cached (measure()): CSS px. */
   private geo = { w: 0, h: 0, sx: 0, sy: 0, sw: 0, sh: 0, dpr: 1 };
   private readonly resizeObserver: ResizeObserver;
@@ -177,7 +256,7 @@ export class GlassRenderer {
     this.canvas = canvas;
     this.source = source;
     this.opts = opts;
-    this.params = { ...GLASS, ...opts.params };
+    this.params = { ...GLASS, ...LIGHTBOX, ...opts.params };
     canvas.addEventListener("webglcontextlost", this.onLost);
     this.init();
     this.resizeObserver = new ResizeObserver(() => this.measure());
@@ -203,19 +282,26 @@ export class GlassRenderer {
     const a = this.canvas.getBoundingClientRect();
     const b = this.source.getBoundingClientRect();
     const dpr = cappedDpr(this.params.MAX_DPR);
+    const dw = this.opts.readDesignWidth?.();
+    if (dw) this.opts.designWidth = dw;
     this.geo = { w: a.width, h: a.height, sx: b.left - a.left, sy: b.top - a.top, sw: b.width, sh: b.height, dpr };
     const cw = Math.max(1, Math.round(a.width * dpr));
     const ch = Math.max(1, Math.round(a.height * dpr));
-    if (this.canvas.width !== cw || this.canvas.height !== ch) {
-      this.canvas.width = cw;
-      this.canvas.height = ch;
+    for (const c of [this.canvas, this.opts.base]) {
+      if (c && (c.width !== cw || c.height !== ch)) {
+        c.width = cw;
+        c.height = ch;
+      }
     }
+    this.baseDirty = true;
+    if (this.opts.base) this.maskWall();
     this.invalidate();
   };
 
   /** Dev (the lab): change parameters and redraw. */
   set(params: Partial<GlassParams>): void {
     Object.assign(this.params, params);
+    this.baseDirty = true;
     this.invalidate();
   }
 
@@ -231,6 +317,7 @@ export class GlassRenderer {
     this.resizeObserver.disconnect();
     window.removeEventListener("resize", this.onResize);
     this.canvas.removeEventListener("webglcontextlost", this.onLost);
+    if (this.opts.base) this.unmaskWall();
     const gl = this.gl;
     if (gl) {
       for (const t of this.targets) {
@@ -248,9 +335,46 @@ export class GlassRenderer {
 
   private onResize = () => this.measure();
 
+  /** The card blocks the spray from the wall just above its top edge (the
+   *  can is below, so the paint on the card lands STANDOFF_DROP lower):
+   *  a soft-edged gap masked out of the source canvas (stencil stand-off
+   *  softens the edge it leaves). The card's own paint reads the bitmap, so
+   *  this mask never touches it. */
+  private maskWall() {
+    const { w, h, sx, sy, sw, sh } = this.geo;
+    const style = this.source.style;
+    if (!w || !h || !sw || !sh || !this.gl) return this.unmaskWall();
+    const unit = w / this.opts.designWidth;
+    const P = this.params;
+    const drop = P.STANDOFF_DROP * unit;
+    const soft = P.STANDOFF_SOFT * unit;
+    const r = Math.min(this.opts.radius * unit, w / 2, h / 2);
+    const f = (n: number) => n.toFixed(2);
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${f(sw)}" height="${f(sh)}" viewBox="0 0 ${f(sw)} ${f(sh)}">` +
+      `<filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${f(soft)}"/></filter>` +
+      `<rect width="100%" height="100%" fill="#fff"/>` +
+      `<rect x="${f(-sx)}" y="${f(-sy - drop)}" width="${f(w)}" height="${f(h)}" rx="${f(r)}" fill="#000" filter="url(#b)"/>` +
+      `</svg>`;
+    const url = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    for (const p of ["mask", "-webkit-mask"]) {
+      style.setProperty(`${p}-image`, url);
+      style.setProperty(`${p}-size`, "100% 100%");
+      style.setProperty(`${p}-repeat`, "no-repeat");
+      style.setProperty(`${p}-mode`, "luminance");
+    }
+  }
+
+  private unmaskWall() {
+    for (const p of ["mask", "-webkit-mask"]) {
+      for (const k of ["image", "size", "repeat", "mode"]) this.source.style.removeProperty(`${p}-${k}`);
+    }
+  }
+
   private onLost = (e: Event) => {
     e.preventDefault();
     this.gl = null;
+    this.unmaskWall();
     this.opts.onLost?.();
   };
 
@@ -370,7 +494,54 @@ export class GlassRenderer {
     gl.uniform1f(L.uShadePow, P.SHADE_POWER);
     gl.uniform1f(L.uGlow, P.GLOW_GAIN * P.LIGHT_INTENSITY);
     gl.uniform1f(L.uGlowPow, P.GLOW_POWER);
+    gl.uniform1f(L.uStretchY, 1);
+    gl.uniform1f(L.uDrop, 0);
+    const lb = this.opts.lightbox;
+    gl.uniform1i(L.uLightbox, lb ? 1 : 0);
+    gl.uniform1f(L.uBacklight, 0);
+    if (lb) {
+      gl.uniform3f(L.uFace, lb.face[0], lb.face[1], lb.face[2]);
+      gl.uniform3f(L.uFrame, lb.frame[0], lb.frame[1], lb.frame[2]);
+      gl.uniform1f(L.uFrameW, lb.frameWidth * k);
+      gl.uniform1f(L.uBloom, P.FRAME_BLOOM * k);
+      gl.uniform1f(L.uFrameShade, P.FRAME_SHADE);
+      gl.uniform1f(L.uFalloff, P.FALLOFF);
+      gl.uniform1f(L.uFalloffDepth, P.FALLOFF_DEPTH * k);
+      gl.uniform1f(L.uSheen, P.SHEEN);
+    }
     gl.clearColor(0, 0, 0, 0);
+
+    const base = this.opts.base;
+    if (!base) {
+      gl.uniform1i(L.uMode, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      return;
+    }
+    // Split: the base (glass, nothing behind it) is copied under the text in
+    // this same task, then the WebGL canvas keeps only the paint, over it.
+    if (this.baseDirty) {
+      const ctx = base.getContext("2d");
+      if (ctx) {
+        gl.uniform1i(L.uMode, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        ctx.clearRect(0, 0, base.width, base.height);
+        ctx.drawImage(this.canvas, 0, 0);
+        this.baseDirty = false;
+      }
+    }
+    gl.uniform1i(L.uMode, 2);
+    gl.uniform1f(L.uStretchY, lb ? 1 : P.PAINT_STRETCH_Y);
+    // A lightbox face is opaque: the paint on it isn't bent at the rim.
+    if (lb) {
+      gl.uniform1f(L.uShift, 0);
+      gl.uniform1f(L.uBacklight, P.PAINT_BACKLIGHT);
+    }
+    gl.uniform1f(L.uDrop, P.STANDOFF_DROP * k);
+    // One shift for all three channels: paint on the card is not seen
+    // through it, and split channels left pink and green streaks.
+    gl.uniform1f(L.uDisp, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
@@ -388,12 +559,34 @@ export function homeGlassOptions(): GlassOptions {
   };
 }
 
-/** Home's card over the "who?" spray: draws the glass on `canvas` from the
- *  spray's canvas, redrawing as it paints. Sets data-glass="gl" on the card
- *  while WebGL is up (home.css drops the CSS blur then). Returns the teardown. */
-export function attachHomeGlass(card: HTMLElement, canvas: HTMLCanvasElement, engine: SprayEngine): () => void {
+/** Home's card with "who?" sprayed over it (user request), drawn as a
+ *  backlit lightbox: the frame and face on `base` (under the text), the
+ *  spray's paint on `canvas` (over the text), redrawing as it paints. Sets data-glass="gl" on
+ *  the card while WebGL is up (home.css drops the CSS blur then). Returns the
+ *  teardown. */
+const rgb = (css: string): [number, number, number] => {
+  const [r, g, b] = parseColor(css);
+  return [r, g, b];
+};
+
+export function attachHomeGlass(
+  card: HTMLElement,
+  canvas: HTMLCanvasElement,
+  base: HTMLCanvasElement,
+  engine: SprayEngine,
+): () => void {
+  const readWidth = () => parseFloat(getComputedStyle(card).getPropertyValue("--glass-w")) || 456;
   const glass = new GlassRenderer(canvas, engine.canvas, {
     ...homeGlassOptions(),
+    // Home's card is its own width (home.css --glass-w; compact changes it).
+    designWidth: readWidth(),
+    readDesignWidth: readWidth,
+    base,
+    lightbox: {
+      face: rgb(readToken("--lightbox-face")),
+      frame: rgb(readToken("--lightbox-frame")),
+      frameWidth: parseFloat(readToken("--lightbox-frame-w")) || 0,
+    },
     onLost: () => delete card.dataset.glass,
   });
   if (glass.ok) card.dataset.glass = "gl";

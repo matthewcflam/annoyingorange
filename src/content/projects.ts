@@ -12,6 +12,9 @@ import mango2 from "../../assets-src/images/mango-2.png?collage";
 import mango3 from "../../assets-src/images/mango-3.png?collage";
 import oysterMap from "../../assets-src/images/oyster-news-map.png?collage";
 import portfolio1 from "../../assets-src/images/portfolio-1.png?collage";
+import refSkyline from "../../assets-src/images/portfolio-ref-skyline.png?collage";
+import ref2xa from "../../assets-src/images/portfolio-ref-2xa.png?collage";
+import refBleibtgleich from "../../assets-src/images/portfolio-ref-bleibtgleich.png?collage";
 import smileySvg from "../../assets-src/svg/project-smiley.svg";
 import heartSvg from "../../assets-src/svg/project-heart.svg";
 import remindDemoAv1 from "../../assets-src/videos/remind-demo.webm";
@@ -66,6 +69,9 @@ export interface CollageItem {
   /** The print's width / height on the page, when it differs from the media's:
    *  the photo is cropped to it, centred (the lightbox shows it uncropped). */
   aspect?: number;
+  /** An outside site: a click opens it in a new tab (cursor "Visit Site")
+   *  instead of expanding the print; the lightbox's arrows still reach it. */
+  href?: string;
   /** Text written on a placeholder, at this spot (% of the piece). */
   caption?: { text: string[]; x: number; y: number };
 }
@@ -109,7 +115,8 @@ export interface Project {
   year: string;
   /** The block's heading. */
   name: string;
-  tagline: string;
+  /** Optional (This Portfolio has none). */
+  tagline?: string;
   /** One line each, under the tagline. */
   awards: string[];
   links: ProjectLink[];
@@ -125,12 +132,16 @@ export interface Project {
   extraMedia?: Media[];
   /** Paragraphs under the links (no heading); empty for none. */
   description: string[];
+  /** Centre the text block on the collage's centre line instead of its top
+   *  (This Portfolio; user request). Full layout only. */
+  centerText?: boolean;
 }
 
 /** A photo; its lightbox aspect is the picture's own. */
 const photo = (label: string, picture: Picture): Media => ({ kind: "image", label, picture, w: picture.img.w, h: picture.img.h });
-const placeholder = (label: string, w: number, h: number): Media => ({ kind: "placeholder", label, w, h });
 const t = (name: string, dim = false): Tool => ({ name, dim });
+/** This Portfolio's references: the shape of Figma's grey boxes. */
+const REF_ASPECT = 219 / 153;
 
 
 /** Page and list order: the sections of Figma "Project Final" (its list is in
@@ -244,7 +255,7 @@ export const PROJECTS: readonly Project[] = [
     category: "Project",
     year: "2026",
     name: "This Portfolio",
-    tagline: "The greatest website ever!!!!",
+    centerText: true,
     awards: ["#1 in never actually being finished"],
     links: [
       { kind: "github", href: "https://github.com/matthewcflam/annoyingorange" },
@@ -256,18 +267,17 @@ export const PROJECTS: readonly Project[] = [
       [t("Claude Code"), t("Grokbot", true), t("Figma", true)],
     ],
     poster: { color: "--color-poster-portfolio", text: [[":)"]] },
-    // TODO(open-question #13): the three references are placeholders.
     collage: {
       items: [
         { media: photo("This portfolio’s Figma board", portfolio1), w: 70, x: 28, y: 4, rotate: 1.4, tape: { x: 52, rotate: -4, long: true } },
-        { media: placeholder("Reference", 219, 153), w: 40, x: 2, y: 12, rotate: -3, tape: { x: 46, rotate: 3 } },
-        { media: placeholder("Reference", 219, 154), w: 44, x: 8, y: 45, rotate: 2, tape: { x: 60, rotate: -6, long: true } },
-        { media: placeholder("Reference", 220, 153), w: 46, x: 50, y: 51, rotate: -1.6, tape: { x: 50, rotate: 2 }, caption: { text: ["future references"], x: 13, y: 26 } },
+        // The references keep the grey boxes' shape (219 × 153); the skyline is cropped to it.
+        { media: photo("Reference: the Burnaby skyline under Mount Baker", refSkyline), aspect: REF_ASPECT, w: 40, x: 2, y: 12, rotate: -3, tape: { x: 46, rotate: 3 } },
+        { media: photo("Reference: the 2xA Studio home page", ref2xa), aspect: REF_ASPECT, href: "https://2xa.studio/", w: 44, x: 8, y: 45, rotate: 2, tape: { x: 60, rotate: -6, long: true } },
+        { media: photo("Reference: the Maksym Bleibtgleich home page", refBleibtgleich), aspect: REF_ASPECT, href: "https://bleibtgleich.dev/", w: 46, x: 50, y: 51, rotate: -1.6, tape: { x: 50, rotate: 2 } },
       ],
       marks: [{ src: heartSvg, item: 3, x: -9, y: 20, w: 16 }],
     },
-    // Figma "Project Final" has none here (user decision).
-    description: [],
+    description: ["Check out some of my references :)"],
   },
 ];
 

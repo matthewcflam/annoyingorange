@@ -12,3 +12,7 @@ export const GLASS_LINES: readonly (readonly string[])[] = [
   ["UBC Sailbot", "UBC Third Quadrant Design", "prev. @ EnerSys"],
   ["Open to summer/fall 2027 opportunities :)"],
 ];
+
+/** The lightbox's blue "next stop" strip (Home.tsx, nextStop.ts); the label is
+ *  uppercased in CSS. */
+export const NEXT_STOP = { label: "Next stop", name: "ScalePad", place: "Vancouver" } as const;

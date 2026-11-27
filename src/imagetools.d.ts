@@ -18,6 +18,11 @@ declare module "*?print" {
   const picture: import("./lib/picture").Picture;
   export default picture;
 }
+/** About's café print: wider steps, higher quality. */
+declare module "*?printLarge" {
+  const picture: import("./lib/picture").Picture;
+  export default picture;
+}
 /** Tape: `?w=…&paperFibre=…&tape` (the preset name last). A WebP URL. */
 declare module "*&tape" {
   const src: string;

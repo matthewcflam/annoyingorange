@@ -287,13 +287,13 @@ export default function Lightbox({
     >
       {/* A click on the dim or the player closes it; keyboards have Close and Escape. */}
       {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div ref={backdropRef} className="lightbox__backdrop" data-clickable data-cursor={CURSOR_LABEL.close} onClick={close} />
+      <div ref={backdropRef} className="lightbox__backdrop" data-clickable onClick={close} />
       {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div ref={frameRef} className="lightbox__frame" data-cursor={CURSOR_LABEL.close} onClick={close}>
+      <div ref={frameRef} className="lightbox__frame" data-clickable onClick={close}>
         {leaving.map(renderSlide)}
         {renderSlide(current)}
       </div>
-      <button ref={closeRef} type="button" className="lightbox__close" data-cursor={CURSOR_LABEL.close} onClick={close}>
+      <button ref={closeRef} type="button" className="lightbox__close" onClick={close}>
         <span>Close</span>
       </button>
       {n > 1 && (

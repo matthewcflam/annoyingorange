@@ -86,7 +86,9 @@ html {
 
 /* The page colour comes from body; no layer paints an opaque full-screen background (spec §4.1). */
 body {
-  background: var(--color-bg);
+  /* The wall grain scrolls with the page (never `fixed`: janky on mobile);
+     anything opaque on top covers it. */
+  background: var(--tex-wall-grain) repeat, var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
   letter-spacing: var(--tracking); /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */
@@ -100,6 +102,36 @@ body {
 ::selection {
   background-color: var(--color-selection);
   color: var(--color-selection-text);
+}
+
+/* Poster paper (texture plan): uncoated stock, a stronger grain over a soft
+   mottle, so a poster reads as a different material from the wall. Only the
+   texture: each poster keeps its own colour, shadow and turn. Never on signs,
+   marks, tape, text or photos. */
+.paper-stock {
+  background-image: var(--tex-paper-grain), var(--tex-paper-mottle);
+  background-repeat: repeat, repeat;
+}
+
+/* The wall's grain and tile only show on the bare wall (user request), never
+   through the see-through pieces on it (the prints at 80%, the tech papers at
+   70%, the tape, the spray). A group of pieces gets a page-coloured
+   silhouette of itself underneath (a drop-shadow with no offset or blur), so
+   the pieces still show each other through but not the wall. Two passes: one
+   leaves (1 − alpha)² of the wall, under 1% at the 70% papers. Put it on the
+   group, never on each piece, or overlapping prints would lose each other.
+   It also makes the element a containing block, so it must be positioned. */
+.wall-solid {
+  filter: drop-shadow(0 0 0 var(--color-bg)) drop-shadow(0 0 0 var(--color-bg));
+}
+
+/* Textures are for the screen only. */
+@media print {
+  body,
+  .paper-stock,
+  .home {
+    background-image: none !important;
+  }
 }
 
 /* Lenis (lib/scroll.ts). Its stock .lenis-stopped { overflow: clip } is left

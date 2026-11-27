@@ -1,33 +1,29 @@
-import photo from "../../../assets-src/images/home-photo.png?print";
-import { TAPE_LONG, TAPE_SHORT } from "../../components/paper/tapes";
+import photo from "../../../assets-src/images/home-photo.jpg?printLarge";
+import groupPhoto from "../../../assets-src/images/home-group.jpg?printLarge";
 import tapeSkyline from "../../../assets-src/images/tape-skyline.png?w=252&paperFibre=126&tape";
 import sheetPaper from "../../../assets-src/images/paper-sheet.png?sheet";
 import { compactSizes, frameSizes } from "../../lib/frame";
 import type { Sheet } from "../../components/paper/sheet";
 
 /**
- * Home's paper (Figma "Home Page Final"): the taped prints and the skyline's
- * sheet, as boxes in mockup px (components/paper/sheet.ts).
+ * Home's paper (Figma "Home Page Final"): the two prints top right and the
+ * skyline's sheet, as boxes in mockup px (components/paper/sheet.ts).
  */
 
-/** Figma's crop of the photo inside each print. */
+/** Figma's crop of the photo inside the front print ("image 127"). */
 const PHOTO_CROP = { x: -0.3058, y: -0.0952, w: 1.5207, h: 1.0952 };
 
-/** The prints' image is 213.82 × 1.5207 ≈ 325 mockup px wide (the big ones;
- *  all three share one `sizes`, so they share one download). Compact: ~310px.
- */
-const PRINT_SIZES = compactSizes("310px", frameSizes(325));
+/** The front print's image is 250.99 × 1.5207 ≈ 382 mockup px wide; the group
+ *  photo fills its 349-wide box. Compact: ~340px and ~310px. */
+const ME_SIZES = compactSizes("340px", frameSizes(382));
+const GROUP_SIZES = compactSizes("310px", frameSizes(349));
 
-/** The three prints, back to front, and their tape. */
+/** The two prints, back to front (Figma "IMG_7757-2 1" and "image 127"; centres
+ *  from Figma's transforms, CSS rotations). No tape. The group photo runs off
+ *  the top edge (its top is at y -48), so home.css pins this cluster to the top. */
 export const PHOTO_SHEETS: Sheet[] = [
-  { id: "photo-0", kind: "photo", cx: 1485.7, cy: 244.6, w: 213.82, h: 222.66, rotate: 4.51, picture: photo, sizes: PRINT_SIZES, crop: PHOTO_CROP },
-  { id: "photo-1", kind: "photo", cx: 1430.4, cy: 186.8, w: 213.82, h: 222.66, rotate: -3.59, picture: photo, sizes: PRINT_SIZES, crop: PHOTO_CROP },
-  { id: "photo-2", kind: "photo", cx: 1371.7, cy: 337.4, w: 146.14, h: 152.18, rotate: 2.79, picture: photo, sizes: PRINT_SIZES, crop: PHOTO_CROP },
-];
-
-export const PHOTO_TAPES: Sheet[] = [
-  { id: "tape-long", kind: "tape", cx: 1420.9, cy: 79.8, w: 135, h: 31, rotate: -7.2, src: TAPE_LONG },
-  { id: "tape-short", kind: "tape", cx: 1375, cy: 263, w: 76, h: 30, rotate: 0, src: TAPE_SHORT },
+  { id: "photo-group", kind: "photo", cx: 1492.9, cy: 48.17, w: 349, h: 183, rotate: 1.545, picture: groupPhoto, sizes: GROUP_SIZES },
+  { id: "photo-me", kind: "photo", cx: 1299.26, cy: 139.41, w: 250.99, h: 261.36, rotate: -0.334, picture: photo, sizes: ME_SIZES, crop: PHOTO_CROP },
 ];
 
 /** The skyline's sheet (Figma "Rectangle 154": a blank paper sheet, the
@@ -45,6 +41,7 @@ export const SKY_TAPE: Sheet = {
 
 /** Everything home shows above the fold, for lib/assets.ts to fetch at boot. */
 export const HOME_PICTURES = [
-  { picture: photo, sizes: PRINT_SIZES },
+  { picture: photo, sizes: ME_SIZES },
+  { picture: groupPhoto, sizes: GROUP_SIZES },
 ];
-export const HOME_URLS = [TAPE_LONG, TAPE_SHORT, tapeSkyline, sheetPaper];
+export const HOME_URLS = [tapeSkyline, sheetPaper];

@@ -12,13 +12,13 @@ const BUDGET_KB = {
   /** The main JS chunk (everything home needs to run). */
   mainJs: 136, // 135 until the home glass card (its WebGL is a separate chunk; the spray hook and GLASS values stay in main)
   /** Everything home loads before its intro: JS, CSS, preloaded fonts, home's images and skyline. */
-  homeTotal: 300,
+  homeTotal: 580, // 300 until the group photo; 310 until both home prints moved to ?printLarge (sharper; the 1600w AVIFs counted here are ~160/200 KB, a 1x reference screen fetches the ~30 KB 600w)
   /** Any one home image. */
-  image: 60,
+  image: 210, // 60 until home's prints moved to ?printLarge
 };
 
 /** Home's images and the skyline, by source file name. */
-const HOME_ASSETS = ["home-photo", "tape-long", "tape-short", "tape-skyline", "paper-sheet", "home-skyline"];
+const HOME_ASSETS = ["home-photo", "home-group", "tape-skyline", "paper-sheet", "home-skyline"];
 
 const DIST = "dist";
 const ASSETS = join(DIST, "assets");

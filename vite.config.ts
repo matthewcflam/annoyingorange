@@ -22,6 +22,9 @@ const PRESETS: Record<string, Record<string, string>> = {
   // Paper prints (home, About, Experience; components/paper/): shown ~325 CSS px wide at the reference size, up to
   // ~460 on a big screen, so 400/800/1200 covers 1x–2.6x.
   print: { w: '400;800;1200', format: 'avif;webp', as: 'picture' },
+  // About's café print, the biggest print (~366–400 CSS px): wider steps and
+  // collage quality, since the default AVIF 50 at 400w looked low-res there.
+  printLarge: { w: '600;1000;1600', format: 'avif;webp', quality: '72', as: 'picture' },
   // The paper texture below is baked in at build time (scripts/paperBake.ts),
   // so the page ships plain images.
   // Tape: alpha WebP, warmed by --tape-tint, with fibre. Pass `w` (2x its box)

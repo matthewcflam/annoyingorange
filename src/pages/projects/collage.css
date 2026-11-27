@@ -38,7 +38,8 @@
   rotate: var(--r);
 }
 
-/* A <button>: global.css already resets its padding, border, background and font. */
+/* A <button> (or an <a> to an outside site): global.css already resets their
+   padding, border, background and font. */
 .collage__item {
   position: relative;
   display: block;

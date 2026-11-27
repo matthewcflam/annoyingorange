@@ -7,7 +7,7 @@ import { hoverSound } from "../../audio/engine";
 import { mapRef } from "../../lib/mapRef";
 import { PROJECT } from "../../config/timings";
 import { PROJECTS, type Project, type ProjectSlug } from "../../content/projects";
-import { PROJECT_LINK_CURSOR, PROJECT_LINK_LABEL } from "../../content/ui";
+import { PROJECT_LINK_LABEL } from "../../content/ui";
 import Icon from "../../components/Icon";
 import Collage from "./Collage";
 import ProjectList from "./ProjectList";
@@ -81,6 +81,7 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
       id={p.slug}
       className="project-block"
       data-flip={flip || undefined}
+      data-center-text={p.centerText || undefined}
       aria-labelledby={`project-${p.slug}`}
       style={{ "--project-color": `var(${p.poster.color})` }}
     >
@@ -99,7 +100,7 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
       <div className="project-block__text">
         <div className="project-block__intro">
           <h2 id={`project-${p.slug}`}>{p.name}</h2>
-          <p className="project-block__tagline">{p.tagline}</p>
+          {p.tagline && <p className="project-block__tagline">{p.tagline}</p>}
           {p.awards.length > 0 && (
             <p className="project-block__awards">
               {p.awards.map((a) => (
@@ -113,7 +114,6 @@ function ProjectBlock({ project: p, flip, eager, ref }: { project: Project; flip
                 <a
                   href={link.href}
                   aria-label={`${p.name} on ${PROJECT_LINK_LABEL[link.kind]}`}
-                  data-cursor={PROJECT_LINK_CURSOR[link.kind]}
                   {...(link.href.startsWith("/")
                     ? { onClick: (e: React.MouseEvent) => onNavClick(e, link.href) }
                     : { target: "_blank", rel: "noreferrer" })}
