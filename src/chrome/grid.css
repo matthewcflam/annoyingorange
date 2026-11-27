@@ -1,0 +1,14 @@
+/* The layout grid overlay (chrome/GridOverlay.tsx, Shift+G): one column
+   stripe repeated every column + gutter, inside the margins. Above the page
+   and its chrome, under the transition cover. */
+.grid-overlay {
+  position: fixed;
+  inset: 0 var(--grid-margin);
+  z-index: var(--z-grid);
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-grid) 0 var(--grid-col),
+    transparent var(--grid-col) calc(var(--grid-col) + var(--grid-gutter))
+  );
+}

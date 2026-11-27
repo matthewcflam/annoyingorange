@@ -1,0 +1,220 @@
+/* ---- About (Figma "ABOUT FINAL", a 1600×998 frame drawn at the site's
+   real size): one screen, no footer. The collage on the left
+   (content/aboutPhotos.ts: the sketch card, two prints in home's paper
+   styling, the Connections card, "Let's chat!") is Figma px × --au from the
+   frame's centre (800, 499): --cp (the body / 16, so 1 at the usual size),
+   shrunk so the collage (x 130–801, y 166–747: 670 left of the centre, 333
+   above, less below) fits between the margins and under the header. The
+   greeting and copy start on column 6's left edge (Figma x 896) and are
+   centred vertically in the window (user request). ---- */
+.about__stage {
+  --au: min(var(--cp), (50vw - var(--grid-margin)) / 670, (50svh - var(--station-head-h)) / 333);
+  --ax: 800;
+  --ay: 499;
+  position: relative;
+  height: 100svh;
+}
+
+.about__collage {
+  /* About's prints at 95% (user request), home's paper elsewhere stays at 80%. */
+  --photo-opacity: var(--about-photo-opacity);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* A collage piece (the sketch, the prints, the Connections card): placed by
+   its centre, at its unrotated size, then rotated. */
+.about__collage .about__sketch,
+.about__collage .paper,
+.about__collage .about__connections {
+  left: calc(50% + (var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
+  top: calc(50% + (var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  width: calc(var(--w) * var(--au));
+  height: calc(var(--h) * var(--au));
+  rotate: var(--r);
+}
+
+.about__collage .paper {
+  --ps-u: var(--au);
+}
+
+/* The sketch card (Figma "Group 121"): a flat grey card, no shadow, and the
+   bird (about-bird.svg) drawn on it, each at its own 70%. */
+.about__sketch {
+  position: absolute;
+}
+
+.about__sketch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--about-sketch-bg);
+  opacity: var(--about-sketch-opacity);
+}
+
+.about__bird {
+  position: absolute;
+  left: calc(var(--bx) * var(--au));
+  top: calc(var(--by) * var(--au));
+  width: calc(var(--bw) * var(--au));
+  height: calc(var(--bh) * var(--au));
+  max-width: none;
+  opacity: var(--about-sketch-opacity);
+  user-select: none;
+}
+
+/* "Let's chat!" (Figma 512:745): Rounded Bold at the page's -4%, black, at
+   the Connections card's text size (21.33; user request, Figma has 16). Its
+   right edge (458.6) and the middle of its line (670.5) stay where Figma
+   has them, left of the card. */
+.page .about__chat {
+  position: absolute;
+  right: calc(50% - (var(--cx) - var(--ax)) * var(--au));
+  top: calc(50% + (var(--cy) - var(--ay)) * var(--au));
+  translate: 0 -50%;
+  font-size: calc(21.33 * var(--au));
+  line-height: normal;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* The Connections card (components/Connections.tsx, Figma "Group 122"): a
+   collage piece placed like the prints, in front of them, at
+   --about-card-opacity (Figma 70%). Every footer measure is × --ft, so --ft
+   is the collage unit here, then Figma's sizes: 308×168, text 21.33, rows
+   27.55 apart ending 4 above the foot, logos 18.66 at 9.8 in, labels and
+   title 8 / 7 in. It works as the footer's does (connections.css). */
+.about__collage .about__connections {
+  --ft: var(--au);
+  padding-top: calc(53.8 * var(--au));
+  font-size: calc(21.33 * var(--au));
+  opacity: var(--about-card-opacity);
+  pointer-events: auto;
+}
+
+.about__connections .connections__row {
+  height: calc(27.55 * var(--au));
+  padding: 0 calc(8 * var(--au)) 0 calc(9.8 * var(--au));
+}
+
+.about__connections .connections__icon {
+  width: calc(18.66 * var(--au));
+  height: calc(18.66 * var(--au));
+}
+
+/* Column 6's left edge, 408 wide (in text units, so the measure follows the
+   type), never past the right margin; the block's middle at the window's. */
+.about__text {
+  position: absolute;
+  left: calc(var(--grid-margin) + 5 * var(--col-step));
+  top: 50%;
+  translate: 0 -50%;
+  width: min(408 * var(--cp), 4 * var(--grid-col) + 3 * var(--grid-gutter));
+}
+
+.page .about__hello {
+  font-size: var(--type-project-title);
+  letter-spacing: var(--tracking);
+  line-height: 1.175;
+}
+
+/* Nunito Light (page.css) at Experience's body size and leading (user
+   request): the page's --type-project-body on --project-lh, a blank --line
+   between paragraphs. */
+.page .about__copy {
+  margin-top: calc(16 * var(--au));
+}
+
+.about__accent,
+.about__link {
+  color: var(--color-orange);
+}
+
+.about__link {
+  text-decoration: none;
+  text-decoration-thickness: max(1px, calc(1 * var(--au)));
+  text-underline-offset: calc(2.5 * var(--au));
+}
+
+.about__link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .about__link:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---- Compact layout (global.css): the collage across the column, then
+   the text, under the (scrolling) header. ---- */
+@media (--compact) {
+  /* About: the collage across the column (x 130–801, y 166–747), then
+     the text, scrolling. --au-card is the Connections card's unit, floored
+     so its text is never under 13px. */
+  .about__stage {
+    --au: calc(var(--compact-w) / 672);
+    --au-card: max(var(--au), 13px / 21.33);
+    --ax: 130;
+    --ay: 166;
+    display: flex;
+    flex-direction: column;
+    width: var(--compact-w);
+    height: auto;
+    margin: 0 auto;
+    padding: 32px 0 72px;
+  }
+
+  .about__collage {
+    position: relative;
+    inset: auto;
+    height: calc(582 * var(--au));
+  }
+
+  .about__collage .about__sketch,
+  .about__collage .paper {
+    left: calc((var(--cx) - var(--w) / 2 - var(--ax)) * var(--au));
+    top: calc((var(--cy) - var(--h) / 2 - var(--ay)) * var(--au));
+  }
+
+  /* The Connections card keeps its text at 13px or more (the small-type
+     floor; the collage unit alone makes it 11.5 on a phone). It grows from
+     its bottom-right corner, which stays where the collage puts it, so it
+     spreads over the prints and never past the column. */
+  .about__collage .about__connections {
+    --au: var(--au-card);
+    left: calc((var(--cx) + var(--w) / 2 - var(--ax)) * var(--compact-w) / 672 - var(--w) * var(--au));
+    top: calc((var(--cy) + var(--h) / 2 - var(--ay)) * var(--compact-w) / 672 - var(--h) * var(--au));
+  }
+
+  /* "Let's chat!" at the card's (floored) text size, its right edge moved
+     left by as much as the floored card grew, so the gap to the card stays. */
+  .page .about__chat {
+    right: calc(100% - (var(--cx) - var(--ax)) * var(--au) + 308 * (var(--au-card) - var(--au)));
+    top: calc((var(--cy) - var(--ay)) * var(--au));
+    font-size: calc(21.33 * var(--au-card));
+  }
+
+  .about__text {
+    position: static;
+    translate: none;
+    width: auto;
+    margin-top: 40px;
+  }
+
+  /* The header name's compact size (page.css), so they still match. */
+  .page .about__hello {
+    font-size: min(var(--type-project-title), (100vw - 2 * var(--grid-margin) - var(--map-w) - 16px) / 5.9);
+  }
+
+  .page .about__copy {
+    margin-top: 16px;
+  }
+
+  .about__link {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+}

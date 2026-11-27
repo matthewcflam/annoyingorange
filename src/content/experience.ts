@@ -1,95 +1,106 @@
 /**
- * Experience page copy and photos (design/mockups-v2/Experience (3).png).
- * Photo boxes are mockup px: x from the page's left, dy from the job's
- * header cap top. Later photos sit on top. Each box matches its image's
- * aspect, so object-fit: cover crops nothing.
+ * Experience page copy (Figma "Experience Final", node 460:182). Each job
+ * has a section (company, role, date, points) and a row in the index
+ * (`listName`, `listDate`, its logo); logo boxes are Figma px at a 16px body
+ * (× --cp in experience.css), centred on the row; `crop` is Figma's image
+ * placement inside the box, in % (the TQD logo is a sprite).
  */
-import type { Picture } from "../lib/assets";
-import { frameSizes } from "../lib/frame";
-import enersys1 from "../../assets-src/images/enersys1.png?hero";
-import enersys2 from "../../assets-src/images/enersys2.png?hero";
-import sailbot1 from "../../assets-src/images/sailbot1.png?hero";
-import sailbot2 from "../../assets-src/images/sailbot2.png?hero";
-import tqd from "../../assets-src/images/tqd.png?hero";
-import tqd2 from "../../assets-src/images/tqd2.png?hero";
+import enersysLogo from "../../assets-src/images/enersys-logo.png?logo";
+import sailbotLogo from "../../assets-src/images/sailbot-logo.png?logo";
+import tqdLogo from "../../assets-src/images/tqd-logo.png?logo";
 
-export interface JobPhoto {
-  picture: Picture;
-  alt: string;
-  x: number;
-  dy: number;
+export interface Logo {
+  src: string;
   w: number;
   h: number;
-  sizes: string;
+  /** Left offset from the row's start (Figma px). */
+  x: number;
+  crop?: { w: number; h: number; x: number; y: number };
 }
 
-export interface Job {
+/** A row in the index. */
+/** The jobs, in page order. */
+export type JobId = "enersys" | "sailbot" | "tqd";
+
+export interface IndexRow {
+  id: JobId;
+  /** The index row's name; "\n" breaks the line. */
+  listName: string;
+  listDate: string;
+  logo: Logo;
+}
+
+/** A job with a section on the page. Figma staggers them across the grid:
+ *  `col` is the first of its three columns, `row` the grid row it sits in,
+ *  and `drop` how far its cap top sits below that row's top (Figma px). */
+export interface Job extends IndexRow {
+  company: string;
   role: string;
   date: string;
-  company: string;
   body: string[];
-  photos: JobPhoto[];
+  col: number;
+  row: number;
+  drop: number;
 }
-
-const photo = (picture: Picture, alt: string, x: number, dy: number, w: number, h: number): JobPhoto => ({
-  picture,
-  alt,
-  x,
-  dy,
-  w,
-  h,
-  sizes: frameSizes(w),
-});
 
 export const JOBS: Job[] = [
   {
-    role: "Software Engineering Co-op",
-    date: "2026",
+    id: "enersys",
     company: "EnerSys",
+    role: "Software Engineering Co-op",
+    date: "Summer 2026",
+    listName: "EnerSys",
+    listDate: "2026",
+    logo: { src: enersysLogo, w: 39, h: 39, x: -9 },
+    col: 4,
+    row: 1,
+    drop: 0,
     body: [
-      "Built a battery diagnostic tool in C# and XAML for incorrect protocol configurations, accelerating troubleshooting and resolving a 6-month roadblock",
-      "Led 3 cross-team technical demonstrations of the tool’s setup, core features, and use cases, aligning Tech Support and Controller teams on product capabilities and eliminating support escalations",
+      "Built a battery diagnostic tool in C# and XAML detecting incorrect protocol configurations, accelerating troubleshooting",
+      "Led cross-team technical demonstrations of the tool, aligning Tech Support and Controller teams on product capabilities",
       "Resolved 10+ controller defects through root-cause analysis and targeted fixes, improving stability on 800+ sites",
       "Executed physical tests on battery systems, validating 90% of targeted functionality for the upcoming release",
     ],
-    photos: [
-      photo(enersys1, "Matthew smiling in front of the EnerSys logo", 1288, -45, 235, 176),
-      photo(enersys2, "A meeting room demo at EnerSys, the tool on the big screen", 1432, 55, 229, 173),
-    ],
   },
   {
-    role: "Software Web Developer",
-    date: "2026",
+    id: "sailbot",
     company: "UBC Sailbot",
+    role: "Software Developer",
+    date: "January 2026 - Present",
+    listName: "UBC Sailbot",
+    listDate: "2026",
+    logo: { src: sailbotLogo, w: 21, h: 21, x: 0 },
+    // Cap top 580: 88.4 below the foot of EnerSys's photos (491.6), which
+    // its row reaches (experience.css; content/experiencePhotos.ts), or below
+    // its text if that runs longer.
+    col: 6,
+    row: 2,
+    drop: 88.4,
     body: [
       "Developed an interactive React dashboard featuring real-time telemetry, sensor data visualization, and animated UI for autonomous sailboat testing operations",
       "Collaborated in a team of 6 to develop a custom AIS data pipeline to replace a $25K/year commercial service",
       "Split a combined sensor feed into three using MongoDB, TypeScript, and Redux, improving data organization and supporting sensor-specific updates on the dashboard",
     ],
-    photos: [
-      photo(sailbot1, "The UBC Sailbot logo", 1547, -49, 128, 128),
-      photo(sailbot2, "The UBC Sailbot team on campus", 1298, 42, 268, 201),
-    ],
   },
   {
-    role: "Software & Operations Lead",
-    date: "2024-2026",
+    id: "tqd",
     company: "UBC Third Quadrant Design",
+    role: "Software and Operations Lead",
+    date: "April 2026 - Present",
+    listName: "UBC Third\nQuadrant Design",
+    listDate: "2026",
+    logo: { src: tqdLogo, w: 21, h: 27, x: 0, crop: { w: 314.93, h: 245.35, x: -8.96, y: -66.28 } },
+    // Column 4 (under EnerSys; its text runs into Sailbot's columns, but
+    // well below it). Cap top 979: 487.4 below EnerSys's photos.
+    col: 4,
+    row: 2,
+    drop: 487.4,
     body: [
       "Shipped a full-stack hiring portal and reviewer board using React, Next.js, and Supabase, enabling real-time sync, reviewer authentication, and schema validation for 100+ applications",
-      "Led the design system for the team's web product and brand, standardizing UI components and visual guidelines across 10+ pages and physical assets to speed up feature work and keep every touchpoint on-brand",
-    ],
-    photos: [
-      photo(tqd, "The Third Quadrant Design logo", 1263, 11, 224, 108),
-      photo(tqd2, "Poetry Night, the ice house retrofit competition board", 1395, 103, 303, 214),
+      "Led the design system for the team’s web product and brand, standardizing UI and visual guidelines across 10+ pages and physical assets to speed up development and keep every touchpoint on-brand",
     ],
   },
 ];
 
-/** Under the hand-drawn "extras": no copy, no photos. */
-export const EXTRAS: Job[] = [
-  { role: "Lifeguard & Swim Instructor", date: "2025-2026", company: "UBC Aquatic Centre", body: [], photos: [] },
-  { role: "Camp Instructor", date: "2025", company: "UBC Geering Up Engineering Outreach", body: [], photos: [] },
-];
+export const LOGO_URLS = JOBS.map((j) => j.logo.src);
 
-export const EXPERIENCE_PHOTOS = JOBS.flatMap((j) => j.photos);

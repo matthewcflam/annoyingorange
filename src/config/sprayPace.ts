@@ -1,7 +1,7 @@
 /**
  * "who?" spray pace: how long the nozzle takes between each pair of anchor
  * points in assets-src/svg/who-spray.svg, in ms. Edit freely; the spray lasts
- * as long as everything here adds up to (now 2501 ms).
+ * as long as everything here adds up to (now 2500 ms).
  *
  * Points are named by letter and index along the path: w0 is the w's first
  * point. Within a segment the nozzle still slows on curves and speeds up on
@@ -28,71 +28,75 @@ export const SPRAY_PACE: { readonly leadMs: number; readonly strokes: readonly S
     {
       letter: "w",
       segmentsMs: [
-          81, // w0 → w1      74px    914 px/s
-          17, // w1 → w2      10px    612 px/s
-          72, // w2 → w3      93px   1287 px/s
-          49, // w3 → w4      51px   1041 px/s
-          22, // w4 → w5      12px    556 px/s
-          19, // w5 → w6      12px    645 px/s
-          49, // w6 → w7      36px    729 px/s
-          43, // w7 → w8      45px   1053 px/s
-          24, // w8 → w9      29px   1227 px/s
-          67, // w9 → w10     70px   1041 px/s
-          38, // w10 → w11    32px    831 px/s
-          43, // w11 → w12    26px    607 px/s
+         123, // w0 → w1      23px    184 px/s
+          39, // w1 → w2      11px    291 px/s
+          32, // w2 → w3      11px    338 px/s
+          30, // w3 → w4      11px    351 px/s
+          29, // w4 → w5      10px    337 px/s
+          18, // w5 → w6       6px    325 px/s
+          25, // w6 → w7       9px    347 px/s
+          29, // w7 → w8      11px    392 px/s
+          32, // w8 → w9      10px    319 px/s
+          32, // w9 → w10     11px    347 px/s
+          31, // w10 → w11    11px    345 px/s
+          86, // w11 → w12    21px    250 px/s
+          29, // w12 → w13     3px    120 px/s
+          20, // w13 → w14     2px    108 px/s
       ],
       liftMs: 110,
     },
     {
       letter: "h",
       segmentsMs: [
-          47, // h0 → h1      24px    508 px/s
-          45, // h1 → h2      80px   1769 px/s
-          23, // h2 → h3      23px   1005 px/s
-          66, // h3 → h4      62px    942 px/s
-          43, // h4 → h5      52px   1216 px/s
-          57, // h5 → h6      65px   1132 px/s
-          16, // h6 → h7       8px    485 px/s
-          53, // h7 → h8      13px    249 px/s
+          93, // h0 → h1      41px    445 px/s
+          17, // h1 → h2       4px    262 px/s
+           8, // h2 → h3       2px    248 px/s
+          53, // h3 → h4      21px    391 px/s
+          33, // h4 → h5      11px    329 px/s
+          23, // h5 → h6       6px    274 px/s
+          71, // h6 → h7      19px    273 px/s
+          34, // h7 → h8       6px    170 px/s
       ],
       liftMs: 120,
     },
     {
       letter: "o",
       segmentsMs: [
-          75, // o0 → o1      48px    636 px/s
-          27, // o1 → o2      26px    975 px/s
-          23, // o2 → o3      27px   1166 px/s
-          52, // o3 → o4      50px    970 px/s
-          26, // o4 → o5      18px    703 px/s
-          33, // o5 → o6      36px   1079 px/s
-          43, // o6 → o7      57px   1332 px/s
-          17, // o7 → o8      13px    776 px/s
-          17, // o8 → o9      10px    582 px/s
-          43, // o9 → o10     44px   1018 px/s
-          35, // o10 → o11    26px    746 px/s
+         140, // o0 → o1      24px    175 px/s
+          17, // o1 → o2       4px    255 px/s
+          33, // o2 → o3      10px    293 px/s
+          27, // o3 → o4       8px    311 px/s
+          64, // o4 → o5      19px    292 px/s
+          74, // o5 → o6      10px    136 px/s
+          22, // o6 → o7       2px     97 px/s
       ],
       liftMs: 100,
     },
     {
       letter: "?",
       segmentsMs: [
-         117, // ?0 → ?1     182px   1558 px/s
-          45, // ?1 → ?2      65px   1438 px/s
-          22, // ?2 → ?3      23px   1039 px/s
-          17, // ?3 → ?4       9px    543 px/s
-          65, // ?4 → ?5      96px   1473 px/s
-          44, // ?5 → ?6     101px   2289 px/s
-          33, // ?6 → ?7      45px   1371 px/s
-          13, // ?7 → ?8      15px   1151 px/s
-          10, // ?8 → ?9       7px    724 px/s
+          18, // ?0 → ?1       2px     88 px/s
+          69, // ?1 → ?2       7px    108 px/s
+          43, // ?2 → ?3       8px    192 px/s
+          30, // ?3 → ?4       9px    316 px/s
+          27, // ?4 → ?5       9px    337 px/s
+          34, // ?5 → ?6      13px    369 px/s
+          31, // ?6 → ?7      11px    362 px/s
+          17, // ?7 → ?8       7px    431 px/s
+          23, // ?8 → ?9      13px    582 px/s
+          37, // ?9 → ?10     11px    288 px/s
+          18, // ?10 → ?11     3px    165 px/s
+          19, // ?11 → ?12     3px    143 px/s
       ],
       liftMs: 140,
     },
     {
       letter: ".",
       segmentsMs: [
-         150, // .0 → .1       1px      6 px/s
+          54, // .0 → .1       5px     89 px/s
+          23, // .1 → .2       2px    101 px/s
+          47, // .2 → .3       5px    104 px/s
+          26, // .3 → .4       2px     96 px/s
       ],
     },
   ],

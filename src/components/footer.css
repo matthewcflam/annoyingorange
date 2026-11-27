@@ -1,0 +1,134 @@
+/*
+ * The site footer (SiteFooter.tsx), on every station page: About, Experience
+ * and the project pages. It relies on the page shell (page.css: .page,
+ * --head-clear).
+ */
+/* ---- Footer (SiteFooter.tsx; Figma "Experience Final" revised, the 1640
+   frame from y 1422, the cat's top): one rigid composition, scaled as a whole by --ft (1 =
+   Figma px at a 16px body, like the Experience page's --cp). "Let's chat!"
+   left of the Connections card, the cat up and right of it, centred over
+   the credits (user request). Pieces are placed from the frame's centre at
+   50%, so the Connections card (671 + 232 / 2 = 787) is centred on the page
+   (user request): x(n) = 50% + (n - 787) * --ft, and from the cat's top: y(n) =
+   --footer-gap + (n - 1422) * --ft. The composition reaches ~260 left of the
+   centre ("Let's chat!", right-aligned 40 left of the card) and 398 right (the credits) and is 210 tall (cat top to
+   the card's foot), so --ft only shrinks when the window can't hold it, or
+   when the footer wouldn't fit under the fixed header (--head-clear). The
+   same gap (134) sits above the cat and below the card (user request). ---- */
+.site-footer {
+  --ft: min(
+    var(--type-project-body) / 16,
+    (50vw - var(--grid-margin)) / 398,
+    (100svh - var(--head-clear)) / 478
+  );
+  --footer-gap: calc(134 * var(--ft));
+  position: relative;
+  height: calc(2 * var(--footer-gap) + 210 * var(--ft));
+  margin-top: 0;
+}
+
+/* The cat: 132.91×181.77, top 1422 (Figma's 1398, moved down 24 with the
+   credits; user request), centred over the credits (user
+   request; Figma has it at x 1170.9): x 943 + (242 - 132.91) / 2. */
+.site-footer__cat {
+  position: absolute;
+  left: calc(50% + (997.5 - 787) * var(--ft));
+  top: var(--footer-gap);
+  width: calc(132.909 * var(--ft));
+  pointer-events: none;
+}
+
+/* Mirrored (Figma): it faces left, toward the card. Home's cat is not. */
+.site-footer__cat svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  scale: -1 1;
+}
+
+/* The cat's hit area: each stroke's implied fill (its ends joined), which
+   covers the body, legs, head and tail, plus the stroke itself. A click there
+   redraws the cat. The box around it stays click-through. Figma keeps its
+   5px stroke at this size, so in the SVG's own units (334.894 wide) it is
+   5 × 334.894 / 132.909. */
+.site-footer__cat path {
+  pointer-events: all;
+  stroke-width: 12.6;
+}
+
+/* "Let's chat!": 24, -8% (Figma). Its right edge sits 40 left of the card
+   (x 631), the same gap as the credits on the card's right, and its caps are
+   centred on the card (1466 + 166 / 2 = 1549; user request). */
+.page .site-footer__chat {
+  position: absolute;
+  right: calc(50% + (787 - 631) * var(--ft));
+  top: calc(var(--footer-gap) + (1549 - 1422) * var(--ft));
+  transform: translateY(-50%);
+  font-size: calc(24 * var(--ft));
+  letter-spacing: var(--tracking-name);
+  line-height: 1;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* Credits: the body font (Figma has Nunito Regular; Light kept, user
+   decision), 16, left-aligned at x 943 under the cat (Figma 975; 40 right of the card, user request), cap tops 1621 and 1639 (Figma's 1597 / 1615, moved down 24 with the cat; user request). */
+.page .site-footer__credits {
+  position: absolute;
+  left: calc(50% + (943 - 787) * var(--ft));
+  top: calc(var(--footer-gap) + (1621 - 1422) * var(--ft));
+  font-family: var(--font-text);
+  font-weight: var(--weight-text);
+  font-size: calc(16 * var(--ft));
+  line-height: calc(18 * var(--ft));
+  letter-spacing: var(--tracking);
+  color: var(--color-text);
+  text-align: left;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* The Connections card (chrome/connections.css): at (671, 1466). */
+.site-footer .connections {
+  left: calc(50% + (671 - 787) * var(--ft));
+  top: calc(var(--footer-gap) + (1466 - 1422) * var(--ft));
+}
+
+/* ---- Compact layout (global.css): the footer stacks: the cat, "Let's
+   chat!" over the card, then the credits. ---- */
+@media (--compact) {
+  .site-footer {
+    --ft: 1px;
+    height: auto;
+    padding-inline: var(--grid-margin);
+    margin-top: 96px;
+    padding-bottom: 40px;
+  }
+
+  .site-footer__cat {
+    position: relative;
+    left: auto;
+    top: auto;
+  }
+
+  .page .site-footer__chat {
+    position: static;
+    transform: none;
+    margin-top: 32px;
+  }
+
+  .site-footer .connections {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin-top: 16px;
+  }
+
+  .page .site-footer__credits {
+    position: static;
+    translate: none;
+    margin-top: 48px;
+    text-align: left;
+    white-space: normal;
+  }
+}

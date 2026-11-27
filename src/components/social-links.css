@@ -1,0 +1,113 @@
+/* Shared chrome: the social glyphs (home's row; their positions are
+   mockup px times --s). */
+
+/* ---- Social glyphs (SocialLinks.tsx): beside the cat on home.
+   Sizes times --icon-scale. ---- */
+.social-links {
+  /* --iu: the Map button's unit (--type-small / 20), so they scale alike. */
+  --s: calc(var(--icon-scale, 1) * var(--iu));
+  /* Every glyph's box is cropped to its ink (Icon tight; the sound glyph's
+     own viewBox), so the row lines them up by what shows: one centre line,
+     the same space between inks. Sizes follow icon keyline shapes
+     (Material's 24 grid: circle 20 across, landscape rectangle 20 × 16), so
+     they look the same size rather than measure it: the round and square
+     marks and mail take the full height (mail by user choice), and the
+     sound speaker matches the GitHub circle's width instead. */
+  --glyph-h: calc(30 * var(--s));
+  --glyph-gap: calc(18 * var(--s));
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  height: calc(36 * var(--s));
+  margin-top: calc(-2 * var(--px));
+}
+
+.social-links__icon {
+  position: relative;
+  display: block;
+  flex: none;
+  height: var(--glyph-h);
+  color: var(--color-text);
+}
+
+/* Hover turns the glyph orange (user request); mouse only, like the Map
+   card's rows, so a tap doesn't leave one stuck orange. */
+@media (hover: hover) {
+  .social-links__icon:hover {
+    color: var(--color-orange);
+  }
+}
+
+.social-links__icon:focus-visible {
+  outline: 2px solid var(--color-route);
+  outline-offset: 3px;
+}
+
+/* Touch: a 44px hit area around each glyph (Apple HIG), without moving it. */
+@media (pointer: coarse) {
+  .social-links__icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+}
+
+/* FA's .svg-inline--fa base styles, kept since the glyphs left Font Awesome,
+   except display: block. Inline, the SVG sat on the link's text line, and
+   when the icon box got shorter than that line (small windows) the line's
+   strut pushed the glyph down out of its box. */
+.social-links__icon svg {
+  box-sizing: content-box;
+  display: block;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+/* Widths from each ink box's aspect (icons.ts `ink`). */
+/* github: 512 × 495.9 */
+.social-links__icon:nth-child(1) {
+  aspect-ratio: 512 / 495.9;
+}
+
+/* linkedin: square */
+.social-links__icon:nth-child(2) {
+  aspect-ratio: 1;
+}
+
+/* mail: 512 × 384, full height, the same as GitHub (user request, after
+   trying it at the circle's width, ~0.77, bottom-aligned). */
+.social-links__icon--mail {
+  aspect-ratio: 512 / 384;
+}
+
+/* devpost: a 512 × 442 hexagon; its points make it read wide, so a hair
+   shorter than the round ones. */
+.social-links__icon--devpost {
+  height: calc(var(--glyph-h) * 0.94);
+  aspect-ratio: 512 / 442;
+}
+
+/* sound (MuteToggle.tsx, user decision: the row's last glyph): 20.8 × 15.4,
+   a landscape keyline, as wide as the GitHub circle (≈ 0.764). */
+.social-links__icon--sound {
+  height: calc(var(--glyph-h) * 0.764);
+  aspect-ratio: 20.8 / 15.4;
+}
+
+.social-links .social-links__toast {
+  position: absolute;
+  left: calc(100% + var(--glyph-gap));
+  top: 50%;
+  margin: calc(-9 * var(--px)) 0 0;
+  font-size: max(0.8125rem, 18 * var(--px));
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+}

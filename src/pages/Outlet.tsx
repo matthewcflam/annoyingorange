@@ -1,9 +1,8 @@
 import { lazy, Suspense, type ComponentType } from "react";
 import { useRoute } from "../lib/router";
-import { PAGE_LOADERS } from "../lib/assets";
-import Home from "./Home";
-
-type PageModule = { default: ComponentType };
+import { PATHS, type RoutePath } from "../config/routes";
+import { PAGE_LOADERS, type PageLoader } from "./routeAssets";
+import Home from "./home/Home";
 
 /**
  * A page in its own chunk. The transition fetches it before committing
@@ -12,43 +11,29 @@ type PageModule = { default: ComponentType };
  * React 19 can hold a Suspense reveal for 300 ms); only a page that isn't
  * loaded yet goes through it.
  */
-function chunked(load: () => Promise<PageModule>): ComponentType {
-  let Loaded: ComponentType | null = null;
-  const remember = (m: PageModule) => {
-    Loaded = m.default;
-    return m;
-  };
-  const Lazy = lazy(() => load().then(remember));
+function chunked(load: PageLoader): ComponentType {
+  const Lazy = lazy(load);
   return function Page() {
-    if (!Loaded) void load().then(remember, () => undefined);
+    const Loaded = load.loaded();
     return Loaded ? <Loaded /> : <Lazy />;
   };
 }
 
-const About = chunked(PAGE_LOADERS.about);
-const Experience = chunked(PAGE_LOADERS.experience);
-// Pretext, obstacle text, project content.
-const Projects = chunked(PAGE_LOADERS.projects);
-
 /** Canonical path → page (paths from config/routes.ts). */
-const PAGES: Record<string, ComponentType> = {
-  "/": Home,
-  "/about": About,
-  "/experience": Experience,
-  "/projects/portfolio": Projects,
-  "/projects/oyster-news": Projects,
-  "/projects/mango": Projects,
+const PAGES: Record<RoutePath, ComponentType> = {
+  [PATHS.home]: Home,
+  [PATHS.about]: chunked(PAGE_LOADERS[PATHS.about]),
+  [PATHS.experience]: chunked(PAGE_LOADERS[PATHS.experience]),
+  [PATHS.projects]: chunked(PAGE_LOADERS[PATHS.projects]),
 };
 
-/** Renders the committed route's page, keyed so pages remount fresh. The
- *  project pages share one key: switching projects keeps the shell (list,
- *  scribble) mounted and only swaps its content (§10.1). */
+/** Renders the committed route's page, keyed so pages remount fresh. */
 export default function Outlet() {
   const route = useRoute();
   const Page = PAGES[route];
   return (
     <Suspense fallback={null}>
-      <Page key={Page === Projects ? "projects" : route} />
+      <Page key={route} />
     </Suspense>
   );
 }

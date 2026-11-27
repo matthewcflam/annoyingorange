@@ -57,16 +57,20 @@ export interface Guide {
 }
 
 type Pt = [number, number];
+/** A line (2 points) or a cubic (4). */
+type Seg = [Pt, Pt] | [Pt, Pt, Pt, Pt];
 
 /** Absolute M / L / C only (who-spray.svg uses nothing else). */
-export function parsePath(d: string): Pt[][] {
-  const tokens = d.match(/[MLC]|-?\d*\.?\d+(?:e-?\d+)?/gi) ?? [];
-  const segs: Pt[][] = [];
+export function parsePath(d: string): Seg[] {
+  // Every command letter is a token, so an unsupported one throws below
+  // instead of its numbers being read as more of the previous command.
+  const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+(?:e-?\d+)?/g) ?? [];
+  const segs: Seg[] = [];
   let cmd = "";
   let cur: Pt = [0, 0];
   for (let i = 0; i < tokens.length; ) {
-    if (/[A-Za-z]/.test(tokens[i])) cmd = tokens[i++];
-    const n = (k: number) => Number(tokens[i + k]);
+    if (/[A-Za-z]/.test(tokens[i]!)) cmd = tokens[i++]!;
+    const n = (k: number) => Number(tokens[i + k]!);
     if (cmd === "M") {
       cur = [n(0), n(1)];
       i += 2;
@@ -87,7 +91,7 @@ export function parsePath(d: string): Pt[][] {
   return segs;
 }
 
-function bezier(s: Pt[], t: number): Pt {
+function bezier(s: Seg, t: number): Pt {
   if (s.length === 2) return [s[0][0] + (s[1][0] - s[0][0]) * t, s[0][1] + (s[1][1] - s[0][1]) * t];
   const u = 1 - t;
   const a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, e = t * t * t;
@@ -126,11 +130,11 @@ export function sampleGuide(d: string, maxStep = 1): Guide {
   let j = 0;
   for (let i = 0; i <= segments; i++) {
     const s = step * i;
-    while (j < along.length - 2 && along[j + 1] < s) j++;
-    const span = along[j + 1] - along[j];
-    const t = span > 0 ? Math.min(Math.max((s - along[j]) / span, 0), 1) : 0;
-    pts[i * 2] = xs[j] + (xs[j + 1] - xs[j]) * t;
-    pts[i * 2 + 1] = ys[j] + (ys[j + 1] - ys[j]) * t;
+    while (j < along.length - 2 && along[j + 1]! < s) j++;
+    const span = along[j + 1]! - along[j]!;
+    const t = span > 0 ? Math.min(Math.max((s - along[j]!) / span, 0), 1) : 0;
+    pts[i * 2] = xs[j]! + (xs[j + 1]! - xs[j]!) * t;
+    pts[i * 2 + 1] = ys[j]! + (ys[j + 1]! - ys[j]!) * t;
   }
   return { pts, segments, step, length: total, anchors };
 }
@@ -150,7 +154,7 @@ function smooth(v: Float32Array, half: number): Float32Array {
     let sum = 0;
     let count = 0;
     for (let k = Math.max(0, i - half); k <= Math.min(n - 1, i + half); k++) {
-      sum += v[k];
+      sum += v[k]!;
       count++;
     }
     out[i] = sum / count;
@@ -170,9 +174,9 @@ export function speedShape(g: Guide, { finish = false } = {}): Float32Array {
     const a = Math.max(0, i - span);
     const c = Math.min(n - 1, i + span);
     if (c - a < 2) continue;
-    const ax = pts[a * 2], ay = pts[a * 2 + 1];
-    const bx = pts[i * 2], by = pts[i * 2 + 1];
-    const cx = pts[c * 2], cy = pts[c * 2 + 1];
+    const ax = pts[a * 2]!, ay = pts[a * 2 + 1]!;
+    const bx = pts[i * 2]!, by = pts[i * 2 + 1]!;
+    const cx = pts[c * 2]!, cy = pts[c * 2 + 1]!;
     const cross = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
     const l = Math.hypot(bx - ax, by - ay) * Math.hypot(cx - bx, cy - by) * Math.hypot(cx - ax, cy - ay);
     kappa[i] = l > 0 ? (2 * Math.abs(cross)) / l : 0;
@@ -182,7 +186,7 @@ export function speedShape(g: Guide, { finish = false } = {}): Float32Array {
   const v = new Float32Array(n);
   for (let i = 0; i < n; i++) {
     const s = i * step;
-    let speed = (k[i] + M.KAPPA0) ** -M.BETA;
+    let speed = (k[i]! + M.KAPPA0) ** -M.BETA;
     const rampIn = smoothstep(s / M.RAMP_IN_PX);
     const rampOut = smoothstep((g.length - s) / M.RAMP_OUT_PX);
     speed *= M.RAMP_FLOOR + (1 - M.RAMP_FLOOR) * Math.min(rampIn, rampOut);
@@ -196,21 +200,21 @@ export function speedShape(g: Guide, { finish = false } = {}): Float32Array {
 function overlap(g: Guide, j: number, seg: number): number {
   const a = j * g.step;
   const b = a + g.step;
-  return Math.max(0, Math.min(b, g.anchors[seg + 1]) - Math.max(a, g.anchors[seg]));
+  return Math.max(0, Math.min(b, g.anchors[seg + 1]!) - Math.max(a, g.anchors[seg]!));
 }
 
 /** Time (in the units of 1/speed) each anchor segment takes at speeds `v`. */
 export function segmentTimes(g: Guide, v: Float32Array): number[] {
   const out = new Array<number>(g.anchors.length - 1).fill(0);
-  forEachOverlap(g, (j, seg, px) => (out[seg] += px / ((v[j] + v[j + 1]) / 2)));
+  forEachOverlap(g, (j, seg, px) => (out[seg]! += px / ((v[j]! + v[j + 1]!) / 2)));
   return out;
 }
 
 function forEachOverlap(g: Guide, fn: (j: number, seg: number, px: number) => void) {
   let seg = 0;
   for (let j = 0; j < g.segments; j++) {
-    while (seg < g.anchors.length - 2 && g.anchors[seg + 1] <= j * g.step) seg++;
-    for (let s = seg; s < g.anchors.length - 1 && g.anchors[s] < (j + 1) * g.step; s++) {
+    while (seg < g.anchors.length - 2 && g.anchors[seg + 1]! <= j * g.step) seg++;
+    for (let s = seg; s < g.anchors.length - 1 && g.anchors[s]! < (j + 1) * g.step; s++) {
       const px = overlap(g, j, s);
       if (px > 0) fn(j, s, px);
     }
@@ -231,22 +235,22 @@ export function timeMap(g: Guide, shape: Float32Array, segMs: readonly number[])
     const fitted = new Float32Array(n);
     const weight = new Float32Array(n);
     forEachOverlap(g, (j, seg, px) => {
-      const k = have[seg] > 0 ? have[seg] / (segMs[seg] / 1000) : 1;
+      const k = have[seg]! > 0 ? have[seg]! / (segMs[seg]! / 1000) : 1;
       for (const i of [j, j + 1]) {
-        fitted[i] += v[i] * k * px;
-        weight[i] += px;
+        fitted[i]! += v[i]! * k * px;
+        weight[i]! += px;
       }
     });
-    for (let i = 0; i < n; i++) fitted[i] = weight[i] > 0 ? fitted[i] / weight[i] : v[i];
+    for (let i = 0; i < n; i++) fitted[i] = weight[i]! > 0 ? fitted[i]! / weight[i]! : v[i]!;
     v = pass < 2 ? smooth(fitted, Math.round(PACE_MODEL.SEAM_SMOOTH_PX / 2 / g.step)) : fitted;
   }
   // Integrate, rescaling each segment's share so every anchor lands on its
   // exact time (averaging at the seams leaves small errors).
-  const fix = segmentTimes(g, v).map((have, seg) => (have > 0 ? segMs[seg] / 1000 / have : 0));
+  const fix = segmentTimes(g, v).map((have, seg) => (have > 0 ? segMs[seg]! / 1000 / have : 0));
   const dt = new Float32Array(g.segments);
-  forEachOverlap(g, (j, seg, px) => (dt[j] += (px / ((v[j] + v[j + 1]) / 2)) * fix[seg]));
+  forEachOverlap(g, (j, seg, px) => (dt[j]! += (px / ((v[j]! + v[j + 1]!) / 2)) * fix[seg]!));
   const t = new Float32Array(n);
-  for (let j = 0; j < g.segments; j++) t[j + 1] = t[j] + dt[j];
+  for (let j = 0; j < g.segments; j++) t[j + 1] = t[j]! + dt[j]!;
   return t;
 }
 
@@ -254,23 +258,23 @@ export function timeMap(g: Guide, shape: Float32Array, segMs: readonly number[])
 export function alongAt(g: Guide, t: Float32Array, time: number): number {
   const n = t.length;
   if (time <= 0) return 0;
-  if (time >= t[n - 1]) return g.length;
+  if (time >= t[n - 1]!) return g.length;
   let lo = 0;
   let hi = n - 1;
   while (hi - lo > 1) {
     const mid = (lo + hi) >> 1;
-    if (t[mid] <= time) lo = mid;
+    if (t[mid]! <= time) lo = mid;
     else hi = mid;
   }
-  const span = t[hi] - t[lo];
-  return (lo + (span > 0 ? (time - t[lo]) / span : 0)) * g.step;
+  const span = t[hi]! - t[lo]!;
+  return (lo + (span > 0 ? (time - t[lo]!) / span : 0)) * g.step;
 }
 
 /** Fastest speed (px/s) on a time map. */
 export function maxSpeed(g: Guide, t: Float32Array): number {
   let max = 0;
   for (let j = 1; j < t.length; j++) {
-    const dt = t[j] - t[j - 1];
+    const dt = t[j]! - t[j - 1]!;
     if (dt > 0) max = Math.max(max, g.step / dt);
   }
   return max;

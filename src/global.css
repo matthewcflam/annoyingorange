@@ -11,8 +11,9 @@
  *
  * Compact layout (open question #7, user decision): narrow, portrait or short
  * windows don't fit the 1767×1024 composition, so pages stack and scroll
- * instead. The query is COMPACT_QUERY in lib/frame.ts; CSS repeats it as
- *   @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px)
+ * instead. The query is COMPACT_QUERY in config/media.ts; CSS writes it as
+ *   @media (--compact)
+ * which vite.config.ts expands to the same query.
  * --m is the compact unit: 1px of a 390-wide phone (or 390-tall, for a
  * phone on its side), capped so a portrait tablet doesn't balloon. Compact content is at most --compact-w wide, with
  * a 16px gutter.
@@ -29,38 +30,47 @@
      the composition instead of leaving the right side empty. Use it for x
      positions only; sizes stay in --px. */
   --vx: calc(100vw / 1767);
-  /* Station pages (About (2).png): the header's inset from the top and the
-     sides (user request: the same on both). The name's cap top and left, and
-     the Map pill's top and right, sit this far in. Unitless mockup px. */
-  --station-edge: 30;
-  /* The same as a length: the compact layout replaces it with its own. */
-  --station-edge-len: calc(var(--station-edge) * var(--px));
-  /* The fixed header bar (user request): the edge, the Map button (2.2em of
-     --type-station-small, the row's tallest item), then the edge again, so
-     the margin below the row matches the one above. */
-  --station-head-h: calc(2 * var(--station-edge-len) + 2.2 * var(--type-station-small));
-  /* Corner rounding on every photo (user request): 10 mockup px. */
-  --image-radius: calc(10 * var(--px));
+  /* The Map box (components/MapBox.tsx; Figma "Portfolio" and "Portfolio - Map
+     Expanded"): closed 102×66 in Figma, enlarged to the user's reference (box 5.7 × 3.7 cap heights of "Map": 98×64 × --map-k), open 346×196, 20 from the top (all × --ps, tokens.css), its right edge
+     on the grid margin. Fixed px, on every station page. The open card and
+     its text scale by --map-k, the footer Connections card's --ft cap (24 ×
+     --map-k = 32px; user request: the same type size as Connections). */
+  --map-k: calc(var(--type-project-title) / 36);
+  --map-top: calc(20 * var(--pp));
+  --map-w: calc(98 * var(--map-k));
+  --map-h: calc(64 * var(--map-k));
+  --map-open-w: min(346 * var(--map-k), 100vw - 2 * var(--grid-margin));
+  --map-open-h: calc(196 * var(--map-k));
+  /* The centre line of the header row: the glyphs and the name's caps sit on it. */
+  --station-row-mid: calc(var(--map-top) + var(--map-h) / 2);
+  /* The fixed header bar (user request): the Map box with the same margin
+     below it as above. */
+  --station-head-h: calc(2 * var(--map-top) + var(--map-h));
 }
 
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   :root {
-    --station-edge-len: var(--gutter);
+    --map-top: 14px;
+    --map-k: 1px;
   }
 }
 
-/* Page theme: light on home and the gate, dark on station pages. App sets
-   data-theme while the transition cover hides the page (--theme-fade is set
-   from timings.ts in main.tsx; it only shows on a deep link's gate exit). */
-:root,
-:root[data-theme="light"] {
-  --color-bg: var(--color-home-bg);
-  --color-text: var(--color-home-text);
+/* Helvetica Rounded Bold, until (or without) the supplied file
+   (lib/fonts.ts): a copy installed on this machine, else Arial Rounded
+   (Windows, macOS). Declared as weight 700 so the browser doesn't
+   synthesize a second bold on top of a bold face. */
+@font-face {
+  font-family: "Rounded Fallback";
+  src: local("Helvetica Rounded Bold"), local("HelveticaRounded-Bold"), local("Helvetica Rounded LT Std Bold"),
+    local("Arial Rounded MT Bold"), local("ArialRoundedMTBold");
+  font-weight: 700;
+  font-style: normal;
 }
 
-:root[data-theme="dark"] {
-  --color-bg: var(--color-station-bg);
-  --color-text: var(--color-station-text);
+/* Every page is light. */
+:root {
+  --color-bg: var(--color-home-bg);
+  --color-text: var(--color-home-text);
 }
 
 html,
@@ -76,13 +86,52 @@ html {
 
 /* The page colour comes from body; no layer paints an opaque full-screen background (spec §4.1). */
 body {
-  background: var(--color-bg);
-  transition: background-color var(--theme-fade, 0s), color var(--theme-fade, 0s);
+  /* The wall grain scrolls with the page (never `fixed`: janky on mobile);
+     anything opaque on top covers it. */
+  background: var(--tex-wall-grain) repeat, var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  letter-spacing: var(--tracking); /* site-wide tracking (user request): -4% everywhere, only "Matthew Lam" is -8% */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* Text selection (user request): the site orange (tokens.css). Pure paint,
+   no JS; only background-color and color, so it never triggers layout. */
+::selection {
+  background-color: var(--color-selection);
+  color: var(--color-selection-text);
+}
+
+/* Poster paper (texture plan): uncoated stock, a stronger grain over a soft
+   mottle, so a poster reads as a different material from the wall. Only the
+   texture: each poster keeps its own colour, shadow and turn. Never on signs,
+   marks, tape, text or photos. */
+.paper-stock {
+  background-image: var(--tex-paper-grain), var(--tex-paper-mottle);
+  background-repeat: repeat, repeat;
+}
+
+/* The wall's grain and tile only show on the bare wall (user request), never
+   through the see-through pieces on it (the prints at 80%, the tech papers at
+   70%, the tape, the spray). A group of pieces gets a page-coloured
+   silhouette of itself underneath (a drop-shadow with no offset or blur), so
+   the pieces still show each other through but not the wall. Two passes: one
+   leaves (1 − alpha)² of the wall, under 1% at the 70% papers. Put it on the
+   group, never on each piece, or overlapping prints would lose each other.
+   It also makes the element a containing block, so it must be positioned. */
+.wall-solid {
+  filter: drop-shadow(0 0 0 var(--color-bg)) drop-shadow(0 0 0 var(--color-bg));
+}
+
+/* Textures are for the screen only. */
+@media print {
+  body,
+  .paper-stock,
+  .home {
+    background-image: none !important;
+  }
 }
 
 /* Lenis (lib/scroll.ts). Its stock .lenis-stopped { overflow: clip } is left
@@ -98,7 +147,7 @@ html.lenis body {
    appearing at a page commit shifted the cover, its title and the right-hand
    chrome, and the browser draws it above the cover. Touch bars overlay, so
    they stay. */
-@media (hover: hover) and (pointer: fine) {
+@media (--fine-pointer) {
   html {
     scrollbar-width: none;
   }
@@ -117,6 +166,7 @@ html.lenis body {
 }
 
 button {
+  letter-spacing: inherit;
   font: inherit;
   color: inherit;
   background: none;
@@ -152,26 +202,30 @@ canvas {
 .layer--page {
   position: relative;
   inset: auto;
-  z-index: 0;
+  z-index: var(--z-page);
   min-height: 100vh;
 }
 
+/* Focused from code after a page change (App.tsx), never by Tab: no ring. */
+.layer--page:focus {
+  outline: none;
+}
+
+/* Read by screen readers, never shown (App.tsx's page-change announcement). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .layer--chrome {
-  z-index: 10;
+  z-index: var(--z-chrome);
   pointer-events: none;
 }
-
-.layer--map {
-  z-index: 20;
-  pointer-events: none;
-}
-
-/* Glass: what's painted on the screen (the "who?" spray), above the map. */
-.layer--glass {
-  z-index: 40;
-  pointer-events: none;
-}
-
 
 /* Interactive elements inside pass-through layers opt back in individually. */
 .interactive {
@@ -182,7 +236,7 @@ canvas {
    on a portrait tablet (above the map labels there); under ~340px wide it may
    drop to 24 so the station header row (name, glyphs, Map) still fits on one
    line. The glyphs keep following the Map button (--iu). */
-@media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px) {
+@media (--compact) {
   :root:root {
     --type-name: max(1.5rem, 28 * var(--m));
   }

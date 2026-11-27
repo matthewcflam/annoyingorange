@@ -1,0 +1,152 @@
+.lightbox__close:focus-visible,
+.lightbox__arrow:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+.media__label {
+  font-size: var(--type-project-name);
+  letter-spacing: var(--tracking);
+  line-height: 1;
+}
+
+/* A video or photo fills the lightbox frame, cropped to it: the frame takes
+   the item's aspect ratio, so only the morph from a piece crops. */
+.media__picture,
+.media__picture img,
+.media__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The expanded media, over the page and its chrome, under the transition
+   cover. Lightbox.tsx sizes the frame: from the piece's box to a centred player
+   (MEDIA.PLAYER_WIDTH of the window). */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-lightbox);
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-rounded);
+  color: var(--color-home-text);
+}
+
+/* The expanded label is Nunito Light (page.css); Close
+   keeps the Map box's Helvetica Rounded Bold. */
+.lightbox__frame .media__label {
+  font-family: var(--font-text);
+  font-weight: var(--weight-text);
+}
+
+/* The page stays visible under a dim; a click on it closes the player. */
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-lightbox-dim);
+}
+
+/* Lightbox.tsx tweens its border from the piece's frame to none. */
+.lightbox__frame {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0 solid var(--project-color);
+  background: var(--color-media);
+  overflow: hidden;
+}
+
+/* "Close", where the Map box is, in its shape. */
+.lightbox__close {
+  position: absolute;
+  top: var(--map-top);
+  right: var(--grid-margin);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: var(--map-w);
+  height: var(--map-h);
+  padding: 0.31em;
+  background: var(--color-map-box);
+  color: var(--color-map-box-text);
+  font-size: var(--type-project-card);
+  letter-spacing: var(--tracking);
+  line-height: 1;
+}
+
+.lightbox__close span {
+  text-box: trim-both cap alphabetic;
+}
+
+/* One item in the lightbox; Lightbox.tsx slides them over each other. */
+.lightbox__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The carousel arrows and "1 / 3", lower middle, in the Close box's style. */
+.lightbox__nav {
+  position: absolute;
+  left: 50%;
+  bottom: var(--map-top);
+  translate: -50% 0;
+  display: flex;
+  align-items: stretch;
+  height: var(--map-h);
+  background: var(--color-map-box);
+  color: var(--color-map-box-text);
+  font-size: var(--type-project-card);
+  letter-spacing: var(--tracking);
+  line-height: 1;
+}
+
+.lightbox__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--map-h);
+}
+
+.lightbox__arrow svg {
+  width: 0.9em;
+  height: 0.9em;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lightbox__arrow--next svg {
+  scale: -1 1;
+}
+
+@media (hover: hover) {
+  .lightbox__arrow--prev:hover svg {
+    translate: -0.15em 0;
+  }
+
+  .lightbox__arrow--next:hover svg {
+    translate: 0.15em 0;
+  }
+}
+
+.lightbox__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6em;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.lightbox__count span {
+  text-box: trim-both cap alphabetic;
+}
+
+html.is-scroll-locked {
+  overflow: hidden;
+}

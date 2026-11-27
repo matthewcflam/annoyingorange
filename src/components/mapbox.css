@@ -1,0 +1,168 @@
+/*
+ * The Map box (MapBox.tsx), measured from the Figma frames "Portfolio"
+ * (closed: 102×66 at the top-right) and "Portfolio - Map Expanded" (open:
+ * 346×196). Sizes are tokens (global.css --map-*). The blue is an SVG path
+ * (MapBox.tsx animates it); everything here sits on top of it.
+ */
+.map-box {
+  position: absolute;
+  top: var(--map-top);
+  right: var(--grid-margin);
+  /* Above the glyphs, which the open card covers. */
+  z-index: 2;
+  width: var(--map-w);
+  height: var(--map-h);
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-rounded);
+  font-size: var(--type-project-card);
+  letter-spacing: var(--tracking);
+  line-height: 1;
+  color: var(--color-map-box-text);
+}
+
+/* Its origin is the box's top-right corner; the path runs left and down. */
+.map-box__shape {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.map-box__shape path {
+  fill: var(--color-map-box);
+}
+
+/* "Map": cap top and right ~0.43 cap heights from the corner, open or closed
+   (the user's reference). */
+.map-box__toggle {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0.31em;
+}
+
+.map-box__title,
+.map-box__label {
+  text-box: trim-both cap alphabetic;
+}
+
+.map-box__toggle:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+/* The open card's rows, laid out at the open size from the same corner. Four
+   31px rows: dots (21) 11 from the left, the first one's top at 69; labels
+   right-aligned 9 from the right. All in Figma px × --map-k (global.css). */
+.map-box__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--map-open-w);
+  height: var(--map-open-h);
+  padding-top: calc(64 * var(--map-k));
+  pointer-events: none;
+}
+
+.map-box[data-open] .map-box__panel {
+  pointer-events: auto;
+}
+
+.map-box__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: calc(31 * var(--map-k));
+  padding: 0 calc(9 * var(--map-k)) 0 calc(11 * var(--map-k));
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--hover-fade) ease-out;
+}
+
+.map-box__row:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: -2px;
+}
+
+.map-box__dot {
+  flex: none;
+  width: calc(21 * var(--map-k));
+  height: calc(21 * var(--map-k));
+  border-radius: 50%;
+  background: var(--color-map-dot);
+  transition: background-color var(--hover-fade) ease-out;
+}
+
+.map-box__dot[data-here] {
+  background: var(--color-map-here);
+}
+
+/* The current station: its label is orange too (user request), like its dot. */
+.map-box__row[aria-current] {
+  color: var(--color-map-here);
+}
+
+/* Hover (user request: no sound, no grow): the dot and label turn orange.
+   The current station (already orange) isn't a link to hover. */
+.map-box__row:not([aria-current]):focus-visible {
+  color: var(--color-orange);
+}
+
+.map-box__row:not([aria-current]):focus-visible .map-box__dot {
+  background: var(--color-orange);
+}
+
+@media (hover: hover) {
+  .map-box__row:not([aria-current]):hover {
+    color: var(--color-orange);
+  }
+
+  .map-box__row:not([aria-current]):hover .map-box__dot {
+    background: var(--color-orange);
+  }
+}
+
+/* ---- Home's centre card (variant="home"; Figma "Home Page Final", 444×366
+   at (662, 321)) ----
+   The same card, larger and pinned open (MapBox.tsx). Placed by its slot
+   (home.css), right edge on the slot's. Figma px × --hk: "Map" 36px, its cap
+   top 18 and right edge 14 from the corner; four 56px rows starting 119 down
+   (dot and label centres at 147, 203, 259, 315), 42px dots 18 from the left,
+   labels right-aligned 18 from the right. Closed, it's a "Map" box in the
+   station box's proportions (98×64 at 24px type), so the rush starts from the
+   same shape. */
+.map-box[data-variant="home"] {
+  --hk: var(--home-card-k, var(--px));
+  top: 0;
+  right: 0;
+  z-index: auto;
+  width: calc(147 * var(--hk));
+  height: calc(96 * var(--hk));
+  font-size: calc(36 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__toggle {
+  padding: calc(18 * var(--hk)) calc(14 * var(--hk)) 0 0;
+}
+
+.map-box[data-variant="home"] .map-box__panel {
+  width: calc(444 * var(--hk));
+  height: calc(366 * var(--hk));
+  padding-top: calc(119 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__row {
+  height: calc(56 * var(--hk));
+  padding: 0 calc(18 * var(--hk));
+}
+
+.map-box[data-variant="home"] .map-box__dot {
+  width: calc(42 * var(--hk));
+  height: calc(42 * var(--hk));
+}

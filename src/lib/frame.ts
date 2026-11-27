@@ -5,37 +5,31 @@
  */
 export const FRAME = { W: 1767, H: 1024 } as const;
 
+/** The project pages' Figma frame (1640 wide) and its layout grid, as in
+ *  tokens.css (--grid-cols / --grid-margin / --grid-gutter: keep in step). */
+export const PROJECT_FRAME_W = 1640;
+export const GRID = { COLS: 9, MARGIN: 15, GUTTER: 15 } as const;
+
+/** Width of `n` grid columns plus the gutters between them, in frame px. */
+export const gridSpan = (n: number, frameW = PROJECT_FRAME_W) =>
+  (n * (frameW - 2 * GRID.MARGIN - (GRID.COLS - 1) * GRID.GUTTER)) / GRID.COLS + (n - 1) * GRID.GUTTER;
+
 /** CSS px per mockup px: the value of --px. */
 export function pxScale(): number {
   return Math.min(window.innerWidth / FRAME.W, window.innerHeight / FRAME.H);
 }
 
-/** Narrow, portrait or short windows get the stacked compact layout (open
- *  question #7, user decision). CSS repeats this query (global.css). */
-export const COMPACT_QUERY = "(max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 500px)";
+import { COMPACT_CLAUSES, COMPACT_QUERY } from "../config/media";
 
-const compactMql = window.matchMedia(COMPACT_QUERY);
+/** A `<source sizes>` value: `compact` under any compact clause, else `full`. */
+export const compactSizes = (compact: string, full: string) =>
+  [...COMPACT_CLAUSES.map((q) => `${q} ${compact}`), full].join(", ");
 
-export const isCompact = () => compactMql.matches;
+/** Created on first use, so the pure helpers here import without a window (tests). */
+let compactMql: MediaQueryList | null = null;
 
-/** Calls `fn` whenever the layout switches between compact and full; returns
- *  the unsubscribe. */
-export function onCompactChange(fn: () => void): () => void {
-  compactMql.addEventListener("change", fn);
-  return () => compactMql.removeEventListener("change", fn);
-}
-
-/** The viewport's size in mockup px (it can be wider or taller than the frame). */
-export function viewportInMockupPx() {
-  const px = pxScale();
-  return { w: window.innerWidth / px, h: window.innerHeight / px };
-}
-
-/** The project article (column, heroes, obstacle text) was designed in the old 1440×1024 frame. The Projects page draws
- *  it in its right pane at this many --px per old mockup px (project.css
- *  --apx must match). */
-export const ARTICLE_SCALE = 1.1;
+export const isCompact = () => (compactMql ??= window.matchMedia(COMPACT_QUERY)).matches;
 
 /** `<source sizes>` for an image box `w` mockup px wide in the --px frame. */
 export const frameSizes = (w: number) =>
-  `(min-aspect-ratio: 1767/1024) ${((w / FRAME.H) * 100).toFixed(2)}vh, ${((w / FRAME.W) * 100).toFixed(2)}vw`;
+  `(min-aspect-ratio: ${FRAME.W}/${FRAME.H}) ${((w / FRAME.H) * 100).toFixed(2)}vh, ${((w / FRAME.W) * 100).toFixed(2)}vw`;

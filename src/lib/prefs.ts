@@ -1,20 +1,19 @@
-/** Persisted sound preference (spec §6.3, §9.8). Storage can throw (private mode, blocked). */
-export type SoundPref = "sound" | "muted";
+/** Persisted preferences. Storage can throw (private mode, blocked). Sound is
+ *  deliberately not persisted: every load starts muted (user decision). */
 
-const KEY = "pref.sound";
-
-export function loadSoundPref(): SoundPref {
+/** A persisted on/off switch (the layout grid overlay). */
+export function loadFlag(key: string): boolean {
   try {
-    return localStorage.getItem(KEY) === "muted" ? "muted" : "sound";
+    return localStorage.getItem(key) === "1";
   } catch {
-    return "sound";
+    return false;
   }
 }
 
-export function saveSoundPref(pref: SoundPref): void {
+export function saveFlag(key: string, on: boolean): void {
   try {
-    localStorage.setItem(KEY, pref);
+    localStorage.setItem(key, on ? "1" : "0");
   } catch {
-    /* preference just won't persist */
+    /* it just won't persist */
   }
 }

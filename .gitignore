@@ -26,3 +26,6 @@ dist-ssr
 
 # Claude instructions (kept local)
 CLAUDE.md
+test-results/
+playwright-report/
+blob-report/

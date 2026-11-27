@@ -1,26 +1,35 @@
 /** vite-imagetools presets (vite.config.ts). */
-declare module "*?hero" {
-  const picture: import("./lib/assets").Picture;
+declare module "*?collage" {
+  const picture: import("./lib/picture").Picture;
   export default picture;
 }
-declare module "*?obstacle" {
-  const picture: import("./lib/assets").Picture;
-  export default picture;
-}
-declare module "*?frost" {
-  /** A data URI. */
+declare module "*?logo" {
+  /** A WebP URL. */
   const src: string;
   export default src;
 }
-declare module "*?frostlight" {
+declare module "*?poster" {
+  /** A WebP URL. */
   const src: string;
   export default src;
 }
-declare module "*?charm" {
-  const picture: import("./lib/assets").Picture;
+/** Home's paper (vite.config.ts; the texture is baked in by scripts/paperBake.ts). */
+declare module "*?print" {
+  const picture: import("./lib/picture").Picture;
   export default picture;
 }
-declare module "*?paper" {
+/** About's café print: wider steps, higher quality. */
+declare module "*?printLarge" {
+  const picture: import("./lib/picture").Picture;
+  export default picture;
+}
+/** Tape: `?w=…&paperFibre=…&tape` (the preset name last). A WebP URL. */
+declare module "*&tape" {
+  const src: string;
+  export default src;
+}
+declare module "*?sheet" {
+  /** A WebP URL. */
   const src: string;
   export default src;
 }

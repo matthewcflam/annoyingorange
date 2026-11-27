@@ -20,7 +20,9 @@
  */
 import { gsap } from "../lib/gsap";
 import { readToken } from "../lib/tokens";
+import { bindQuad, cappedDpr, createGL, linkProgram, parseColor, uniforms, type Uniforms } from "../lib/webgl";
 import { TRANSITION } from "../config/timings";
+import { onBrowserIdle } from "../lib/idle";
 
 const T = TRANSITION;
 
@@ -131,15 +133,6 @@ const UNIFORMS = [
   "uProgress", "uOffset", "uNoiseScale", "uNoiseStrength", "uEdgeSmooth", "uDirection",
   "uAspect", "uResolution", "uPixelSize", "uDitherSize", "uColor",
 ] as const;
-type Uniform = (typeof UNIFORMS)[number];
-
-const rand = (min: number, max: number) => min + Math.random() * (max - min);
-
-function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.replace("#", "").slice(0, 6), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
-
 export interface HideOptions {
   /** Seconds the cover stays solid before clearing. */
   delay: number;
@@ -149,20 +142,23 @@ export interface HideOptions {
   onUnlock?: () => void;
 }
 
-export class DitherCover {
+class DitherCover {
   readonly canvas = document.createElement("canvas");
   /** CSS fallback and reduced-motion cover. */
   readonly fade = document.createElement("div");
 
   private gl: WebGLRenderingContext | null = null;
-  private loc = {} as Record<Uniform, WebGLUniformLocation | null>;
+  /** WebGL set up (or tried): deferred off the boot path (ensureGL). */
+  private initialised = false;
+  private loc = {} as Uniforms<typeof UNIFORMS>;
   private progress = 0;
   private direction = 1;
   private offset: [number, number] = [0, 0];
   private tween: gsap.core.Tween | null = null;
   /** How the current transition covers the screen. */
   private mode: "dither" | "fade" = "dither";
-  private color: [number, number, number] = [0.06, 0.06, 0.06];
+  /** --color-cover-dark, read in show() before every draw. */
+  private color: [number, number, number] = [0, 0, 0];
 
   constructor() {
     this.canvas.className = "transition__canvas";
@@ -179,10 +175,12 @@ export class DitherCover {
       }
     });
     this.canvas.addEventListener("webglcontextrestored", () => {
-      this.init();
+      this.safeInit();
       this.draw();
     });
-    this.init();
+    // Compiling the shader isn't needed until the first transition: do it
+    // when the browser is idle after load, not during boot.
+    onBrowserIdle(() => this.ensureGL(), { timeoutMs: T.INIT_IDLE_TIMEOUT_MS, fallbackMs: T.INIT_IDLE_FALLBACK_MS });
     window.addEventListener("resize", this.onResize);
   }
 
@@ -191,22 +189,18 @@ export class DitherCover {
     return this.mode === "dither" && this.progress > 0;
   }
 
-  /** Tone of the next transition: the layer's title and fade colours follow it
-   *  (transition.css). Set before show(). */
-  setTone(tone: "dark" | "light"): void {
-    const layer = this.canvas.parentElement;
-    if (layer) layer.dataset.tone = tone;
-  }
-
-  /** Dither in, bottom to top, in the colour of token `color`. Resolves when
-   *  fully covered. */
-  show(reduced: boolean, color: `--${string}`): Promise<void> {
+  /** Dither in, bottom to top, in --color-cover-dark (every page is light,
+   *  so every cover is dark; transition.css colours the CSS fade the same).
+   *  Resolves when fully covered. */
+  show(reduced: boolean): Promise<void> {
     this.tween?.kill();
-    this.color = hexToRgb(readToken(color) || "#212121");
+    this.ensureGL();
+    const [r, g, b] = parseColor(readToken("--color-cover-dark"));
+    this.color = [r, g, b];
     this.mode = reduced || !this.gl ? "fade" : "dither";
-    if (this.mode === "fade") return this.fadeTo(1, reduced ? T.REDUCED_FADE : T.SHOW * 0.3, 0);
+    if (this.mode === "fade") return this.fadeTo(1, reduced ? T.REDUCED_FADE : T.SHOW * T.FALLBACK_SHOW_SHARE, 0);
     this.direction = 1;
-    this.offset = [rand(0, 100), rand(0, 100)];
+    this.offset = [gsap.utils.random(0, 100), gsap.utils.random(0, 100)];
     this.progress = 0;
     this.resize();
     this.setVisible(true);
@@ -230,10 +224,10 @@ export class DitherCover {
       this.progress = 0;
       this.clear();
       this.setVisible(false);
-      return this.fadeTo(0, reduced ? T.REDUCED_FADE : T.HIDE * 0.15, delay, onClearStart).then(() => onUnlock?.());
+      return this.fadeTo(0, reduced ? T.REDUCED_FADE : T.HIDE * T.FALLBACK_HIDE_SHARE, delay, onClearStart).then(() => onUnlock?.());
     }
     this.direction = 0;
-    this.offset = [rand(0, 100), rand(0, 100)];
+    this.offset = [gsap.utils.random(0, 100), gsap.utils.random(0, 100)];
     this.draw();
     let unlocked = false;
     return new Promise((resolve) => {
@@ -263,6 +257,7 @@ export class DitherCover {
   /** Dev: draw one frame by hand (progress 0..1, direction 1 show / 0 hide). */
   drawAt(progress: number, direction: number): void {
     this.tween?.kill();
+    this.ensureGL();
     this.mode = "dither";
     this.progress = progress;
     this.direction = direction;
@@ -281,29 +276,31 @@ export class DitherCover {
     });
   }
 
+  /** Set up WebGL the first time it's needed. */
+  private ensureGL() {
+    if (this.initialised) return;
+    this.initialised = true;
+    this.safeInit();
+  }
+
+  /** WebGL set up, or left null (every transition then uses the CSS fade).
+   *  A failure here must never stop the app. */
+  private safeInit() {
+    try {
+      this.init();
+    } catch (err) {
+      this.gl = null;
+      if (import.meta.env.DEV) console.warn("Dither cover: WebGL setup failed; using the fade.", err);
+    }
+  }
+
   private init() {
-    const gl = this.canvas.getContext("webgl", { alpha: true, antialias: false, premultipliedAlpha: false });
+    const gl = createGL(this.canvas);
     if (!gl) return;
-    const compile = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? "shader");
-      return s;
-    };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
-    gl.linkProgram(prog);
+    const prog = linkProgram(gl, VERT, FRAG);
     gl.useProgram(prog);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(prog, "aPos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-    for (const u of UNIFORMS) this.loc[u] = gl.getUniformLocation(prog, u);
+    bindQuad(gl);
+    this.loc = uniforms(gl, prog, UNIFORMS);
     gl.uniform1f(this.loc.uNoiseScale, T.NOISE_FREQ);
     gl.uniform1f(this.loc.uNoiseStrength, T.NOISE_STRENGTH);
     gl.uniform1f(this.loc.uEdgeSmooth, T.EDGE_SMOOTH);
@@ -324,7 +321,7 @@ export class DitherCover {
    *  is rounded up to whole cells and sized in CSS so each cell lands on
    *  exactly DITHER_PX device px; the overhang (under one cell) is clipped. */
   private resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, T.MAX_DPR);
+    const dpr = cappedDpr(T.MAX_DPR);
     const w = window.innerWidth;
     const h = window.innerHeight;
     const cell = Math.max(1, T.DITHER_PX);

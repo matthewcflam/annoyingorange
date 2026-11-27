@@ -1,0 +1,231 @@
+/*
+ * The Projects page (Projects.tsx), from the Figma frames "Portfolio" and
+ * "Project Redesign": 1640 wide, on the 9-column grid; everything sits on
+ * column edges (the frame's stray 17/23/743 x values are snapped). The shell (font, the fixed name, the
+ * element resets, --line) is page.css; the footer is footer.css.
+ */
+.project {
+  /* Where TOOLS locks while the page scrolls: one list row below the last
+     project, i.e. the name's cap top (20) and cap height, the list's 10px gap,
+     four rows (20px padding + a body cap height; Helvetica's cap is 0.72em)
+     and a gap below the list (user request: 40, was 10, the row padding, so
+     TOOLS reads as its own block). 194 in Figma at 16px. */
+  --tools-stick: calc((20 + 10 + 4 * 20 + 40) * var(--pp) + 0.72 * var(--type-project-title) + 4 * 0.72 * var(--type-project-body));
+  /* The footer's cat stays clear of the list too. */
+  --head-clear: var(--tools-stick);
+  /* The first project's TOOLS heading + its lines, a body size between groups. */
+  --tools-h: calc(var(--tool-lines) * var(--line) + (var(--tool-groups) - 1) * var(--type-project-body));
+  /* Cap top of the first project (its TOOLS and name). 731 in the frame; less on a shorter
+     window, so the whole TOOLS list shows before any scrolling. */
+  --content-top: clamp(var(--tools-stick) + 66 * var(--pp), 100svh - var(--tools-h) - 24 * var(--pp), 731 * var(--pp));
+}
+
+
+/* A page-coloured band behind the header, over columns 1–2, ending half the
+   gap above the stick line: a TOOLS pushed out by the next one slides under
+   it instead of over the list. Above the body, under the header. */
+.project__band {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: calc(var(--grid-margin) + var(--grid-span2) + var(--grid-gutter) / 2);
+  height: calc(var(--tools-stick) - 20 * var(--pp));
+  /* The wall grain too, or the band would show as a flat stripe on it. */
+  background: var(--tex-wall-grain) repeat, var(--color-bg);
+  pointer-events: none;
+}
+
+/* ---- The projects, one block each ---- */
+.project__body {
+  position: relative;
+  z-index: 1;
+  padding: var(--content-top) var(--grid-margin) 0;
+}
+
+/* One project on the 9-column grid: TOOLS (1–2), text (4–5), collage (6–8);
+   columns 3 and 9 stay empty, so the content sits a column clear of the
+   list and of the right margin (user request).
+   The gap to the next project is the block's own padding. */
+.project-block {
+  display: grid;
+  grid-template-columns: var(--grid-template);
+  column-gap: var(--grid-gutter);
+  align-items: start;
+  padding-bottom: calc(9 * var(--type-project-body));
+}
+
+.project-block:last-child {
+  padding-bottom: 0;
+}
+
+/* TOOLS: black, or grey for the ones used a little; the heading in the
+   project's colour (its poster's). Scrolls with the page (user request: was
+   sticky) and slides under .project__band, out of sight behind the list. */
+.project-block__tools {
+  grid-column: 1 / span 2;
+  grid-row: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+.page .project-block__tools-title {
+  color: var(--project-color);
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-rounded);
+}
+
+.project-block__tools li[data-dim] {
+  color: var(--color-grey);
+}
+
+.project-block__tools ul + ul {
+  margin-top: var(--type-project-body);
+}
+
+/* The text, columns 4–5 (Figma "Project Final"): the intro, then, two blank
+   lines under the links (user request: was one), the description (no
+   heading, user request). */
+.project-block__text {
+  grid-column: 4 / span 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--line));
+}
+
+/* Every other block is mirrored (Projects.tsx data-flip; user request: the
+   projects zigzag like Experience's jobs): the collage in columns 3–5, its
+   right edge against the text in 6–7 (user request: the mirrored blocks sit
+   one column left of the plain ones' mirror image). */
+.project-block[data-flip] .project-block__text {
+  grid-column: 6 / span 2;
+}
+
+.project-block[data-flip] .collage {
+  grid-column: 3 / span 3;
+  justify-self: end;
+  margin-inline: 0 var(--collage-gap);
+}
+
+/* All project text (user request) sits on the centre line of the collage
+   beside it, not at its top or foot: TOOLS and the text column are centred
+   in the row (the row is as tall as the collage). */
+.project-block__text,
+.project-block__tools {
+  align-self: center;
+}
+
+.project-block__intro,
+.project-block__desc {
+  text-box: trim-both cap alphabetic;
+}
+
+.page .project-block h2 {
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-rounded);
+  font-size: var(--type-project-heading);
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+/* The name, then (one body size down; user request: was 2) the tagline; a blank line; the awards. */
+.page .project-block__tagline {
+  margin-top: var(--type-project-body);
+}
+
+.page .project-block__awards {
+  margin-top: var(--line);
+}
+
+/* No tagline (This Portfolio): the awards take its place. */
+.page .project-block h2 + .project-block__awards {
+  margin-top: var(--type-project-body);
+}
+
+.project-block__awards span {
+  display: block;
+}
+
+/* The links: 28px glyphs at 16px body, 13 apart, a body size under the text. */
+.page .project-block__links {
+  display: flex;
+  gap: calc(0.8 * var(--type-project-body));
+  margin-top: var(--type-project-body);
+}
+
+.project-block__links a {
+  display: block;
+  width: calc(1.75 * var(--type-project-body));
+  height: calc(1.75 * var(--type-project-body));
+  color: var(--color-text);
+  transition: color var(--hover-fade);
+}
+
+.project-block__links svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.project-block__links a:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .project-block__links a:hover {
+    color: var(--project-color);
+  }
+}
+
+/* ---- Compact layout (global.css): one column. The name and list scroll
+   with the page (page.css), each project stacks and its TOOLS no longer
+   sticks (the header: page.css; the list: project-list.css; the footer:
+   footer.css). ---- */
+@media (--compact) {
+  .project__band {
+    display: none;
+  }
+
+  .project__body {
+    padding-top: 24px;
+  }
+
+  /* Stacked: the intro, the description, the collage (the column wide, from
+     the text), then TOOLS (not sticky). */
+  .project-block {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 108px;
+  }
+  .project-block__text {
+    display: contents;
+  }
+
+  .project-block__intro {
+    order: 1;
+  }
+
+  .project-block__desc {
+    order: 2;
+    margin-top: 56px;
+  }
+
+  .project-block .collage {
+    order: 3;
+    width: 100%;
+    margin-top: 28px;
+  }
+
+  .project-block .collage,
+  .project-block[data-flip] .collage {
+    margin-inline: 0;
+  }
+
+  .project-block__tools {
+    order: 4;
+    position: static;
+    align-self: stretch;
+    margin-top: 28px;
+  }
+}

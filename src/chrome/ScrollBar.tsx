@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "../lib/gsap";
 import { onScroll } from "../lib/scroll";
-import { prefersReducedMotion } from "../lib/motion";
+import { hasFinePointer, prefersReducedMotion } from "../lib/motion";
+import { clamp01 } from "../lib/math";
 import { SCROLLBAR } from "../config/timings";
 import "./scrollbar.css";
 
@@ -18,7 +19,7 @@ export default function ScrollBar() {
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!el || !hasFinePointer()) return;
 
     const setY = gsap.quickSetter(el, "y", "px");
     const reduced = prefersReducedMotion();
@@ -32,7 +33,7 @@ export default function ScrollBar() {
       gsap.to(el, {
         opacity: on ? SCROLLBAR.OPACITY : 0,
         duration: reduced ? 0 : on ? SCROLLBAR.FADE_IN : SCROLLBAR.FADE_OUT,
-        ease: on ? "power2.out" : "power2.in",
+        ease: on ? SCROLLBAR.FADE_IN_EASE : SCROLLBAR.FADE_OUT_EASE,
         overwrite: true,
       });
     };
@@ -54,7 +55,7 @@ export default function ScrollBar() {
         thumb = h;
         el.style.height = `${h}px`;
       }
-      const p = Math.min(1, Math.max(0, scroll / limit));
+      const p = clamp01(scroll / limit);
       setY(SCROLLBAR.INSET_PX + p * (track - thumb));
       fade(true);
       hideLater.restart(true);
@@ -73,7 +74,7 @@ export default function ScrollBar() {
       ref={ref}
       className="scrollbar"
       aria-hidden="true"
-      style={{ "--scrollbar-w": SCROLLBAR.WIDTH_PX, "--scrollbar-inset": SCROLLBAR.INSET_PX } as React.CSSProperties}
+      style={{ "--scrollbar-w": SCROLLBAR.WIDTH_PX, "--scrollbar-inset": SCROLLBAR.INSET_PX }}
     />,
     document.body,
   );

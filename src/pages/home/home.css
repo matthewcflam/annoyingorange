@@ -1,0 +1,575 @@
+/* Home (Figma "Home Page Final", 1767×1024). Every piece is placed at its
+   mockup coordinates: sizes and y in --px, x in --vx for the pieces out
+   toward the edges (as the old map did: on a wide screen they spread out),
+   while the name and the centre card stay centred. When the window is taller
+   than the frame (--px from the width), the composition centres vertically
+   (--hy); the tech papers and the photos stay pinned to the top edge they
+   bleed off.
+
+   The pieces share one placement rule (centre or corner × units), so the
+   compact layout below can swap the units and origin instead of re-placing
+   each one. */
+.home {
+  --hy: max(0px, (100svh - 1024 * var(--px)) / 2);
+  /* x unit, size unit, y unit, and the origin (compact moves these). */
+  --ux: var(--vx);
+  --us: var(--px);
+  --ox: 0px;
+  --oy: var(--hy);
+  /* The centre card's unit: --px, floored so a small window keeps it legible. */
+  --hk: max(var(--px), 0.5px);
+  position: relative;
+  height: 100svh;
+  overflow: clip;
+  /* Subway tile (texture plan), home only: the wall grain on top, the grout
+     under it, the page colour at the bottom. It covers body's grain, which
+     carries on everywhere else. */
+  background: var(--tex-wall-grain) repeat, var(--tex-tile) repeat, var(--color-bg);
+}
+
+/* ---- The tech papers (Figma "Group 123", "Group 124"): two faded sheets
+   bleeding off the top edge, each listing languages / frameworks in Rounded
+   Bold 40. Pinned to the top (no --hy), x on --vx, the rest in --px. The
+   list sits at Figma's text box (line-height "normal": 47 per line). ---- */
+/* The tech papers, and the photos (HomePhotos.tsx), each share one box over
+   the whole page: .wall-solid (global.css) needs a group, so a top sheet
+   still shows the one under it, not the wall. Same box as .home, so the
+   sheets place as before. Compact repositions .home-photos. */
+.home__techs,
+.home-photos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The photos (Figma "IMG_7757-2 1" behind, "image 127" in front): the group
+   photo runs off the top edge (top at y -48), so the cluster is pinned to the
+   top like the tech papers (no --hy). Each print's opacity is Figma's. */
+.home-photos {
+  --oy: 0px;
+}
+
+.home-photo--photo-group { --photo-opacity: 1; }
+.home-photo--photo-me { --photo-opacity: 0.9; }
+
+.home__tech {
+  position: absolute;
+  background: var(--home-tech-paper);
+  opacity: var(--home-tech-opacity);
+  box-shadow: var(--home-tech-shadow);
+}
+
+/* 456×466 at (112, -192), unrotated; its list at (145, 41). */
+.home__tech--0 {
+  left: calc(112 * var(--vx));
+  top: calc(-192 * var(--px));
+  width: calc(456 * var(--px));
+  height: calc(466 * var(--px));
+  padding: calc(233 * var(--px)) 0 0 calc(33 * var(--px));
+}
+
+/* 303.53×291 centred on (381.05, 66.74), turned -2.95°; its list is placed in
+   the sheet's own (turned) axes, so it turns with it. Anchored to the first
+   sheet (117.29 px right of it), so a wide window keeps them overlapped. */
+.home__tech--1 {
+  left: calc(112 * var(--vx) + 117.29 * var(--px));
+  top: calc(-78.76 * var(--px));
+  width: calc(303.53 * var(--px));
+  height: calc(291 * var(--px));
+  padding: calc(110.06 * var(--px)) 0 0 calc(25.41 * var(--px));
+  rotate: -2.95deg;
+}
+
+.home__tech-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-rounded);
+  font-size: calc(40 * var(--px));
+  font-weight: var(--weight-rounded);
+  line-height: 1.175;
+  white-space: nowrap;
+  color: var(--home-tech-ink);
+  opacity: var(--home-tech-opacity);
+}
+
+/* ---- "Matthew Lam" over the card: Rounded Bold 36, -8%, cap top 280 ---- */
+.home__name {
+  position: absolute;
+  left: calc(50% - 222 * var(--hk));
+  top: calc(var(--hy) + 280 * var(--px));
+  margin: 0;
+  font-family: var(--font-name);
+  font-size: calc(36 * var(--hk));
+  font-weight: var(--weight-rounded);
+  line-height: 1;
+  letter-spacing: var(--tracking-name);
+  white-space: nowrap;
+  color: var(--color-text);
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- The centre card (MapBox variant="home"; mapbox.css): 444×366 at
+   (662, 321), its right edge at the slot's ---- */
+.home__card {
+  --home-card-k: var(--hk);
+  position: absolute;
+  z-index: 2;
+  left: calc(50% - 222 * var(--hk));
+  top: calc(var(--hy) + 321 * var(--px));
+  width: calc(444 * var(--hk));
+  height: calc(366 * var(--hk));
+}
+
+/* ---- Sheets placed by their centres: the taped photos (HomePhotos.tsx),
+   the skyline's sheet, its tape and the skyline drawn on it ---- */
+.home-paper,
+.home__skyline {
+  position: absolute;
+  left: calc(var(--ox) + var(--cx) * var(--ux) - var(--w) / 2 * var(--us));
+  top: calc(var(--oy) + (var(--cy) - var(--h) / 2) * var(--us));
+  width: calc(var(--w) * var(--us));
+  height: calc(var(--h) * var(--us));
+  rotate: var(--r);
+}
+
+/* ---- "who?" (§7.2): the guide box (221×99) at (1316.9, 661; was 685, moved
+   24 up off the lightbox, user request): Figma's box
+   (1261, 690, 212.8×89) moved 60 right (user request) so it covers the card's
+   first line less; the glass card covers its foot; the canvas reaches --who-pad past it on every
+   side for overspray and drips. ---- */
+.home__who {
+  --who-w: 220.937;
+  --who-h: 98.8558;
+  --who-pad: 20;
+  position: absolute;
+  z-index: 3;
+  left: calc(1316.9 * var(--vx));
+  top: calc(var(--hy) + 661 * var(--px));
+  width: calc(var(--who-w) * var(--px));
+  height: calc(var(--who-h) * var(--px));
+  /* A click sprays it again (Home.tsx); the canvas pad is part of the target. */
+}
+
+.home__who-canvas {
+  position: absolute;
+  left: calc(-100% * var(--who-pad) / var(--who-w));
+  top: calc(-100% * var(--who-pad) / var(--who-h));
+  width: calc(100% * (var(--who-w) + 2 * var(--who-pad)) / var(--who-w));
+  height: calc(100% * (var(--who-h) + 2 * var(--who-pad)) / var(--who-h));
+}
+
+/* ---- The glass card (Figma "Rectangle 157", at (1170.76, 711.6)), over the
+   foot of "who?", which looks sprayed onto it. Radius 50. Squarer than
+   Figma's 456×196 (user request): --glass-w × --glass-h, the lines (Rounded
+   Bold 16, 80% black, a blank line between groups) inset --glass-pad from the
+   top, left and bottom edges alike (user request), measured to the cap top and
+   the last baseline (text-box trim; centred vertically, so the bottom matches
+   whatever the font). The width is the pad, the longest line (295) and the
+   pad again; the height is the pad, the trimmed lines (125.9) and the pad.
+   The shader reads --glass-w for its unit. Sized in its own --hk
+   (0.75px: 12px text, capped so the card always fits in the window);
+   compact overrides it to fill the column. A link to Experience (Home.tsx).
+   Drawn as a backlit subway lightbox (user request): a dark snap frame round
+   a cool-white diffuser face, a soft light spill on the wall (the stacked
+   glows in box-shadow) and a light cast shadow. The face and frame are WebGL
+   (glass/glassRenderer.ts, LIGHTBOX in timings.ts) on .home__glass-base, and
+   "who?" sprayed over it all on .home__glass-canvas, set up with
+   data-glass="gl"; without WebGL a flat face and a CSS border stand in. */
+.home__glass {
+  /* The text side (the old card) plus the blue "next stop" strip on the
+     right (user request). --glass-w is a plain number, their sum: the shader
+     parseFloats it, so it can't be a calc(). */
+  --glass-text-w: 383;
+  --glass-strip-w: 220;
+  --glass-w: 603;
+  --glass-h: 214;
+  --glass-pad: 44;
+  --ps-u: var(--us); /* --paper-shadow scales like home's paper */
+  /* The frame width and its inner radius (the strip and the overlays). */
+  --fw: calc(var(--lightbox-frame-w) * var(--hk));
+  --ri: calc((50 - var(--lightbox-frame-w)) * var(--hk));
+  isolation: isolate; /* the overlays' blend modes stay inside the card */
+  /* 12px text (user request), the card scaled to match, shrunk further when
+     it would cross the window's right or bottom edge (24 frame px clear). */
+  --hk: min(
+    0.75px,
+    (596.24 * var(--vx) - 24 * var(--px)) / var(--glass-w),
+    (100svh - var(--hy) - 735.6 * var(--px)) / var(--glass-h)
+  );
+  position: absolute;
+  z-index: 4;
+  left: calc(1170.76 * var(--vx));
+  top: calc(var(--hy) + 711.6 * var(--px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: calc(var(--glass-w) * var(--hk));
+  height: calc(var(--glass-h) * var(--hk));
+  padding: 0 calc(var(--glass-strip-w) * var(--hk)) 0 calc(var(--glass-pad) * var(--hk));
+  border-radius: calc(50 * var(--hk));
+  background: var(--lightbox-face);
+  /* The paper cards' shadow (user request: match the rest of the site),
+     listed first so it sits over the spill; then the spill, three glows
+     falling off fast (roughly exponential). */
+  box-shadow:
+    var(--paper-shadow),
+    0 0 calc(4 * var(--hk)) color-mix(in srgb, var(--lightbox-spill) 70%, transparent),
+    0 0 calc(18 * var(--hk)) color-mix(in srgb, var(--lightbox-spill) 50%, transparent),
+    0 0 calc(56 * var(--hk)) color-mix(in srgb, var(--lightbox-spill) 35%, transparent);
+  font-family: var(--font-rounded);
+  font-size: calc(16 * var(--hk));
+  font-weight: var(--weight-rounded);
+  line-height: 1.19;
+  color: var(--glass-ink);
+  text-decoration: none;
+}
+
+/* The frame without WebGL (the shader draws its own, shaded). */
+.home__glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: calc(var(--lightbox-frame-w) * var(--hk)) solid var(--lightbox-frame);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Under the text: the lightbox face and frame. Over it all, the frame
+   included: the paint, so "who?" looks sprayed onto the card (user request). */
+.home__glass-base,
+.home__glass-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.home__glass-canvas {
+  z-index: 1;
+}
+
+/* The shader draws the face and the frame; the spill and shadow stay. */
+.home__glass[data-glass="gl"] {
+  background: none;
+}
+
+.home__glass[data-glass="gl"]::after {
+  display: none;
+}
+
+.home__glass:not([data-glass]) .home__glass-base,
+.home__glass:not([data-glass]) .home__glass-canvas {
+  display: none;
+}
+
+.home__glass p {
+  position: relative;
+  margin: 0 0 1.19em;
+}
+
+/* The lines' block runs from the first cap top to the last baseline, so the
+   top and bottom pads are what the eye sees (a flex container can't trim, so
+   its first and last paragraphs do). Of-type: the paint canvas comes last. */
+.home__glass p:first-of-type {
+  text-box: trim-start cap alphabetic;
+}
+
+.home__glass p:last-of-type {
+  margin-bottom: 0;
+  text-box: trim-end cap alphabetic;
+}
+
+.home__glass p span {
+  display: block;
+}
+
+/* ---- The "next stop" strip (user request; nextStop.ts loops it). Real
+   backlit signs colour a panel with translucent film over the same diffuser,
+   so the blue multiplies over the lit face (it keeps the face's falloff and
+   sheen) and its letters are cut out of the film: the bare face, the
+   brightest thing on the sign. Inside the frame on the right, its outer
+   corners following the frame's inner radius; the water flows from its
+   top-right corner (the path's origin, as the Map box's). The film runs
+   --sb under the frame (user request: no gap between the blue and the rim):
+   the shader's halation brightens the frame's inner edge with the white face
+   light, which read as a white seam; multiplied, it glows blue instead, and
+   the face's 1px anti-aliased edge is covered. ---- */
+.home__strip {
+  --sb: calc(2 * var(--hk));
+  position: absolute;
+  top: calc(var(--fw) - var(--sb));
+  right: calc(var(--fw) - var(--sb));
+  bottom: calc(var(--fw) - var(--sb));
+  width: calc(var(--glass-strip-w) * var(--hk) - var(--fw) + var(--sb));
+  border-radius: 0 calc(var(--ri) + var(--sb)) calc(var(--ri) + var(--sb)) 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home__strip-shape {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  mix-blend-mode: multiply;
+}
+
+.home__strip-shape path {
+  fill: var(--lightbox-strip);
+}
+
+/* Signage hierarchy: a small tracked label, the destination large, the
+   place under it. The label's cap top is level with the card's first line. */
+.home__strip-text {
+  position: absolute;
+  top: calc((var(--glass-pad) * var(--hk)) - var(--fw) + var(--sb));
+  left: calc(26 * var(--hk));
+  margin: 0;
+  color: var(--lightbox-strip-ink);
+  text-shadow: 0 0 calc(3 * var(--hk)) color-mix(in srgb, var(--lightbox-strip-ink) 55%, transparent);
+  line-height: 1.1;
+}
+
+.home__strip-text span {
+  display: block;
+}
+
+.home__strip-label {
+  font-size: calc(12 * var(--hk));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-box: trim-start cap alphabetic;
+  margin-bottom: calc(14 * var(--hk));
+}
+
+.home__strip-name {
+  font-size: calc(28 * var(--hk));
+}
+
+.home__strip-place {
+  margin-top: calc(4 * var(--hk));
+}
+
+/* ---- Backlit acrylic (user request): three layers on the face only (inset
+   by the frame, its inner radius), all under the "who?" paint. Tunables:
+   --lb-* in tokens.css. Each is its own element: nesting blend layers under
+   one blended parent would isolate them from the card. ---- */
+.home__lb {
+  position: absolute;
+  inset: var(--fw);
+  border-radius: var(--ri);
+  pointer-events: none;
+}
+
+/* Fluorescent tubes behind the diffuser, dimming toward the frame. The face
+   is near white, so lightening blends (soft-light, screen) can't show here:
+   the tubes read as the dimmer gaps between them (multiply), as on a real
+   ~90%-uniform box. Under the text (opaque ink blocks the backlight; white
+   bands over it striped the lines) and under the strip, whose film
+   multiplies over it, so the bands show through the blue. */
+.home__lb-tubes {
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(0 0 0 / var(--lb-tube-strength)) 0%,
+    rgb(0 0 0 / 0) calc(var(--lb-tube-period) / 2),
+    rgb(0 0 0 / var(--lb-tube-strength)) var(--lb-tube-period)
+  );
+  box-shadow: inset 0 0 calc(var(--lb-falloff-blur) * var(--hk)) rgb(0 0 0 / var(--lb-falloff));
+  mix-blend-mode: multiply;
+}
+
+/* The diffuser's fine grain (monochrome fractal noise). */
+.home__lb-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: var(--lb-grain);
+}
+
+/* The front glass: a diagonal highlight from the top left, a bright top edge. */
+.home__lb-sheen {
+  background:
+    linear-gradient(112deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 32%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.35) 0, rgb(255 255 255 / 0) calc(8 * var(--hk)));
+  mix-blend-mode: screen;
+  opacity: var(--lb-sheen);
+}
+
+/* ---- The cat (the footer's chat-cat.svg at 164 wide; Figma keeps its 5px
+   stroke, so the stroke is doubled in its own units). A click inside it
+   redraws it (Home.tsx); the box around it stays click-through. ---- */
+.home__cat {
+  position: absolute;
+  left: calc(115 * var(--vx));
+  top: calc(var(--hy) + 431.67 * var(--px));
+  width: calc(164.04 * var(--px));
+  pointer-events: none;
+}
+
+.home__cat svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.home__cat path {
+  stroke-width: 10.2;
+  pointer-events: all;
+}
+
+/* ---- GitHub, LinkedIn, mail and sound (social-links.css places the glyphs):
+   Figma's 124-wide row of three at (301, 515), centred on y 536.5. Kept
+   186 frame px right of the cat, so a wide screen doesn't pull them apart. ---- */
+.home .home__social {
+  --icon-scale: 0.83;
+  position: absolute;
+  left: calc(115 * var(--vx) + 186 * var(--px));
+  top: calc(var(--hy) + 536.5 * var(--px) - 18 * var(--s));
+  margin: 0;
+}
+
+/* ---- The skyline: 664×143 at (249.5, 816.5), inline (Home.tsx) so a click can draw its lines again (skylineDraw.ts; the whole box is the target), on its taped sheet (Figma
+   "Rectangle 154", turned -1.757°; trimmed on the left to 679×221, see sheets.ts), so it turns with the sheet. The
+   group lays out in .home on the full layout; compact makes it one block. ---- */
+.home__sky {
+  display: contents;
+}
+
+.home__skyline {
+  --cx: 581.5;
+  --cy: 888;
+  --w: 664;
+  --h: 143;
+  --r: -1.757deg;
+}
+
+.home__skyline svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ---- Compact layout (global.css): one centred column that scrolls: the
+   photos, the name, the card, the glyphs, "who?", then the cat beside the
+   skyline. No tech papers; the glass card overlaps the foot of "who?" as on
+   the full layout. ---- */
+@media (--compact) {
+  .home {
+    --col: min(var(--compact-w), 444px);
+    --hk: calc(var(--col) / 444);
+    /* The photo cluster spans frame x 1173–1675, y -48–272 (502 × 320). */
+    --pu: calc(min(var(--col), 420px) / 502);
+    --ux: var(--pu);
+    --us: var(--pu);
+    --ox: calc(-1173 * var(--pu));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(28 * var(--m));
+    height: auto;
+    min-height: 100svh;
+    padding: calc(28 * var(--m)) var(--gutter) calc(48 * var(--m));
+  }
+
+  .home__techs {
+    display: none;
+  }
+
+  .home__name { order: 1; }
+  .home__card { order: 2; }
+  .home .home__social { order: 3; }
+  .home__who { order: 4; }
+  .home__glass { order: 5; }
+  .home__cat { order: 6; }
+  .home__sky { order: 7; }
+
+  .home-photos {
+    --oy: calc(48 * var(--pu));
+    position: relative;
+    inset: auto;
+    width: calc(502 * var(--pu));
+    height: calc(320 * var(--pu));
+  }
+
+  .home__name,
+  .home__card,
+  .home .home__social,
+  .home__who,
+  .home__glass,
+  .home__cat {
+    position: relative;
+    left: auto;
+    top: auto;
+  }
+
+  .home__name {
+    align-self: center;
+    width: var(--col);
+    font-size: var(--type-name);
+    margin-bottom: calc(-12 * var(--m));
+  }
+
+  /* Left on the column, as wide as its glyphs (the toast sits past the last). */
+  .home .home__social {
+    align-self: flex-start;
+    margin-left: calc((100% - var(--col)) / 2);
+    --icon-scale: 1;
+  }
+
+  .home__who {
+    width: min(var(--col), 240px);
+    height: auto;
+    aspect-ratio: var(--who-w) / var(--who-h);
+  }
+
+  /* As wide as the column; pulled up over the lower 73% of "who?" (its
+     guide box is 99 tall, the card starts 26.6 below its top), less the gap. */
+  /* The strip becomes a band across the foot (the card keeps the text
+     column's width); the water still flows from its top-right corner. */
+  .home__glass {
+    --glass-w: 383;
+    --glass-h: 334;
+    --glass-band-h: 120;
+    --hk: calc(var(--col) / var(--glass-w));
+    padding: 0 0 calc(var(--glass-band-h) * var(--hk)) calc(var(--glass-pad) * var(--hk));
+    margin-top: calc(-28 * var(--m) - 0.733 * min(var(--col), 240px) * 98.8558 / 220.937);
+  }
+
+  .home__strip {
+    top: auto;
+    left: calc(var(--fw) - var(--sb));
+    width: auto;
+    height: calc(var(--glass-band-h) * var(--hk) - var(--fw) + var(--sb));
+    border-radius: 0 0 calc(var(--ri) + var(--sb)) calc(var(--ri) + var(--sb));
+  }
+
+  .home__strip-text {
+    top: calc(26 * var(--hk));
+    left: calc(var(--glass-pad) * var(--hk) - var(--fw) + var(--sb));
+  }
+
+  .home__cat {
+    width: calc(var(--col) * 0.28);
+    margin-bottom: calc(-40 * var(--m));
+    align-self: flex-start;
+    margin-left: calc((100% - var(--col)) / 2);
+  }
+
+  /* The sheet with its tape spans frame x 238–925, y 724–1004. */
+  .home__sky {
+    --su: calc(var(--col) / 687);
+    --ux: var(--su);
+    --us: var(--su);
+    --ox: calc(-238 * var(--su));
+    --oy: calc(-724 * var(--su));
+    display: block;
+    position: relative;
+    width: var(--col);
+    height: calc(280 * var(--su));
+  }
+}

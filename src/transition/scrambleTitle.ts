@@ -11,18 +11,18 @@
  */
 import { gsap } from "../lib/gsap";
 import { TRANSITION } from "../config/timings";
+import { clamp } from "../lib/math";
 
 const T = TRANSITION;
 
-const VARIATIONS = ["charFill", "charInverse", "charAccent", "charAccentInverse", "charAccentFill", "charBorder"];
+export const VARIATIONS = ["charFill", "charInverse", "charAccent", "charAccentInverse", "charAccentFill", "charBorder"];
 
-const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
-const snap = (v: number, step: number) => Math.round(v / step) * step;
+export const snap = (v: number, step: number) => Math.round(v / step) * step;
 const mapRange = (v: number, inMin: number, inMax: number, outMin: number, outMax: number) =>
   ((v - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 
 /** CSS cubic-bezier(x1, y1, x2, y2) evaluated at x (2xa's helper). */
-function cubicBezierAt(x: number, x1: number, y1: number, x2: number, y2: number, eps = 1e-6): number {
+export function cubicBezierAt(x: number, x1: number, y1: number, x2: number, y2: number, eps = 1e-6): number {
   const bx = (u: number) => 3 * (1 - u) ** 2 * u * x1 + 3 * (1 - u) * u ** 2 * x2 + u ** 3;
   const by = (u: number) => 3 * (1 - u) ** 2 * u * y1 + 3 * (1 - u) * u ** 2 * y2 + u ** 3;
   const dx = (u: number) => 3 * (1 - u) ** 2 * x1 + 6 * (1 - u) * u * (x2 - x1) + 3 * u ** 2 * (1 - x2);
@@ -47,6 +47,32 @@ function cubicBezierAt(x: number, x1: number, y1: number, x2: number, y2: number
   return by(u);
 }
 
+/** Frames to type `length` characters in (typing out takes as many again). */
+export function titleFrames(length: number): number {
+  return length ? Math.round(T.TITLE_FPS * T.TITLE_SECONDS * (1 + length * T.TITLE_STRETCH_PER_CHAR)) : 0;
+}
+
+/** When character `i` of `length` starts, as a fraction of the type-in. */
+export function charStart(i: number, length: number): number {
+  return snap(cubicBezierAt(i / (length > 1 ? length - 1 : 1), ...T.TITLE_START_CURVE), T.TITLE_START_SNAP);
+}
+
+/** A character's class at `frame` (0 → 2 × frames: in, then out), given its
+ *  start `cp` and the shuffled box `variations`. */
+export function charClass(frame: number, frames: number, cp: number, variations: readonly string[]): string {
+  const denominator = frames - frames * T.TITLE_CYCLE_LENGTH || 1;
+  const out = frame > frames;
+  const h = (out ? frame - frames : frame) / denominator;
+  const e = clamp(snap(h - cp, T.TITLE_PROGRESS_SNAP), 0, 1);
+  let variant = "charInit";
+  if (e > 0) variant = variations[Math.round(mapRange(e, 0, 1, 0, T.TITLE_CYCLES)) % variations.length]!;
+  if (e >= 1) variant = "";
+  const moving = variant ? `char ${variant}` : "char";
+  return out
+    ? e <= 0 ? "char" : e >= 1 ? "char charInit" : moving
+    : e <= 0 ? "char charInit" : e >= 1 ? "char" : moving;
+}
+
 interface CharNode {
   el: HTMLSpanElement;
   /** When this character starts, as a fraction of the type-in. */
@@ -54,12 +80,11 @@ interface CharNode {
   cls: string;
 }
 
-export class ScrambleTitle {
+class ScrambleTitle {
   readonly el = document.createElement("span");
 
   private chars: CharNode[] = [];
   private frames = 0;
-  private denominator = 1;
   private variations = [...VARIATIONS];
   private start = 0;
   private done: (() => void) | null = null;
@@ -106,9 +131,7 @@ export class ScrambleTitle {
     this.el.textContent = "";
     this.chars = [];
     const length = groups.join("").replace(/\s/g, "").length;
-    const divisor = length > 1 ? length - 1 : 1;
-    this.frames = length ? T.TITLE_FPS * (1 + length * 0.01) : 0;
-    this.denominator = this.frames - this.frames * T.TITLE_CYCLE_LENGTH || 1;
+    this.frames = titleFrames(length);
     let i = 0;
     groups.forEach((text, g) => {
       const group = document.createElement("span");
@@ -124,7 +147,7 @@ export class ScrambleTitle {
           const el = document.createElement("span");
           el.className = "char charInit";
           el.textContent = ch;
-          const cp = snap(cubicBezierAt(i / divisor, 0, 0.75, 0.75, 0), 0.05);
+          const cp = charStart(i, length);
           this.chars.push({ el, cp, cls: el.className });
           word.append(el);
           i += 1;
@@ -146,19 +169,7 @@ export class ScrambleTitle {
   };
 
   private apply(frame: number) {
-    const out = frame > this.frames;
-    const h = (out ? frame - this.frames : frame) / this.denominator;
-    for (const c of this.chars) {
-      const e = clamp(snap(h - c.cp, 0.1), 0, 1);
-      let variant = "charInit";
-      if (e > 0) variant = this.variations[Math.round(mapRange(e, 0, 1, 0, T.TITLE_CYCLES)) % this.variations.length];
-      if (e >= 1) variant = "";
-      const moving = variant ? `char ${variant}` : "char";
-      const cls = out
-        ? e <= 0 ? "char" : e >= 1 ? "char charInit" : moving
-        : e <= 0 ? "char charInit" : e >= 1 ? "char" : moving;
-      this.setClass(c, cls);
-    }
+    for (const c of this.chars) this.setClass(c, charClass(frame, this.frames, c.cp, this.variations));
   }
 
   private setClass(c: CharNode, cls: string) {

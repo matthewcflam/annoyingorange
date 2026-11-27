@@ -6,93 +6,208 @@
  * readToken() from src/lib/tokens.ts, so there is one source of truth.
  */
 :root {
-  /* ---- Fonts (spec §5). Family names must match Fontsource exactly. ---- */
-  --font-body:    "Inter Variable", system-ui, sans-serif;
-  --font-name:    "Inter Variable", system-ui, sans-serif;
-  --font-station: "Fragment Mono", ui-monospace, monospace;
-  --font-sound:   "Inter Variable", system-ui, sans-serif;
-  --font-muted:   "Inter Variable", system-ui, sans-serif;
+  /* ---- Fonts (spec §5). Family names must match Fontsource exactly.
+     Home uses the project pages' Helvetica Rounded Bold (user
+     request; --font-rounded below). ---- */
+  --font-body:    var(--font-rounded);
+  --font-name:    var(--font-rounded);
+  /* Body text (user request): Nunito Light, from @fontsource/nunito (only the
+     300 weight is imported, main.tsx). The home bio, About and Experience
+     copy, and the project text; the names, Map box, Connections card,
+     project list, orange headings, footer and transition stay Helvetica
+     Rounded Bold. */
+  --font-text:    "Nunito", "Inter Variable", system-ui, sans-serif;
+  --weight-text:  300;
 
   /* ---- Type scale (user request): text that should match uses these, so
      it is the same size and scales the same way on every page. Each role is
      its mockup size times --px, with its own floor (user request: legible on
      phones, and the floors keep the hierarchy name > label > head > body >
      small). The floors are in rem, so browser zoom and a larger default
-     font size still apply. --tu is --px floored so 18-unit body text never
-     drops below 16px. ---- */
-  --tu:           max(var(--px), 1rem / 18);
+     font size still apply. ---- */
   --type-name:    max(1.75rem, 48 * var(--px));   /* "Matthew Lam" (home, station header), transition title: floor 28 */
-  --type-label:   max(1.125rem, 30 * var(--px));  /* home map labels: floor 18 */
-  --type-head:    max(1.25rem, 24 * var(--tu));   /* gate options: floor 20 */
-  --type-body:    calc(18 * var(--tu));           /* body copy (and Experience role and company): max(16px, 18 * --px) */
-  /* Body spacing from the user's references, scaled to the body size: lines
-     on a 24px pitch for 15px text; from one paragraph (point) to the next,
-     34px line to line (the gap is that minus a line); a closing line ("Connect")
-     sits one more body size further. */
-  --type-body-lh:     round(calc(var(--type-body) * 1.6), 1px);
-  --type-para-gap:    calc(round(var(--type-body) * 34 / 15, 1px) - var(--type-body-lh));
-  --type-section-gap: calc(var(--type-para-gap) + round(var(--type-body), 1px));
   --type-small:   max(0.8125rem, 20 * var(--px)); /* Map / Close, toasts: floor 13 */
-  --type-footer:  0.8125rem;                      /* the footer: fixed 13, never scales (user request) */
-  /* The station header at its floors, fixed (user request): never scales. */
-  --type-station-name:  1.75rem;                  /* station "Matthew Lam": fixed 28 */
-  --type-station-small: 1rem;                     /* station glyphs and Map / Close: fixed 16 */
   /* Social glyphs: the unit of the 36-unit icon box. It is --type-small / 20,
      the Map button's own unit (user request), so the glyphs and the button
      always scale together and share its floor. */
   --iu:           calc(var(--type-small) / 20);
 
-  /* ---- Base: --color-bg / --color-text follow data-theme (global.css) ---- */
-  --color-home-bg:      #FFFFF8;  /* home and the gate */
+  /* ---- Stacking: the site's top-level layers, bottom to top ---- */
+  --z-page:       0;
+  --z-chrome:     10;
+  --z-grid:       44;   /* Shift+G overlay */
+  --z-scrollbar:  45;
+  --z-lightbox:   48;   /* project media, expanded */
+  --z-transition: 50;   /* the page-change cover */
+  --z-cursor:     60;   /* above the cover */
+
+  /* ---- Hover colour fades (links, Map rows, Connections) ---- */
+  --hover-fade: 0.15s;
+
+  /* ---- Base: --color-bg / --color-text (global.css) ---- */
+  --color-home-bg:      #FFFFF8;  /* home */
   --color-home-text:    #000000;
-  --color-station-bg:   #212121;  /* About, Experience, Projects */
+  --color-station-bg:   #212121;  /* the dark cover (every page is light now) */
   --color-station-text: #FFFFFF;
-  --color-divider:      #909090;  /* the station pages' vertical line */
-  --color-experience-date: #A8A8A8;  /* Experience dates (sampled) and body copy */
+  /* The cursor and scroll thumb: white under difference blending, so they
+     invert whatever is below them. */
+  --color-cursor:       #FFFFFF;
 
   /* ---- Brand ---- */
   --color-orange: #FF7700;          /* "who?", scribbles, Portfolio hero */
+  /* Highlighted text (user request): the site orange, not the browser blue.
+     White text so orange text stays readable when it's selected. */
+  --color-selection:      var(--color-orange);
+  --color-selection-text: #FFFFFF;
 
-  /* ---- Transit map ---- */
-  --color-route:          #0664DF;  /* spec said ≈#0A64E0; sampled */
-  --color-station-fill:   #FFFFFF;
-  --color-station-active: #FFA62A;  /* mini-map current dot, sampled */
+  /* ---- Cursor label (chrome/Cursor.tsx): what a click will do, in an
+     orange box at 70% (user request; the text stays fully white) ---- */
+  --cursor-label-bg:    color-mix(in srgb, var(--color-orange) 70%, transparent);
+  --cursor-label-color: #FFFFFF;
+  --cursor-label-font:  var(--font-rounded);
+  --cursor-label-size:  16px;
+  --cursor-label-pad:   0.3em 0.5em 0.25em;
+
+  /* ---- Focus rings ---- */
+  --color-route:          #0664DF;  /* the old transit-map blue, sampled */
 
   /* ---- Page transition (2xa.studio dither cover) ----
-     The cover is the opposite of the page being left: dark leaving home,
-     light leaving a station page. Each matches the page it reveals or covers. */
+     The cover is the opposite of the page being left: dark leaving a light
+     page, light leaving a dark one (transition/pageTransition.ts). */
   --color-cover-dark:        var(--color-station-bg);
-  --color-cover-light:       var(--color-home-bg);
-  --color-transition-accent: var(--color-route); /* 2xa uses its blue */
-  --font-transition: "Inter Variable", system-ui, sans-serif;
-  --font-key-meta:   "Jersey 25", ui-monospace, monospace;  /* "2026" and "Lam" on the key card */
+  --color-transition-accent: var(--color-orange); /* the site orange (user request; 2xa uses its blue) */
+  --font-transition: var(--font-rounded);
 
-  /* ---- Station chrome ---- */
-  --color-map-pill:      #D9D9D9;
-  --color-map-pill-text: #000000;
-  --color-map-open:      var(--color-station-bg);  /* "Close" while the keychain is open: matches the page (user change) */
-  --color-map-open-text: #FFFFFF;
+  /* ---- Station chrome: the Map box (components/MapBox.tsx, Figma "Portfolio" /
+     "Portfolio - Map Expanded") ---- */
+  --color-map-box:      var(--color-route);
+  --color-map-box-text: #FFFFFF;
+  --color-map-dot:      #FFFFFF;
+  --color-map-here:     var(--color-orange);  /* the current station's dot and label */
 
-  /* ---- Keychain (keychain/) ---- */
-  --color-key-card:        #FFFFFF;  /* the station key card, under its paper texture (Group 67.png) */
-  --color-key-card-text:   #000000;
-  --color-key-bubble:      #FFFFFF;  /* station bubbles, measured */
-  --color-key-here:        #FFA62A;  /* the current station's bubble (user change; was the route blue, then pink) */
-  --color-key-band:        var(--color-route);  /* the bands across the card's top and bottom */
-  --color-key-strip:       color-mix(in srgb, var(--color-route) 10%, transparent);  /* the faint strip across the middle */
+  /* ---- Project posters (pages/projects/ProjectList.tsx, Figma "… Hover") ---- */
+  --color-poster-portfolio:   var(--color-orange);
+  --color-poster-remind:      #4DAE44;
+  --color-poster-oyster-news: #D24F39;
+  --color-poster-mango:       #F89E21;
+  --color-poster-text:        #FFFFFF;
 
-  /* ---- Home ---- */
+  /* ---- Home's paper (Figma "Home Page Final"; components/paper/): the prints
+     are see-through like the reference (opacity), with no tint (user
+     request: Figma's 10% orange overlay was removed). The tape is a little more orange than Figma's (user request:
+     realistic masking tape), and the photo under it shows through. The
+     skyline's sheet is plain paper, a hair darker than the page.
+     --paper-sheet and --tape-tint are baked into the images at build time
+     (scripts/paperBake.ts; restart the dev server after changing them); the
+     fibre and halftone are PAPER in timings.ts. One small drop shadow,
+     straight down (Figma's 0/4/4), lighter under the thin tape. --ps-u is the sheet's unit (home.css). */
+  --paper-sheet:   #FBFAF3;
+  --photo-opacity: 0.8;
+  --about-photo-opacity: 0.95; /* About's two prints (user request) */
+  --about-card-opacity: 0.7; /* About's Connections card on the collage (Figma 70%) */
+  /* About's sketch card (Figma "Group 121"): a flat grey card and the orange
+     bird drawn on it, each at 70%. */
+  --about-sketch-bg:      #D9D9D9;
+  --about-sketch-opacity: 0.7;
+  --tape-opacity:  0.9;
+  --tape-tint:     rgba(255, 140, 30, 0.14);
+  --paper-shadow:        0 calc(3 * var(--ps-u, 1px)) calc(4 * var(--ps-u, 1px)) rgb(0 0 0 / 0.18);
+  /* Home's two tech papers top-left (Figma "Group 123/124"): plain sheets at
+     70%, the list in a pale grey, also at 70%. */
+  --home-tech-paper:   #F4F4F0;
+  --home-tech-opacity: 0.7;
+  --home-tech-ink:     #C4C4C0;
+  --home-tech-shadow:  0 calc(4 * var(--px)) calc(4 * var(--px)) rgb(0 0 0 / 0.25);
+  /* ---- Background textures (user request, texture plan): static SVG noise,
+     felt more than seen. Each strength is the `opacity` (or stroke alpha)
+     baked into its file in assets-src/textures/, since CSS can't set opacity
+     per background layer. Wall grain: every page (global.css). Tile grout:
+     home only, under the grain (home.css); its size is the SVG's own
+     width/height (96×48, user request: larger than the plan's 72×36; keep 2:1
+     and the 1px strokes). The textures show only on
+     the bare wall (user request): see-through pieces sit on .wall-solid
+     (global.css). Paper stock (.paper-stock, global.css) is defined but
+     unused for now (user request: no grain on the pieces). ---- */
+  --tex-wall-grain:   url("../../assets-src/textures/grain-wall.svg");
+  --tex-paper-grain:  url("../../assets-src/textures/grain-paper.svg");
+  --tex-paper-mottle: url("../../assets-src/textures/paper-mottle.svg");
+  --tex-tile:         url("../../assets-src/textures/tile-grout.svg");
 
-  /* ---- About photos: frosted glass (pages/AboutPhoto.tsx) ---- */
-  --color-frost-wash: rgba(226, 232, 240, 0.38);  /* milky, slightly cool */
-  --frost-grain:      0.14;
+  /* Home's card over "who?" (Figma "Rectangle 157"), drawn as a backlit
+     subway lightbox (user request; LIGHTBOX in timings.ts). --glass-fill is
+     the /?glass-lab's Figma glass only. */
+  --glass-fill:   rgb(244 244 240 / 0.2);
+  --glass-ink:    rgb(0 0 0 / 0.8);
+  /* The diffuser face: a cool fluorescent white, which reads as electric
+     light against the warm wall (user choice). */
+  --lightbox-face:    #FAFDFF;
+  /* The snap frame: graphite anodised aluminium. Its width is card design px
+     (the shader reads it too). */
+  --lightbox-frame:   #2E3135;
+  --lightbox-frame-w: 5; /* was 9; thinner at the user request */
+  /* The light spill on the wall (stacked glows, home.css): a cool tint that
+     washes out the wall texture near the box. */
+  --lightbox-spill:   rgb(248 251 255);
+  /* The "next stop" strip (user request): translucent blue film over the
+     same face (multiplied, so the backlight shows through it), its letters
+     cut out of the film: the bare face colour. */
+  --lightbox-strip:     var(--color-route);
+  --lightbox-strip-ink: var(--lightbox-face);
+  /* Backlit acrylic overlays on the face (user request; home.css .home__lb-*):
+     tubes + edge falloff (multiply, under the text: the dim gaps between
+     tubes), diffuser grain (overlay), glass sheen (screen). They replace the
+     shader's FALLOFF and SHEEN. */
+  --lb-tube-strength: .07;  /* the dip between tubes */
+  --lb-tube-period:   25%;  /* 25% = 4 tubes across */
+  --lb-falloff:       .08;
+  --lb-falloff-blur:  66;   /* card design px (≈50px at 12px text) */
+  --lb-grain:         .55;
+  --lb-sheen:         .45;
+  /* Its shadow is the paper cards' --paper-shadow (user request). */
+  --paper-shadow-tape:   drop-shadow(0 calc(1.2 * var(--ps-u, 1px)) calc(1 * var(--ps-u, 1px)) rgb(0 0 0 / 0.1));
 
-  /* ---- Project pages ---- */
-  --color-link-underline: #BE4525;  /* spec said ≈#C8452F; sampled. Asset missing */
-  --color-obstacle-oyster: #D24F39; /* spec said ≈#D9503A; sampled */
-  --color-mango:       #FFA62A;     /* from mango.svg */
-  --color-mango-stem:  #76C933;     /* from mango.svg */
-  --color-portfolio-grey: #77736F;  /* Portfolio hero back circle, sampled */
-  --color-hero-placeholder: #172131; /* missing world-map hero: its ocean, sampled */
+  /* ---- Project pages (Figma "Portfolio", a 1640-wide frame) ---- */
+  /* Helvetica Rounded Bold: supplied by the user as
+     assets-src/fonts/helvetica-rounded-bold.woff2 (lib/fonts.ts registers it
+     when the file exists). Until then "Rounded Fallback" (global.css: a local
+     copy, else Arial Rounded), then Inter. */
+  --font-rounded: "Helvetica Rounded", "Rounded Fallback", "Inter Variable", system-ui, sans-serif;
+  --weight-rounded: 700;
+  /* Site-wide tracking (user request): -4% everywhere, only "Matthew Lam"
+     (home and the page header) at -8%. */
+  --tracking:      -0.04em;
+  --tracking-name: -0.08em;
+  /* Project scale (user request): the project pages and the Map box were
+     judged at 67% browser zoom, so every fixed size on them is × --ps (the
+     compact layout keeps 1). --pp is one project px. Tune --ps here. */
+  --ps: 0.6667;
+  --pp: calc(var(--ps) * 1px);
+  /* The layout grid (Figma: 9 stretched columns, 15 margin, 15 gutter; GRID in
+     lib/frame.ts mirrors these for image sizes). The
+     project page lays out on it and chrome/GridOverlay.tsx draws it (Shift+G). */
+  --grid-cols:   9;
+  --grid-margin: calc(15 * var(--pp));
+  --grid-gutter: calc(15 * var(--pp));
+  /* The 9 stretched columns as a grid template (Experience's jobs, each project). */
+  --grid-template: repeat(var(--grid-cols), minmax(0, 1fr));
+  --grid-col:    calc((100vw - 2 * var(--grid-margin) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
+  --grid-span2:  calc(2 * var(--grid-col) + var(--grid-gutter));
+  --color-grid:  rgba(200, 75, 33, 0.1);
+  /* Type: fixed px × --ps (the columns stretch, the type doesn't). */
+  --type-project-title: calc(3rem * var(--ps));    /* 32 (48 × 2/3; 48 compact): "Matthew Lam" and "Let's chat!" (user request: they meet in the middle) */
+  --type-project-name:  calc(2.25rem * var(--ps)); /* 24 (36 compact): media labels */
+  --type-project-card:  calc(24 * var(--map-k)); /* 21 (24 compact): the Map box, matching Connections (24 × --ft) */
+  --type-project-body:  calc(1.5rem * var(--ps));  /* 16 (24 compact): everything else, footer credits included (user request; 16 in Figma) */
+  --project-lh:         1.1875;    /* 19px lines at 16 (measured from the frame) */
+  --color-grey:  #939393;          /* inactive projects, tools, list rules */
+  --color-media: #C6C6C6;          /* media placeholders */
+  --color-lightbox-dim: rgb(0 0 0 / 0.55); /* the page behind the expanded media player */
 
+}
+
+/* The compact layout (global.css) keeps the project pages at full size. */
+@media (--compact) {
+  :root {
+    --ps: 1;
+  }
 }

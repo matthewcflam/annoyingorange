@@ -1,0 +1,119 @@
+/*
+ * The station page shell (StationLayout.tsx), shared by About, Experience
+ * and the project pages (Figma "Portfolio", a 1640-wide frame): a light page
+ * on the 9-column grid (tokens.css --grid-*), everything Helvetica Rounded
+ * Bold. Type and vertical measures are fixed px × --ps (tokens.css: 2/3, the
+ * size the user judged at 67% zoom), written calc(N * var(--pp)).
+ *
+ * Figma trims text boxes to the cap height, so every y there is a cap top.
+ * `text-box: trim-both cap alphabetic` does the same here (where a browser
+ * lacks it, text sits a few px lower).
+ */
+.page {
+  /* One line of body text: 19px at 16. */
+  --line: calc(var(--type-project-body) * var(--project-lh));
+  /* Headings in the page: a project's name, an Experience company. 24 at a
+     16px body (user request; was 2.25 × body). */
+  --type-project-heading: calc(1.5 * var(--type-project-body));
+  /* How far below the top the footer's cat must stay, clear of the fixed
+     header (footer.css). The project pages raise it to clear their list. */
+  --head-clear: var(--station-head-h);
+
+  position: relative;
+  min-height: 100svh;
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-rounded);
+  font-size: var(--type-project-body);
+  line-height: var(--project-lh);
+  letter-spacing: var(--tracking);
+}
+
+.page h1,
+.page h2,
+.page h3,
+.page p,
+.page ul,
+.page ol {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.page ul {
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- Fixed, columns 1–2: the name (and on the project pages, the list) ---- */
+.page__head {
+  position: fixed;
+  top: 0;
+  left: var(--grid-margin);
+  z-index: 3;
+  width: var(--grid-span2);
+}
+
+/* "Matthew Lam": --type-project-title, cap top at 20. */
+.page .page__name {
+  margin-top: calc(20 * var(--pp));
+  font-size: var(--type-project-title);
+  letter-spacing: var(--tracking-name);
+  line-height: 1;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+.page__home {
+  color: var(--color-orange);
+  text-decoration: none;
+}
+
+/* Keyboard focus on the header's links (the name, the Experience and Projects
+   indexes). */
+.page__home:focus-visible,
+.experience-list__link:focus-visible,
+.project-list__link:focus-visible {
+  outline: 2px solid var(--color-route);
+  outline-offset: 4px;
+}
+
+/* Body text in Nunito Light (tokens.css --font-text): the About and
+   Experience copy and the project body (tools, taglines, descriptions,
+   media labels). The headings (and the project names) stay Helvetica Rounded Bold; so do the header, the
+   project list and the footer, which sit outside these blocks. */
+.page .about__copy,
+.page .experience__jobs,
+.page .project__body {
+  font-family: var(--font-text);
+  font-weight: var(--weight-text);
+}
+
+/* ---- Compact layout (global.css): the header scrolls with the page (the
+   Map box stays), with no band. ---- */
+@media (--compact) {
+  .page__head {
+    position: relative;
+    left: auto;
+    width: auto;
+    margin: 0 var(--grid-margin);
+    /* Clear of the Map box. */
+    padding-top: 1px;
+  }
+
+  .page {
+    --type-project-heading: 24px;
+  }
+
+  .page .page__name {
+    margin-top: calc(var(--station-row-mid) - 13px);
+    font-size: min(var(--type-project-title), (100vw - 2 * var(--grid-margin) - var(--map-w) - 16px) / 5.9);
+  }
+}
+
+/* A blank line between paragraphs (About's copy, Experience's points, a
+   project's description). */
+.page .about__copy p + p,
+.page .experience-job__points p + p,
+.page .project-block__desc p + p {
+  margin-top: var(--line);
+}

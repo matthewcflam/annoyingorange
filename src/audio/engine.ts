@@ -2,20 +2,22 @@
  * The sound engine (spec §9). Module-level singletons only, never created in
  * effects, so React StrictMode can't double them (§4.2).
  *
- *   sources ─┬─> ui bus ─────────┐
- *            ├─> transition bus ─┼─> master gain ─> limiter ─> destination
- *            └─> ambient bus ────┘
+ *   sources ─┬─> ui bus ──────┬─> master gain ─> limiter ─> destination
+ *            └─> ambient bus ─┘
  *
  * Lifecycle:
- * 1. preloadSounds() at app start, while the gate shows: fetch + decode every
- *    discovered file on an OfflineAudioContext (exempt from autoplay policy).
- * 2. unlock() inside the gate gesture, synchronously: creates the one real
- *    AudioContext and resumes it. Creating it earlier makes Chrome warn.
- * 3. play() anywhere after that.
+ * 1. preloadSounds() at app start: fetch + decode every discovered file on an
+ *    OfflineAudioContext (exempt from autoplay policy).
+ * 2. Sound starts muted on every load (user decision). unlock() runs inside
+ *    the first toggle-on gesture (home's sound toggle), synchronously: it
+ *    creates the one real AudioContext and resumes it. Creating it earlier
+ *    makes Chrome warn. A visitor who never turns sound on never gets one.
+ * 3. play() anywhere after that (a no-op before it).
  */
 import { MASTER_GAIN, SOUNDS, SOUND_FILES, variantKeys, type Bus, type SoundDef, type SoundId } from "../config/sounds";
 import { AUDIO } from "../config/timings";
 import { SAMPLE_RATE, synthPlaceholder } from "./procedural";
+import { onBrowserIdle } from "../lib/idle";
 
 // ---------------------------------------------------------------------------
 // Buffers
@@ -23,11 +25,12 @@ import { SAMPLE_RATE, synthPlaceholder } from "./procedural";
 
 type Source = "file" | "placeholder";
 interface Loaded {
-  buffer: AudioBuffer | null; // null while a file is still decoding
+  /** null while a file is still decoding, or a placeholder not yet made. */
+  buffer: AudioBuffer | null;
   source: Source;
 }
 
-/** Keyed by file key: "gate.select", "paint.stroke.3". */
+/** Keyed by file key: "mute.toggle", "paint.stroke.3". */
 const buffers = new Map<string, Loaded>();
 let preloadStarted = false;
 
@@ -36,13 +39,30 @@ function placeholderFor(id: SoundId, key: string): AudioBuffer {
   return synthPlaceholder((SOUNDS[id] as SoundDef).placeholder, variant);
 }
 
+/** A placeholder's buffer, synthesized the first time it's needed (most
+ *  visitors never turn sound on, so boot never pays for them). */
+function bufferOf(id: SoundId, key: string): AudioBuffer | null {
+  const entry = buffers.get(key);
+  if (!entry) return null;
+  if (!entry.buffer && entry.source === "placeholder") entry.buffer = placeholderFor(id, key);
+  return entry.buffer;
+}
+
+/** Synthesize every placeholder not made yet (after unlock, when idle). */
+function synthPlaceholders() {
+  for (const id of Object.keys(SOUNDS) as SoundId[]) for (const key of variantKeys(id)) bufferOf(id, key);
+}
+
 /**
- * Decode every discovered sound file and synthesize placeholders for the
- * rest. Idempotent. Resolves when every file has decoded or fallen back.
+ * Decode every discovered sound file; the rest (and any that fail) fall back
+ * to synthesized placeholders, made on first use. Idempotent. Resolves when
+ * every file has decoded or fallen back.
  */
 export function preloadSounds(): Promise<void> {
   if (preloadStarted) return Promise.resolve();
   preloadStarted = true;
+  // No Web Audio at all (some embedded and test browsers): the site runs silent.
+  if (!HAS_WEB_AUDIO) return Promise.resolve();
 
   // Module-level decoder: an offline context never triggers autoplay rules,
   // and AudioBuffers are not tied to the context that decoded them.
@@ -55,7 +75,7 @@ export function preloadSounds(): Promise<void> {
       const url = SOUND_FILES.get(key);
       if (!url) {
         missing.push(key);
-        buffers.set(key, { buffer: placeholderFor(id, key), source: "placeholder" });
+        buffers.set(key, { buffer: null, source: "placeholder" });
         continue;
       }
       buffers.set(key, { buffer: null, source: "file" });
@@ -66,7 +86,7 @@ export function preloadSounds(): Promise<void> {
           .then((buffer) => void buffers.set(key, { buffer, source: "file" }))
           .catch((err) => {
             if (import.meta.env.DEV) console.warn(`[audio] "${key}" failed to decode; using placeholder.`, err);
-            buffers.set(key, { buffer: placeholderFor(id, key), source: "placeholder" });
+            buffers.set(key, { buffer: null, source: "placeholder" });
           }),
       );
     }
@@ -78,21 +98,18 @@ export function preloadSounds(): Promise<void> {
   return Promise.all(jobs).then(() => undefined);
 }
 
-/** Dev inspection: where each file key's audio comes from. */
-export function soundReport(): Record<string, Source | "decoding"> {
-  const out: Record<string, Source | "decoding"> = {};
-  for (const [key, l] of buffers) out[key] = l.buffer ? l.source : "decoding";
-  return out;
-}
-
 // ---------------------------------------------------------------------------
 // Context + graph
 // ---------------------------------------------------------------------------
 
+/** Every browser the site targets has Web Audio; without it, sound stays off
+ *  (play() returns null) instead of the boot throwing. */
+const HAS_WEB_AUDIO = typeof AudioContext !== "undefined" && typeof OfflineAudioContext !== "undefined";
+
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let buses: Record<Bus, GainNode> | null = null;
-let muted = false;
+let muted = true; // every load starts muted
 const listeners = new Set<() => void>();
 
 function notify() {
@@ -120,6 +137,7 @@ type AudioSessionNavigator = Navigator & { audioSession?: { type: string } };
  * running context (§6.4).
  */
 export function unlock({ muted: startMuted }: { muted: boolean }): void {
+  if (!HAS_WEB_AUDIO) return;
   muted = startMuted;
 
   if (ctx) {
@@ -152,13 +170,14 @@ export function unlock({ muted: startMuted }: { muted: boolean }): void {
 
   buses = {
     ui: new GainNode(ctx),
-    transition: new GainNode(ctx),
     ambient: new GainNode(ctx),
   };
   for (const bus of Object.values(buses)) bus.connect(master);
 
   installLifecycle(ctx);
   notify();
+  // Sound is on: make the rest of the placeholders before they're asked for.
+  onBrowserIdle(synthPlaceholders, { timeoutMs: AUDIO.SYNTH_IDLE_TIMEOUT_MS, fallbackMs: AUDIO.SYNTH_IDLE_FALLBACK_MS });
 }
 
 function applyMute() {
@@ -203,29 +222,15 @@ if (import.meta.hot) {
 export interface PlayOptions {
   /** AudioContext time to start at. Schedule rhythmic sounds up front (§9.3). */
   when?: number;
-  /** Multiplies the manifest gain. */
-  gain?: number;
-  /** Multiplies playbackRate (e.g. station.hover pitch by index). */
-  rate?: number;
-  /** -1 (left) … 1 (right). */
-  pan?: number;
-  loop?: boolean;
-  /** Random ±rate/gain variation. Default: on, except for loops. */
-  vary?: boolean;
 }
 
-export interface Voice {
+interface Voice {
+  stopped: boolean;
   /** Fade out and stop. Safe to call more than once. */
   stop(fade?: number): void;
-  /** Smoothly set gain (relative to the play's base gain), e.g. per frame. */
-  setGain(value: number, timeConstant?: number): void;
 }
 
-interface ActiveVoice extends Voice {
-  stopped: boolean;
-}
-
-const voices = new Map<SoundId, ActiveVoice[]>();
+const voices = new Map<SoundId, Voice[]>();
 const roundRobin = new Map<SoundId, number>();
 
 const spread = (amount: number) => 1 + (Math.random() * 2 - 1) * amount;
@@ -236,7 +241,7 @@ function nextBuffer(id: SoundId): AudioBuffer | null {
   const start = roundRobin.get(id) ?? 0;
   for (let k = 0; k < keys.length; k++) {
     const i = (start + k) % keys.length;
-    const buffer = buffers.get(keys[i])?.buffer;
+    const buffer = bufferOf(id, keys[i]!);
     if (buffer) {
       roundRobin.set(id, i + 1);
       return buffer;
@@ -246,41 +251,32 @@ function nextBuffer(id: SoundId): AudioBuffer | null {
 }
 
 /**
- * Play a sound. Returns a Voice handle (for loops and live gain), or null if
- * the engine isn't unlocked or the buffer isn't ready. Muted plays still run
- * (master gain is 0), so unmuting mid-loop just works.
+ * Play a sound, with a little random gain and rate variation. A no-op until
+ * the engine is unlocked or while the buffer isn't ready. Muted plays still
+ * run (master gain is 0).
  */
-export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
-  if (!ctx || !buses) return null;
+export function play(id: SoundId, opts: PlayOptions = {}): void {
+  if (!ctx || !buses) return;
   const buffer = nextBuffer(id);
-  if (!buffer) return null;
+  if (!buffer) return;
 
   const context = ctx;
-  const def = SOUNDS[id] as SoundDef;
-  const vary = opts.vary ?? !opts.loop;
-  const baseGain = (def.gain ?? 1) * (opts.gain ?? 1) * (vary ? spread(AUDIO.GAIN_VARIATION) : 1);
-
+  const def: SoundDef = SOUNDS[id];
   const src = new AudioBufferSourceNode(context, {
     buffer,
-    loop: opts.loop ?? false,
-    playbackRate: (opts.rate ?? 1) * (vary ? spread(AUDIO.RATE_VARIATION) : 1),
+    playbackRate: spread(AUDIO.RATE_VARIATION),
   });
-  const gain = new GainNode(context, { gain: baseGain });
+  const gain = new GainNode(context, { gain: (def.gain ?? 1) * spread(AUDIO.GAIN_VARIATION) });
   src.connect(gain);
-  let tail: AudioNode = gain;
-  if (opts.pan) {
-    tail = new StereoPannerNode(context, { pan: opts.pan });
-    gain.connect(tail);
-  }
-  tail.connect(buses[def.bus]);
+  gain.connect(buses[def.bus]);
 
   // Voice limit: fade out the oldest before adding a new one.
   const list = voices.get(id) ?? [];
   voices.set(id, list);
   const limit = def.voices ?? AUDIO.DEFAULT_VOICE_LIMIT;
-  while (list.length >= limit) list[0].stop(AUDIO.VOICE_STEAL_FADE);
+  while (list.length >= limit) list[0]!.stop(AUDIO.VOICE_STEAL_FADE);
 
-  const voice: ActiveVoice = {
+  const voice: Voice = {
     stopped: false,
     stop(fade = AUDIO.VOICE_STEAL_FADE) {
       if (voice.stopped) return;
@@ -291,11 +287,7 @@ export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
       gain.gain.cancelScheduledValues(t);
       gain.gain.setValueAtTime(gain.gain.value, t);
       gain.gain.linearRampToValueAtTime(0, t + fade);
-      src.stop(t + fade + 0.005);
-    },
-    setGain(value, timeConstant = 0.015) {
-      if (voice.stopped) return;
-      gain.gain.setTargetAtTime(baseGain * value, context.currentTime, timeConstant);
+      src.stop(t + fade + AUDIO.STOP_TAIL);
     },
   };
   list.push(voice);
@@ -304,10 +296,14 @@ export function play(id: SoundId, opts: PlayOptions = {}): Voice | null {
     voice.stopped = true;
     const i = list.indexOf(voice);
     if (i >= 0) list.splice(i, 1);
-    tail.disconnect();
-    if (tail !== gain) gain.disconnect();
+    gain.disconnect();
   };
 
   src.start(Math.max(opts.when ?? 0, context.currentTime));
-  return voice;
+}
+
+/** The link.hover tick for a pointer entering a link or button; touch has no
+ *  hover, so it stays silent there. */
+export function hoverSound(e: { pointerType: string }): void {
+  if (e.pointerType !== "touch") play("link.hover");
 }

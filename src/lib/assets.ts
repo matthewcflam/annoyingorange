@@ -1,35 +1,53 @@
 /**
- * Page code and image preload/decode (spec §10.3). Station and project-list hover call
+ * Page code and image preload/decode (spec §10.3). Station-link hover calls
  * prefetchRoute(); the page transition awaits preloadRoute() before it swaps
- * the page in, so heroes are decoded by the time they're shown.
+ * the page in, so the images are decoded by the time they're shown.
+ *
+ * This file is the machinery only: what each route needs is
+ * pages/routeAssets.ts, registered from main.tsx. Station pages list their
+ * images in their own `*.preload.ts`, fetched with the page's chunk, so their
+ * content stays out of the main chunk.
  */
-import { projectByPath } from "../content/projects";
-import { ABOUT_PHOTOS } from "../content/aboutPhotos";
-import { EXPERIENCE_PHOTOS } from "../content/experience";
+import type { Picture } from "./picture";
+import { loadTextFont } from "./fonts";
+import { onBrowserIdle } from "./idle";
+import { PREFETCH } from "../config/timings";
+import type { RoutePath } from "../config/routes";
 
-/** vite-imagetools `as=picture` output: srcset per format + <img> fallback. */
-export interface Picture {
-  /** Format ("avif", "webp") → srcset. */
-  sources: Record<string, string>;
-  img: { src: string; w: number; h: number };
-}
-
-/** Rendered width of a hero: 600 article px = 660 × --px (project.css, global.css). */
-export const HERO_SIZES = "(min-aspect-ratio: 1767/1024) 64.5vh, 37.4vw";
-
-interface RouteImage {
+/** A picture and the `sizes` the page shows it at. */
+export interface RouteImage {
   picture: Picture;
   sizes: string;
 }
 
-/** Images per route that must be decoded before it shows (above the fold,
- *  or Experience's hover photos, which must not pop in). */
-function routeImages(path: string): RouteImage[] {
-  if (path === "/about") return ABOUT_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
-  if (path === "/experience") return EXPERIENCE_PHOTOS.map(({ picture, sizes }) => ({ picture, sizes }));
-  const heroes = projectByPath(path)?.heroes ?? [];
-  return heroes.flatMap((h) => (h.kind === "image" ? [{ picture: h.picture, sizes: HERO_SIZES }] : []));
+/** The images a route shows above the fold. */
+export interface RoutePreload {
+  /** Pictures to decode. */
+  images?: readonly RouteImage[];
+  /** Plain image URLs to decode (tape, logos). */
+  urls?: readonly string[];
+  /** Anything else to wait for (home's skyline markup). */
+  extras?: () => Promise<unknown>;
 }
+
+/** What a route needs before it shows. */
+export interface RouteAssets {
+  /** Its images (sync for home, whose data is in the main chunk; a dynamic
+   *  import of the page's `*.preload.ts` for the others). */
+  preload?: () => RoutePreload | Promise<RoutePreload>;
+  /** The page's own chunk (home is in the main chunk). Station pages set
+   *  their body text in Nunito, which is fetched alongside. */
+  page?: () => Promise<unknown>;
+}
+
+let routes: Partial<Record<RoutePath, RouteAssets>> = {};
+
+/** main.tsx registers pages/routeAssets.ts before anything preloads. */
+export function registerRouteAssets(table: Partial<Record<RoutePath, RouteAssets>>): void {
+  routes = table;
+}
+
+const noop = () => undefined;
 
 const loads = new Map<Picture, Promise<void>>();
 
@@ -59,8 +77,8 @@ function load({ picture: pic, sizes }: RouteImage): Promise<void> {
 
 const urlLoads = new Map<string, Promise<void>>();
 
-/** Fetch and decode a plain image URL (the About photos' light frost). */
-export function decodeUrl(src: string): Promise<void> {
+/** Fetch and decode a plain image URL (tape, the Experience logos). */
+function decodeUrl(src: string): Promise<void> {
   let p = urlLoads.get(src);
   if (!p) {
     const img = new Image();
@@ -73,36 +91,25 @@ export function decodeUrl(src: string): Promise<void> {
   return p;
 }
 
-/** Plain image URLs per route (decoded alongside its pictures). */
-function routeUrls(path: string): string[] {
-  return path === "/about" ? ABOUT_PHOTOS.map((p) => p.frostLight) : [];
-}
-
-/** Station pages' chunks (pages/Outlet.tsx renders them). Home is in the
- *  main chunk: it's what the gate leads to. */
-export const PAGE_LOADERS = {
-  about: () => import("../pages/About"),
-  experience: () => import("../pages/Experience"),
-  projects: () => import("../pages/projects/Projects"),
-} as const;
-
-function pageLoader(path: string) {
-  if (path === "/about") return PAGE_LOADERS.about;
-  if (path === "/experience") return PAGE_LOADERS.experience;
-  return projectByPath(path) ? PAGE_LOADERS.projects : null;
+function loadAll(p: RoutePreload): Promise<unknown> {
+  return Promise.all([...(p.images ?? []).map(load), ...(p.urls ?? []).map(decodeUrl), p.extras?.()]);
 }
 
 /** Fetch a route's code and decode its images. Never rejects. */
 export function preloadRoute(path: string): Promise<void> {
-  const code = pageLoader(path)?.().then(() => undefined, () => undefined);
-  return Promise.all([...routeImages(path).map(load), ...routeUrls(path).map(decodeUrl), code]).then(() => undefined);
+  const a = routes[path as RoutePath] ?? {};
+  const code = a.page?.().then(noop, noop);
+  const font = a.page ? loadTextFont() : undefined;
+  const images = a.preload ? Promise.resolve().then(a.preload).then(loadAll).then(noop, noop) : undefined;
+  return Promise.all([code, font, images]).then(noop);
 }
 
 /** Fetch every page chunk (code only, no images) once the browser is idle. */
 export function prefetchPages(): void {
-  const run = () => Object.values(PAGE_LOADERS).forEach((load) => void load().catch(() => undefined));
-  if ("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 3000 });
-  else setTimeout(run, 1000);
+  onBrowserIdle(() => Object.values(routes).forEach((r) => void r.page?.().catch(noop)), {
+    timeoutMs: PREFETCH.IDLE_TIMEOUT_MS,
+    fallbackMs: PREFETCH.IDLE_FALLBACK_MS,
+  });
 }
 
 /** Start fetching a route's images. Cheap to call repeatedly (hover). */

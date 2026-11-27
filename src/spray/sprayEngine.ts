@@ -17,12 +17,12 @@
  */
 import whoSvg from "../../assets-src/svg/who-spray.svg?raw";
 import { gsap } from "../lib/gsap";
+import { clamp } from "../lib/math";
 import { readToken } from "../lib/tokens";
 import { SPRAY } from "../config/timings";
 import { SPRAY_PACE } from "../config/sprayPace";
+import { pointAt, seeded } from "./sprayMath";
 import { alongAt, maxSpeed, sampleGuide, speedShape, timeMap, type Guide } from "./paceModel";
-// TODO(spray rattle): restore with the play() call in spray().
-// import { play } from "../audio/engine";
 import { startHiss, type Hiss } from "../audio/sprayHiss";
 
 // ---------------------------------------------------------------------------
@@ -32,7 +32,7 @@ import { startHiss, type Hiss } from "../audio/sprayHiss";
 const TAU = Math.PI * 2;
 
 const guideDoc = new DOMParser().parseFromString(whoSvg, "image/svg+xml");
-const [, , VIEW_W, VIEW_H] = guideDoc.documentElement.getAttribute("viewBox")!.split(/\s+/).map(Number);
+const [, , VIEW_W, VIEW_H] = guideDoc.documentElement.getAttribute("viewBox")!.split(/\s+/).map(Number) as [number, number, number, number];
 /** Guide box size in mockup px; the canvas adds CANVAS_PAD_PX on every side. */
 export const WHO_BOX = { width: VIEW_W, height: VIEW_H } as const;
 
@@ -60,7 +60,7 @@ if (import.meta.hot) {
 /** A stroke's time map (seconds at every sample) from the pace table. The
  *  word's last real stroke (the ?-hook) gets the model's finishing rush. */
 export function strokeTimes(i: number): Float32Array {
-  const g = loadGuides()[i];
+  const g = loadGuides()[i]!;
   const ms = pace.strokes[i]?.segmentsMs ?? [];
   if (import.meta.env.DEV && ms.length !== g.anchors.length - 1) {
     console.warn(`sprayPace: "${pace.strokes[i]?.letter}" has ${ms.length} segments, its path has ${g.anchors.length - 1}`);
@@ -69,30 +69,9 @@ export function strokeTimes(i: number): Float32Array {
   return timeMap(g, speedShape(g, { finish: i === loadGuides().length - 2 }), segMs);
 }
 
-/** Point at distance `along` on a guide (linear between samples). */
-function pointAt(g: Guide, along: number): [number, number] {
-  const f = g.length > 0 ? Math.min(Math.max(along / g.length, 0), 1) * g.segments : 0;
-  const i = Math.min(Math.floor(f), g.segments - 1);
-  const t = f - i;
-  const p = g.pts;
-  return [p[i * 2] + (p[i * 2 + 2] - p[i * 2]) * t, p[i * 2 + 1] + (p[i * 2 + 3] - p[i * 2 + 1]) * t];
-}
-
 // ---------------------------------------------------------------------------
 // Randomness
 // ---------------------------------------------------------------------------
-
-/** mulberry32: small, fast, seedable. Replays need the same dot sequence. */
-function seeded(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 const lerp = ([a, b]: readonly [number, number], t: number) => a + (b - a) * t;
 const randomIn = (range: readonly [number, number]) => lerp(range, Math.random());
@@ -126,7 +105,7 @@ export interface SprayOptions {
 }
 
 export class SprayEngine {
-  private readonly canvas: HTMLCanvasElement;
+  readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly color = readToken("--color-orange");
   private readonly resizeObserver: ResizeObserver;
@@ -148,12 +127,25 @@ export class SprayEngine {
   private sized = false;
   /** From show(): drawn instead of a replay if the canvas size matches. */
   private cached: HTMLCanvasElement | null = null;
+  /** Told whenever the canvas changes (home's glass card refracts it). */
+  private readonly drawListeners = new Set<() => void>();
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(canvas);
+  }
+
+  /** Call `fn` whenever the canvas's pixels change (new paint, a wipe, a
+   *  replay after a resize). Returns the unsubscribe. */
+  onDraw(fn: () => void): () => void {
+    this.drawListeners.add(fn);
+    return () => this.drawListeners.delete(fn);
+  }
+
+  private notify() {
+    for (const fn of this.drawListeners) fn();
   }
 
   /** Start a fresh spray. Returns its timeline (null when instant). */
@@ -163,11 +155,10 @@ export class SprayEngine {
     this.timeline = tl;
 
     if (!instant) {
-      // The hiss starts silent. TODO(spray rattle): the rattle that led the
-      // first stroke (§7.2) was cut: it was ~8 dB louder than the full hiss.
+      // The hiss starts silent. (The rattle that led the first stroke, §7.2,
+      // was cut at the user's request: ~8 dB louder than the full hiss.)
       tl.call(() => {
         if (this.fastForward) return;
-        // play("spray.rattle");
         this.hiss ??= startHiss();
       }, undefined, 0);
     }
@@ -179,7 +170,7 @@ export class SprayEngine {
     loadGuides().forEach((guide, i) => {
       const times = strokeTimes(i);
       tl.add(this.strokeTween(guide, times), t);
-      lastEnd = t + times[times.length - 1];
+      lastEnd = t + times[times.length - 1]!;
       t = lastEnd + (pace.strokes[i]?.liftMs ?? 0) / 1000;
       if (drips < SPRAY.DRIP_MAX && Math.random() < SPRAY.DRIP_CHANCE) {
         drips++;
@@ -243,10 +234,12 @@ export class SprayEngine {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.applyTransform();
+    this.notify();
   }
 
   destroy(): void {
     this.clear();
+    this.drawListeners.clear();
     this.resizeObserver.disconnect();
     this.dprQuery?.removeEventListener("change", this.onDprChange);
   }
@@ -267,8 +260,8 @@ export class SprayEngine {
     const peakSpeed = maxSpeed(guide, times);
 
     const tween: gsap.core.Tween = gsap.to(nozzle, {
-      time: times[times.length - 1],
-      duration: times[times.length - 1],
+      time: times[times.length - 1]!,
+      duration: times[times.length - 1]!,
       ease: "none",
       onStart: () => {
         lastAlong = 0;
@@ -312,7 +305,10 @@ export class SprayEngine {
       ease: SPRAY.DRIP_EASE,
       onStart: () => void (this.drips.includes(drip) || this.drips.push(drip)),
       onUpdate: () => {
-        if (drip.progress > drawn && !this.fastForward) this.drawDrip(drip, drawn, drip.progress);
+        if (drip.progress > drawn && !this.fastForward) {
+          this.drawDrip(drip, drawn, drip.progress);
+          this.notify();
+        }
         drawn = drip.progress;
       },
     });
@@ -323,12 +319,13 @@ export class SprayEngine {
     // A stamp at least every STEP_PX, and enough stamps to lay down all the
     // paint: a dwelling nozzle (the ?-dot) piles many stamps onto one spot.
     const stamps = Math.max(1, Math.ceil(dist / SPRAY.STEP_PX), Math.ceil(dots / SPRAY.DOTS_MAX));
-    const perStamp = Math.round(Math.min(Math.max(dots / stamps, SPRAY.DOTS_MIN), SPRAY.DOTS_MAX));
+    const perStamp = Math.round(clamp(dots / stamps, SPRAY.DOTS_MIN, SPRAY.DOTS_MAX));
     for (let s = 1; s <= stamps; s++) {
       const [x, y] = pointAt(guide, from + (dist * s) / stamps);
       this.stamps.push(x, y, perStamp);
       if (!this.fastForward) this.drawStamp(x, y, perStamp);
     }
+    if (!this.fastForward) this.notify();
   }
 
   /** One Gaussian cluster: a dense core, sparse overspray, the odd spit. */
@@ -411,12 +408,14 @@ export class SprayEngine {
       this.ctx.globalAlpha = 1;
       this.ctx.drawImage(cached, 0, 0);
       this.applyTransform();
+      this.notify();
       return;
     }
     this.applyTransform(); // resizing the canvas already cleared it and reset state
     this.rng = seeded(this.seed);
     const s = this.stamps;
-    for (let i = 0; i < s.length; i += 3) this.drawStamp(s[i], s[i + 1], s[i + 2]);
+    for (let i = 0; i < s.length; i += 3) this.drawStamp(s[i]!, s[i + 1]!, s[i + 2]!);
     for (const d of this.drips) this.drawDrip(d, 0, d.progress);
+    this.notify();
   }
 }

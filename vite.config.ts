@@ -1,33 +1,47 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
+import { paperTransform } from './scripts/paperBake.ts'
+import { CUSTOM_MEDIA } from './src/config/media.ts'
 
-/** Image presets (spec §10.3). `?hero` on an image import generates AVIF +
- *  WebP at 1× and 2× the rendered width and returns a `Picture` (see
- *  src/imagetools.d.ts). Hero boxes are 600 mockup px wide; 700 leaves room
- *  for `object-fit: cover` cropping. `?obstacle` is the same for small
- *  draggable images (~41 mockup px, so 64 and 128 cover up to 3× DPR).
- *  `?charm` rasterizes the keychain charms (doug-keychain.svg,
- *  compass-keychain.svg: 200–300 mockup px wide), so
- *  the browser moves bitmaps instead of re-rasterizing 150-path SVGs. */
+/** Image presets (spec §10.3): `?<name>` on an image import applies its
+ *  directives. `as: 'picture'` presets return a `Picture` (AVIF + WebP
+ *  srcsets; src/imagetools.d.ts). */
 const PRESETS: Record<string, Record<string, string>> = {
-  hero: { w: '700;1400', format: 'avif;webp', as: 'picture' },
-  obstacle: { w: '64;128', format: 'avif;webp', as: 'picture' },
-  charm: { w: '300;600', format: 'avif;webp', as: 'picture' },
-  // About photos' frosted glass, blurred here instead of with CSS filters.
-  // `frost` (heavy) is tiny and inlined as a data URI, so it shows before
-  // any image loads; `frostlight` (the mid blur) is a small file.
-  frost: { w: '32', blur: '1.6', format: 'webp', quality: '70', inline: '' },
-  frostlight: { w: '160', blur: '3', format: 'webp', quality: '70' },
-  // The key card's paper texture (texture.png, 509×289 at 30% alpha), kept at
-  // its own size; WebP keeps the alpha.
-  paper: { format: 'webp', quality: '85' },
+  // The project collages' photos (content/projects.ts): ~250–420 CSS px in
+  // the page (asked for at 1.5x, since they're rotated; collageSizes()), up
+  // to 60% of the window in the lightbox. Quality is above sharp's AVIF
+  // default (50), which looked soft at these sizes.
+  collage: { w: '600;1000;1600;2400', format: 'avif;webp', quality: '72', as: 'picture' },
+  // Experience's index logos: ~14–26 CSS px boxes (the TQD sprite shows a
+  // third of its width), so one 160px WebP covers 3x screens.
+  logo: { w: '160', format: 'webp', quality: '85' },
+  // A <video> poster: one URL (the attribute takes no srcset), wide enough
+  // for the expanded lightbox.
+  poster: { w: '1280', format: 'webp', quality: '75' },
+  // Paper prints (home, About, Experience; components/paper/): shown ~325 CSS px wide at the reference size, up to
+  // ~460 on a big screen, so 400/800/1200 covers 1x–2.6x.
+  print: { w: '400;800;1200', format: 'avif;webp', as: 'picture' },
+  // About's café print, the biggest print (~366–400 CSS px): wider steps and
+  // collage quality, since the default AVIF 50 at 400w looked low-res there.
+  printLarge: { w: '600;1000;1600', format: 'avif;webp', quality: '72', as: 'picture' },
+  // The paper texture below is baked in at build time (scripts/paperBake.ts),
+  // so the page ships plain images.
+  // Tape: alpha WebP, warmed by --tape-tint, with fibre. Pass `w` (2x its box)
+  // and `paperFibre` (its box width, mockup px) on the import.
+  tape: { format: 'webp', quality: '90', paperTint: '--tape-tint' },
+  // The skyline's blank sheet (763×221): a stub filled with --paper-sheet.
+  sheet: { w: '1526', h: '442', fit: 'fill', allowUpscale: 'true', format: 'webp', quality: '80', paperFill: '--paper-sheet', paperFibre: '763' },
 }
 
-/** Preloads the fonts the gate waits for (src/lib/fonts.ts), so they download
- *  alongside the JS instead of after it has run and injected the CSS. Build
- *  only: the files are hashed, so they're found in the bundle. */
-const PRELOAD_FONTS = [/\/inter-latin-wght-normal-[\w-]+\.woff2$/]
+/** Preloads the fonts the first render waits for (src/lib/fonts.ts
+ *  waitForFonts), so they download alongside the JS instead of after it has
+ *  run and injected the CSS: Helvetica Rounded once the user supplies it,
+ *  else Inter, its fallback (with the file there, Inter never shows). Nunito (station body text) isn't preloaded: home never uses
+ *  it, and a station landing loads it with the page. Build only: the files
+ *  are hashed, so they're found in the bundle. */
+const ROUNDED_FONT = /\/helvetica-rounded-bold-[\w-]+\.woff2$/
+const INTER_FONT = /\/inter-latin-wght-normal-[\w-]+\.woff2$/
 
 function preloadFonts(): Plugin {
   return {
@@ -35,14 +49,30 @@ function preloadFonts(): Plugin {
     apply: 'build',
     transformIndexHtml: {
       order: 'post',
-      handler: (_html, ctx) =>
-        Object.keys(ctx.bundle ?? {})
-          .filter((file) => PRELOAD_FONTS.some((re) => re.test(file)))
-          .map((file) => ({
-            tag: 'link',
-            attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
-            injectTo: 'head' as const,
-          })),
+      handler: (_html, ctx) => {
+        const files = Object.keys(ctx.bundle ?? {})
+        const rounded = files.filter((file) => ROUNDED_FONT.test(file))
+        return (rounded.length ? rounded : files.filter((file) => INTER_FONT.test(file))).map((file) => ({
+          tag: 'link',
+          attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+          injectTo: 'head' as const,
+        }))
+      },
+    },
+  }
+}
+
+/** `@media (--compact)` and the other names in src/config/media.ts become
+ *  their queries in every stylesheet, so CSS and TS share one definition
+ *  (CSS has no cross-file custom media). Runs before Vite's CSS pipeline. */
+function customMedia(): Plugin {
+  const re = new RegExp(`@media \\((${Object.keys(CUSTOM_MEDIA).join('|')})\\)`, 'g')
+  return {
+    name: 'custom-media',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/\.css(\?|$)/.test(id)) return
+      return { code: code.replace(re, (_m, name: string) => `@media ${CUSTOM_MEDIA[name]}`), map: null }
     },
   }
 }
@@ -51,10 +81,10 @@ function preloadFonts(): Plugin {
 export default defineConfig({
   plugins: [
     react(),
+    customMedia(),
     preloadFonts(),
     imagetools({
-      // Raster images, plus SVGs imported with ?charm (other SVGs stay ?raw).
-      include: [/^[^?]+\.(avif|gif|heif|jpeg|jpg|png|tiff|webp)(\?.*)?$/, /^[^?]+\.svg\?(.*&)?charm(&.*)?$/],
+      extendTransforms: (builtins) => [...builtins, paperTransform],
       defaultDirectives: (url) => {
         for (const [name, directives] of Object.entries(PRESETS)) {
           if (url.searchParams.has(name)) return new URLSearchParams(directives)

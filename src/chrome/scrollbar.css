@@ -6,11 +6,11 @@
   position: fixed;
   top: 0;
   right: calc(var(--scrollbar-inset) * 1px);
-  z-index: 45;
+  z-index: var(--z-scrollbar);
   width: calc(var(--scrollbar-w) * 1px);
   height: 0;
   border-radius: calc(var(--scrollbar-w) * 1px);
-  background: #fff;
+  background: var(--color-cursor);
   mix-blend-mode: difference;
   opacity: 0;
   pointer-events: none;

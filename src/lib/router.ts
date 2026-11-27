@@ -8,7 +8,7 @@
  */
 import { useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-import { documentTitle, resolvePath, routeFor } from "../config/routes";
+import { documentTitle, projectSlugFromPath, resolvePath, routeFor, type ProjectSlug, type RoutePath } from "../config/routes";
 import { lockScroll, resetScroll, unlockScroll } from "./scroll";
 
 /**
@@ -17,14 +17,18 @@ import { lockScroll, resetScroll, unlockScroll } from "./scroll";
  */
 export type TransitionRunner = (to: string, commit: () => void) => Promise<void>;
 
+/** The project an old /projects/<slug> link named; the Projects page takes
+ *  it on mount and opens scrolled to that project. */
+let projectFocus: ProjectSlug | null = projectSlugFromPath(location.pathname);
+
 let current = resolvePath(location.pathname);
 let transitioning = false;
-let queued: string | null = null;
+let queued: RoutePath | null = null;
 let runner: TransitionRunner = async (_to, commit) => commit();
 const listeners = new Set<() => void>();
 let idleWaiters: (() => void)[] = [];
 
-// Canonicalize the entry URL (/projects → /projects/portfolio, unknown → /).
+// Canonicalize the entry URL (/projects/mango → /projects, unknown → /).
 if (current !== location.pathname) history.replaceState(null, "", current);
 document.title = documentTitle(routeFor(current));
 
@@ -38,7 +42,13 @@ function subscribe(listener: () => void): () => void {
 }
 
 export const getRoute = () => current;
-export const isInputLocked = () => transitioning;
+
+/** The project to open scrolled to, once (see projectFocus). */
+export function takeProjectFocus(): ProjectSlug | null {
+  const slug = projectFocus;
+  projectFocus = null;
+  return slug;
+}
 
 /** Resolves once no transition (or queued one) is running; immediately if idle.
  *  A page that mounts at commit uses it to start its entrance afterwards. */
@@ -47,7 +57,7 @@ export function whenIdle(): Promise<void> {
 }
 
 /** Current canonical path; re-renders on commit. */
-export function useRoute(): string {
+export function useRoute(): RoutePath {
   return useSyncExternalStore(subscribe, getRoute);
 }
 
@@ -58,7 +68,7 @@ export function setTransitionRunner(fn: TransitionRunner): void {
 
 /** Swap the page. Called by the transition at black; never touches history.
  *  Flushed synchronously so the new page is in the DOM when this returns. */
-function commitRoute(to: string) {
+function commitRoute(to: RoutePath) {
   if (to === current) return;
   current = to;
   document.title = documentTitle(routeFor(to));
@@ -66,7 +76,7 @@ function commitRoute(to: string) {
   flushSync(emit);
 }
 
-async function run(to: string) {
+async function run(to: RoutePath) {
   transitioning = true;
   lockScroll(); // no wheel glide under the cover or into the new page
   try {
@@ -76,7 +86,7 @@ async function run(to: string) {
     transitioning = false;
     const next = queued;
     queued = null;
-    if (next && next !== current) void run(next);
+    if (next && next !== current) run(next).catch(reportError);
     if (!transitioning) {
       unlockScroll();
       const waiters = idleWaiters;
@@ -97,18 +107,26 @@ function go(path: string, { push }: { push: boolean }) {
     return;
   }
   if (to === current) return;
+  projectFocus = projectSlugFromPath(path);
   if (push) history.pushState(null, "", to);
-  void run(to);
+  run(to).catch(reportError);
 }
 
-/** Station, link or mini-map click. */
+/** Go to `path` (a station or page link) with the page transition. */
 export function navigate(path: string): void {
   go(path, { push: true });
 }
 
+/** A plain left click: no modifier (new tab, new window, download), not
+ *  already handled. Links handle those clicks themselves; the rest go to the
+ *  browser. */
+export function isPlainClick(e: React.MouseEvent): boolean {
+  return !e.defaultPrevented && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+}
+
 /** onClick for real <a href> links: lets modified clicks (new tab etc.) through. */
 export function onNavClick(e: React.MouseEvent, path: string): void {
-  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (!isPlainClick(e)) return;
   e.preventDefault();
   navigate(path);
 }
