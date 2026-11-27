@@ -13,6 +13,7 @@ import Cursor from "./chrome/Cursor";
 import ScrollBar from "./chrome/ScrollBar";
 import GridOverlay from "./chrome/GridOverlay";
 import PageErrorBoundary from "./chrome/PageErrorBoundary";
+import { Analytics } from "@vercel/analytics/react";
 
 /**
  * Layer stack (spec §4.1), bottom to top:
@@ -74,6 +75,8 @@ export default function App() {
       <Cursor />
       <ScrollBar />
       <GridOverlay />
+      {/* Vercel Web Analytics: counts each pushState route as a pageview. Renders nothing. */}
+      <Analytics />
       {fontsReady && (
         <>
           <main ref={mainRef} className="layer--page" tabIndex={-1}>
